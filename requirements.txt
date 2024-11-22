@@ -1,4 +1,4 @@
 Flask
 python-dotenv
 langchain
-azure-ai-textapytnalytics
+azure-ai-textanalytics
