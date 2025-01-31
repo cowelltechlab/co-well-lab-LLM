@@ -10,7 +10,7 @@ LLM for ND job support
 
 ### Frontend
 - Framework: [Vite + React + TypeScript + SWC](https://vite.dev/guide/)
-- Styles: [Tailwind](https://tailwindcss.com/docs/installation/using-vite)
+- Styles: [Tailwind](https://tailwindcss.com/docs/)(use shadcn/ui docs for installation)
 - Components: [shadcn/ui](https://ui.shadcn.com/docs/installation/vite)
 
 ### Web Server
@@ -22,6 +22,8 @@ LLM for ND job support
 - MongoDB ODM (Flask): ?
 
 ### Flask
+
+## Installation
 
 ### Deployment
 - Are we deploying this or running local demo?
