@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  vite-react:
+    build:
+      context: ./vite-react
+      dockerfile: Dockerfile.dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./vite-react:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+  express:
+    build:
+      context: ./express
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./express:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
