@@ -12,6 +12,42 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: examplepassword
     volumes:
       - mongo_data:/data/db
+  
+  express:
+    build: ./express
+    container_name: express
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: examplepassword
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_AUTH_SOURCE: admin
+    ports:
+    - "3000:3000"
+  
+  flask:
+    build: ./flask
+    container_name: flask
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: examplepassword
+      MONGO_HOST: mongodb
+      MONGO_PORT: 27017
+      MONGO_AUTH_SOURCE: admin
+    ports:
+      - "5000:5000"
+
+  vite-react:
+    build:
+      context: ./vite-react
+      dockerfile: Dockerfile  # Production Dockerfile that builds static files
+    container_name: vite-react
+    ports:
+      - "80:80"
 
 volumes:
   mongo_data:
