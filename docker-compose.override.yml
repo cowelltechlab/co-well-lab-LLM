@@ -12,3 +12,14 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+  express:
+    build:
+      context: ./express
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./express:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
