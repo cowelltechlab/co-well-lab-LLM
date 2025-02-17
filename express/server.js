@@ -1,6 +1,7 @@
 const express = require('express')
 const path = require('path')
-const mongoose = require('mongoose')
+// const mongoose = require('mongoose')
+const { mongooseConnection } = require('./db/connection')
 require('dotenv').config()
 
 // express
@@ -25,8 +26,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // db
-const mongooseConnection = require('./db/connection')
-
 mongooseConnection.once('open', () => {
   console.log(`Mongoose connection open`)
   app.listen(PORT, () => {

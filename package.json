@@ -16,5 +16,7 @@
   "bugs": {
     "url": "https://github.com/tanishaparyani/co-well-lab-LLM/issues"
   },
-  "homepage": "https://github.com/tanishaparyani/co-well-lab-LLM#readme"
+  "homepage": "https://github.com/tanishaparyani/co-well-lab-LLM#readme",
+  "dependencies": {
+  }
 }
