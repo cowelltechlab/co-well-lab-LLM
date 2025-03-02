@@ -42,7 +42,8 @@ Once the containers are running, you can access the services as follows:
   - Test endpoint: http://localhost:3000/api/test
   - The Express service uses nodemon for hot reloading in development. Changes to the code in the express/ directory are automatically detected and the express app will restart.
 - Flask API:
-  - Test endpoint: http://localhost:5000/test-db
+  - Test endpoint: http://localhost:5002/test-db
+  - The port was changed from 5000 because of a collision with a port macOS Control Center uses
 - Vite-React Frontend (Development Mode)
   - Visit: http://localhost:5173
   - Hot reloading is enabled. Changes to the code in the vite-react/ directory will automatically update the UI in the browser.
