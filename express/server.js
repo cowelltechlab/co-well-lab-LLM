@@ -1,34 +1,35 @@
 const express = require('express')
+const path = require('path')
 const mongoose = require('mongoose')
 require('dotenv').config()
 
+// express
 const PORT = process.env.PORT || 3000
-
-const mongooseConnection = require('./db/connection');
-
 const app = express()
 
-app.get('/api/test-db', async (req, res) => {
-  // Check if the native connection is ready
-  if (!mongoose.connection.db) {
-    return res.status(500).json({ error: 'MongoDB connection not ready' });
-  }
-  
-  try {
-    const collections = await mongoose.connection.db.listCollections().toArray();
-    res.json({
-      message: 'MongoDB connection successful!',
-      collections,
-    });
-  } catch (error) {
-    res.status(500).json({ error: 'Error accessing MongoDB', details: error.message });
-  }
-});
+// global middleware
+app.use(express.json())
+app.use(express.urlencoded({ extended: false }))
+
+// routes
+const router = require('./routes')
+app.use('/', router)
+
+// vite-react in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'vite-react', 'dist')))
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'vite-react', 'dist', 'index.html'))
+  })
+}
+
+// db
+const mongooseConnection = require('./db/connection')
 
 mongooseConnection.once('open', () => {
-  console.log(`Mongoose connection open`);
+  console.log(`Mongoose connection open`)
   app.listen(PORT, () => {
     console.log(`Express server listening on port ${PORT}`)
   })
-
 })
