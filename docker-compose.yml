@@ -37,7 +37,7 @@ services:
       MONGO_PORT: 27017
       MONGO_AUTH_SOURCE: admin
     ports:
-      - "5000:5000"
+      - "5002:5002"
 
   vite-react:
     build:
