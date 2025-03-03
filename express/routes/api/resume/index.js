@@ -1,10 +1,11 @@
 const express = require('express')
 const router = express.Router()
 
-router.post('/', (req, res) => {
-  res.json({
-    'msg': 'POST /api/resume received'
-  })
-})
+const upload = require('../../../middleware/uploadMiddleware')
+const { uploadFile, getFile } = require('../../../controllers/resumeController')
+
+router.post('/', upload.single('pdf'), uploadFile)
+
+router.get('/:filename', getFile)
 
 module.exports = router

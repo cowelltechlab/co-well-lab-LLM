@@ -61,6 +61,14 @@ View logs in your terminal to see output from all services. Each service's logs 
 
 To stop the containers, press `CTRL-C` in the terminal where Docker Compose is running.
 
+##### 4.1 If you have trouble with installed packages not being recognized in the containers
+You may need to rebuild the images:
+```
+docker-compose down
+docker-compose build --no-cache
+docker-compose up
+```
+
 #### 5. Switching to Production Mode
 
 The default setup is for development. To run a production version of the Vite-React frontend (which builds and serves static files via Nginx), use the base docker-compose.yml without the development override. For example, on your VPS or in another production context, run:
