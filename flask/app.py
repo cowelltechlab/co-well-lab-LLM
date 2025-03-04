@@ -1,6 +1,7 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from pymongo import MongoClient
 import os
+import openai
 
 app = Flask(__name__)
 
@@ -32,6 +33,29 @@ def test_db():
 @app.route('/test', methods=['GET'])
 def test():
     return jsonify({"message": "Hello from Flask"})
+
+@app.route('/openai', methods=['POST'])
+def call_openai():
+    data = request.get_json()
+    prompt = data.get("prompt", "Hello, world!")
+
+    openai.api_type = "azure"
+    openai.api_base = os.environ.get("AZURE_OPENAI_ENDPOINT")
+    openai.api_key = os.environ.get("AZURE_OPENAI_KEY")
+    openai.api_version = "2023-03-15-preview"
+    engine = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt35-deployment")
+
+
+    try:
+        response = openai.Completion.create(
+            deployment_id=engine,
+            prompt=prompt,
+            max_tokens=50,
+            temperature=0.7
+        )
+        return jsonify(response)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5002)

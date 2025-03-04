@@ -10,7 +10,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: examplepassword
     volumes:
       - mongo_data:/data/db
-  
+
   express:
     build: ./express
     container_name: express
@@ -23,8 +23,8 @@ services:
       MONGO_PORT: 27017
       MONGO_AUTH_SOURCE: admin
     ports:
-    - "3000:3000"
-  
+      - "3000:3000"
+
   flask:
     build: ./flask
     container_name: flask
@@ -36,13 +36,17 @@ services:
       MONGO_HOST: mongodb
       MONGO_PORT: 27017
       MONGO_AUTH_SOURCE: admin
+      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED}
+      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
+      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY}
+      PLATFORM_OPENAI_KEY: ${PLATFORM_OPENAI_KEY}
     ports:
       - "5002:5002"
 
   vite-react:
     build:
       context: ./vite-react
-      dockerfile: Dockerfile  # Production Dockerfile that builds static files
+      dockerfile: Dockerfile # Production Dockerfile that builds static files
     container_name: vite-react
     ports:
       - "80:80"
