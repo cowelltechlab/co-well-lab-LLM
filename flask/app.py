@@ -2,16 +2,11 @@ from flask import Flask, jsonify, request
 from dotenv import load_dotenv
 import os
 import langchain_openai as lcai
-from langchain_core.prompts import ChatPromptTemplate
-import openai
-import PyPDF2
-import io
+import pdfplumber
 
-# Load environment variables (if needed)
 load_dotenv("project.env")
 app = Flask(__name__)
 
-# Configure the Azure Chat OpenAI LLM via LangChain
 llmchat = lcai.AzureChatOpenAI(
     openai_api_key=os.getenv("AZURE_OPENAI_KEY"),
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -20,52 +15,55 @@ llmchat = lcai.AzureChatOpenAI(
     model_name="gpt-4o",
 )
 
-def simple_test_chain():
-    # A simplified prompt that doesn't reference customer support details.
-    simple_prompt = "Hello, world! Please greet me."
-    template = ChatPromptTemplate.from_messages([("system", simple_prompt)])
-    chain = template | llmchat
-    return chain
+def extract_text_from_pdf(pdf_file):
+    try:
+        with pdfplumber.open(pdf_file) as pdf:
+            text = "\n".join([page.extract_text() for page in pdf.pages if page.extract_text()])
+        return text.strip() if text else "No readable text found in the PDF."
+    except Exception as e:
+        print("Error extracting text:", str(e))
+        return None
 
-# Create the simple chain instance.
-simple_chain = simple_test_chain()
-
-@app.route('/openai-test', methods=['GET'])
-def openai_test():
-    # For a simple test, no parameters are needed.
-    response = simple_chain.invoke({})
-    # Convert the response to a string (assuming response is an AIMessage object)
-    message_content = str(response)
-    print(message_content)
-    return jsonify({"response": message_content})
+def generate_cover_letter(resume_text, job_desc):
+    try:
+        prompt = f"""
+        Given the following resume content and job description, write a professional and concise cover letter.
+        
+        Resume:
+        {resume_text}
+        
+        Job Description:
+        {job_desc}
+        
+        Cover Letter:
+        """
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating cover letter:", str(e))
+        return "Error generating cover letter."
 
 @app.route('/cover-letter', methods=['POST'])
-def generate_cover_letter():
+def cover_letter():
     try:
-        # Check if a file was uploaded
-        if 'pdf' not in request.files:
-            return jsonify({"error": "No PDF file uploaded"}), 400
-
+        if 'pdf' not in request.files or 'job_desc' not in request.form:
+            return jsonify({"error": "Missing file or job description"}), 400
+        
         pdf_file = request.files['pdf']
+        job_desc = request.form['job_desc']
 
-        # Validate filename
         if pdf_file.filename == '':
             return jsonify({"error": "Invalid filename"}), 400
 
-        # Save the PDF (for now, saving locally)
-        save_path = os.path.join("/tmp", pdf_file.filename)
-        pdf_file.save(save_path)
-        print(f"Received PDF: {save_path}")
+        resume_text = extract_text_from_pdf(pdf_file)
+        if not resume_text:
+            return jsonify({"error": "Failed to extract text from resume"}), 500
 
-        # (Your OpenAI call should go here)
-        # Mock response for debugging
-        cover_letter = "This is a mock cover letter."
-
+        cover_letter = generate_cover_letter(resume_text, job_desc)
         return jsonify({"cover_letter": cover_letter})
-
     except Exception as e:
         print("Error processing cover letter:", str(e))
-        return jsonify({"error": "Error generating cover letter"}), 500
+        return jsonify({"error": "Error processing cover letter"}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002)
