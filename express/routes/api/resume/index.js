@@ -18,6 +18,18 @@ router.get("/test-flask", async (req, res) => {
   }
 });
 
+router.get("/openai-test", async (req, res) => {
+  try {
+    // Use the Docker service name "flask" to reach the Flask container
+    const response = await axios.get("http://flask:5002/openai-test");
+    // Forward the JSON response from Flask back to the client
+    res.json(response.data);
+  } catch (error) {
+    console.error("Error calling Flask service:", error.message);
+    res.status(500).json({ error: "Error calling Flask service" });
+  }
+});
+
 router.post("/", upload.single("pdf"), uploadFile);
 router.get("/:filename", getFile);
 
