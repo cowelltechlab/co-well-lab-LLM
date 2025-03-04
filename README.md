@@ -1,79 +1,154 @@
 # co-well-lab-LLM
-LLM for ND job support
+
+A language model-powered backend for generating AI-assisted cover letters from resumes.
 
 ## Development with Docker
 
 This project uses Docker Compose to run four services in a containerized environment:
 
-- MongoDB: Database service (accessible on port 27017)
-- Express: Backend service (with hot reloading via nodemon, accessible on port 3000)
-- Flask: Python backend service (accessible on port 5000)
-- Vite-React: Frontend service
-  - Development Mode: Runs the Vite dev server with hot reloading on port 5173
-  - Production Mode: (if needed) builds and serves static files via Nginx on port 80
+- **MongoDB**: Database service (accessible on port `27017`)
+- **Express**: Backend service (hot reloading enabled via Nodemon, accessible on port `3000`)
+- **Flask**: Python backend service (hot reloading enabled via watchdog, handles resume processing and OpenAI calls, accessible on port `5002`)
+- **Vite-React**: Frontend service
+  - **Development Mode**: Runs the Vite dev server with hot reloading on port `5173`
+  - **Production Mode**: (if needed) builds and serves static files via Nginx on port `80`
 
-Below are the steps to set up and run the development environment from scratch.
+---
 
-### Prerequisites
+## **Getting Started**
 
-Before you begin, ensure you have the following installed on your machine:
+### **1. Clone the Repository**
 
-- Git
-- Docker Desktop (includes Docker Engine and Docker Compose)
-  - Note: On Linux you may need to install Docker Engine and Docker Compose separately.
-
-### Getting Started
-
-#### 1. Clone the Repository
-#### 2. Build and Start the Containers
-
-The respository includes a base `docker-compose.yml` file and an override file `docker-compose.override.yml` that sets up services for development (including hot reloading for Vite and Express).
-
-Run the following command from the root of the project:
-```docker-compose up --build```
-
-This will build the Docker images (using development Dockerfiles when applicable) and start all services (MongoDB, Express, Flask, and Vite-React).
-
-#### 3. Access the Services
-
-Once the containers are running, you can access the services as follows:
-- MongoDB: Accessible internally or via GUI client like MongoDB Compass at localhost:27017
-- Express API:
-  - Test endpoint: http://localhost:3000/api/test
-  - The Express service uses nodemon for hot reloading in development. Changes to the code in the express/ directory are automatically detected and the express app will restart.
-- Flask API:
-  - Test endpoint: http://localhost:5002/test-db
-  - The port was changed from 5000 because of a collision with a port macOS Control Center uses
-- Vite-React Frontend (Development Mode)
-  - Visit: http://localhost:5173
-  - Hot reloading is enabled. Changes to the code in the vite-react/ directory will automatically update the UI in the browser.
-  - In development requests to /api are proxied to express on localhost:3000
-
-#### 4. Working with the Containers
-- Hot Reloading:
-
-The Express and Vite-React services have been set up to mount your local source code into the container. This means that any changes you make on your host machine are immediately reflected in the running containers.
-
-- Logs and Debugging:
-
-View logs in your terminal to see output from all services. Each service's logs are prefixed with its container name.
-
-- Stopping the Environment:
-
-To stop the containers, press `CTRL-C` in the terminal where Docker Compose is running.
-
-##### 4.1 If you have trouble with installed packages not being recognized in the containers
-You may need to rebuild the images:
+```sh
+git clone https://github.com/your-repo/co-well-lab-LLM.git
+cd co-well-lab-LLM
 ```
+
+### **2. Set Up Environment Variables**
+
+Create a `.env` file in the root directory and add the necessary credentials.  
+There is an example `.env` file called `.env copy` with the following variables:
+
+```env
+PYTHONUNBUFFERED=1
+AZURE_OPENAI_ENDPOINT=https://vds-openai-test-001.openai.azure.com/
+AZURE_OPENAI_KEY=
+PLATFORM_OPENAI_KEY=
+AZURE_OPENAI_DEPLOYMENT=TEST-Embedding
+```
+
+### **3. Start the Services**
+
+Run the following command from the project root:
+
+```sh
+docker-compose up --build
+```
+
+This will:
+
+- Build the Docker images
+- Start all services (`MongoDB`, `Express`, `Flask`, `Vite-React`)
+
+### **4. Access the Services**
+
+Once running, the services can be accessed as follows:
+
+- **MongoDB** → localhost:27017 _(Use MongoDB Compass for visualization)_
+- **Express API** → http://localhost:3000
+- **Flask API** → http://localhost:5002
+- **Vite-React (Frontend)** → http://localhost:5173 _(Hot reloading enabled)_
+
+---
+
+## **Resume Processing & Cover Letter Generation**
+
+To generate a cover letter, submit a `POST` request to **Express** at:
+`POST http://localhost:3000/api/resume/cover-letter`
+
+### **Request Format**
+
+Send the request with **FormData** containing:
+
+- `pdf` → A PDF resume file
+- `job_desc` → The job description text
+
+### **Example Using Postman or cURL**
+
+#### **Postman Setup**
+
+- **Method**: `POST`
+- **URL**: `http://localhost:3000/api/resume/cover-letter`
+- **Body**:
+  - Select `form-data`
+  - Upload `pdf` (a resume file)
+  - Add a `job_desc` field with the job description text
+
+#### **cURL Example**
+
+```sh
+curl -X POST http://localhost:3000/api/resume/cover-letter \
+  -F "pdf=@example.pdf" \
+  -F "job_desc=We are looking for fullstack software engineers..."
+```
+
+### **Example Files for Testing**
+
+- **Example Resume**: `example.pdf` (located in the root directory)
+- **Example Job Description**:
+
+`We are looking for fullstack software engineers to join our product team and help build interfaces and APIs to interact with large language models. You will work with a team of engineers and researchers to design and implement key components of our product and platform.`
+
+---
+
+## **Working with Docker Containers**
+
+### **Hot Reloading**
+
+- Express, Flask, and Vite-React **automatically reload** when code changes.
+
+### **Viewing Logs**
+
+To view logs from all services:
+
+```sh
+docker-compose logs -f
+```
+
+### **Stopping the Environment**
+
+Press `CTRL+C` in the terminal where Docker Compose is running.
+
+If needed, shut down the services completely:
+
+```sh
+docker-compose down
+```
+
+### **Rebuilding the Containers**
+
+If dependencies change and need reinstalling:
+
+```sh
 docker-compose down
 docker-compose build --no-cache
 docker-compose up
 ```
 
-#### 5. Switching to Production Mode
+---
 
-The default setup is for development. To run a production version of the Vite-React frontend (which builds and serves static files via Nginx), use the base docker-compose.yml without the development override. For example, on your VPS or in another production context, run:
+## **Production Mode**
 
-```docker-compose -f docker-compose.yml up --build```
+The default setup is for **development**. To run a **production build**, use:
 
-In production, the Vite-React service wil use the production Dockerfile (which performs a multi-stage build) and will be accessible on port 80.
+```sh
+docker-compose -f docker-compose.yml up --build
+```
+
+- In production, the Vite-React frontend is served via **Nginx** on port `80`.
+
+---
+
+## **License**
+
+_(Optional)_ TBD
