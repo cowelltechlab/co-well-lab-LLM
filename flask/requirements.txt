@@ -12,3 +12,4 @@ openai>=1.58.1,<2.0.0
 python-dotenv==1.0.1
 langchain_openai
 langchain_core
+PyPDF2
