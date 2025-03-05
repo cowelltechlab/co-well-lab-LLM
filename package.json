@@ -4,7 +4,8 @@
   "description": "LLM for ND job support",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "concurrently \"cd express && npm install\" \"cd flask && pip install -r requirements.txt\" \"cd vite-react && npm install\""
   },
   "repository": {
     "type": "git",
@@ -18,5 +19,6 @@
   },
   "homepage": "https://github.com/tanishaparyani/co-well-lab-LLM#readme",
   "dependencies": {
+    "concurrently": "^9.1.2"
   }
 }
