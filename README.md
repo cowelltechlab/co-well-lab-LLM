@@ -2,6 +2,29 @@
 
 A language model-powered backend for generating AI-assisted cover letters from resumes.
 
+## Table of Contents
+
+- [Development with Docker](#development-with-docker)
+- [Getting Started](#getting-started)
+  - [Clone the Repository](#1-clone-the-repository)
+  - [Set Up Environment Variables](#2-set-up-environment-variables)
+  - [Start the Services](#3-start-the-services)
+  - [Access the Services](#4-access-the-services)
+- [Testing API Endpoints](#testing-api-endpoints)
+  - [Test MongoDB Connection](#test-mongodb-connection)
+  - [Cover Letter Generation](#cover-letter-generation)
+  - [Fetching Cover Letter in React](#fetching-cover-letter-in-react)
+- [Running Tests](#running-tests)
+- [Working with Docker Containers](#working-with-docker-containers)
+  - [Hot Reloading](#hot-reloading)
+  - [Viewing Logs](#viewing-logs)
+  - [Stopping the Environment](#stopping-the-environment)
+  - [Rebuilding the Containers](#rebuilding-the-containers)
+- [Production Mode](#production-mode)
+- [License](#license)
+
+---
+
 ## Development with Docker
 
 This project uses Docker Compose to run three services in a containerized environment:
@@ -121,6 +144,24 @@ async function generateCoverLetter(resumeText, jobDesc) {
   const data = await response.json();
   return data.cover_letter;
 }
+```
+
+---
+
+## **Running Tests**
+
+To ensure the Flask app and MongoDB are running correctly, you can execute tests inside the Flask container.
+
+### **Run All Tests**
+
+```sh
+docker-compose exec flask pytest tests/
+```
+
+### **Run a Specific Test File**
+
+```sh
+docker-compose exec flask pytest tests/test_flask.py
 ```
 
 ---
