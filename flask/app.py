@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import langchain_openai as lcai
@@ -6,6 +7,8 @@ import pdfplumber
 
 load_dotenv("project.env")
 app = Flask(__name__)
+
+CORS(app)
 
 llmchat = lcai.AzureChatOpenAI(
     openai_api_key=os.getenv("AZURE_OPENAI_KEY"),

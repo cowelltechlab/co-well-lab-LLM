@@ -11,19 +11,19 @@ services:
     volumes:
       - mongo_data:/data/db
 
-  express:
-    build: ./express
-    container_name: express
-    depends_on:
-      - mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: examplepassword
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_AUTH_SOURCE: admin
-    ports:
-      - "3000:3000"
+  # express:
+  #   build: ./express
+  #   container_name: express
+  #   depends_on:
+  #     - mongodb
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: examplepassword
+  #     MONGO_HOST: mongodb
+  #     MONGO_PORT: 27017
+  #     MONGO_AUTH_SOURCE: admin
+  #   ports:
+  #     - "3000:3000"
 
   flask:
     build: ./flask
