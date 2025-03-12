@@ -85,25 +85,43 @@ To generate a cover letter, submit a `POST` request to **Flask** at:
 
 - **Method**: `POST`
 - **URL**: `http://localhost:5002/cover-letter`
+- **Headers**:
+  - `Content-Type: application/json`
 - **Body**:
-  - Select `form-data`
-  - Upload `pdf` (a resume file)
-  - Add a `job_desc` field with the job description text
+  - Select `raw` → `JSON` format
+
+```json
+{
+  "resume_text": "Experienced software engineer with expertise in Python and backend development.",
+  "job_desc": "Looking for a backend engineer with experience in Flask and MongoDB."
+}
+```
 
 #### **cURL Example**
 
 ```sh
-curl -X POST http://localhost:5002/cover-letter \
-  -F "pdf=@example.pdf" \
-  -F "job_desc=We are looking for fullstack software engineers..."
+curl -X POST "http://localhost:5002/cover-letter" \
+     -H "Content-Type: application/json" \
+     -d '{"resume_text": "Experienced software engineer with expertise in Python and backend development.", "job_desc": "Looking for a backend engineer with experience in Flask and MongoDB."}'
 ```
 
-### **Example Files for Testing**
+### **Fetching Cover Letter in React**
 
-- **Example Resume**: `example.pdf` (located in the root directory)
-- **Example Job Description**:
+Example fetch request from the React frontend:
 
-`We are looking for fullstack software engineers to join our product team and help build interfaces and APIs to interact with large language models. You will work with a team of engineers and researchers to design and implement key components of our product and platform.`
+```javascript
+async function generateCoverLetter(resumeText, jobDesc) {
+  const response = await fetch("http://localhost:5002/cover-letter", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ resume_text: resumeText, job_desc: jobDesc }),
+  });
+  const data = await response.json();
+  return data.cover_letter;
+}
+```
 
 ---
 
