@@ -4,10 +4,9 @@ A language model-powered backend for generating AI-assisted cover letters from r
 
 ## Development with Docker
 
-This project uses Docker Compose to run four services in a containerized environment:
+This project uses Docker Compose to run three services in a containerized environment:
 
 - **MongoDB**: Database service (accessible on port `27017`)
-- **Express**: Backend service (hot reloading enabled via Nodemon, accessible on port `3000`)
 - **Flask**: Python backend service (hot reloading enabled via watchdog, handles resume processing and OpenAI calls, accessible on port `5002`)
 - **Vite-React**: Frontend service
   - **Development Mode**: Runs the Vite dev server with hot reloading on port `5173`
@@ -48,37 +47,44 @@ docker-compose up --build
 This will:
 
 - Build the Docker images
-- Start all services (`MongoDB`, `Express`, `Flask`, `Vite-React`)
+- Start all services (`MongoDB`, `Flask`, `Vite-React`)
 
 ### **4. Access the Services**
 
 Once running, the services can be accessed as follows:
 
 - **MongoDB** → localhost:27017 _(Use MongoDB Compass for visualization)_
-- **Express API** → http://localhost:3000
 - **Flask API** → http://localhost:5002
 - **Vite-React (Frontend)** → http://localhost:5173 _(Hot reloading enabled)_
 
 ---
 
-## **Resume Processing & Cover Letter Generation**
+## **Testing API Endpoints**
 
-To generate a cover letter, submit a `POST` request to **Express** at:
-`POST http://localhost:3000/api/resume/cover-letter`
+### **Test MongoDB Connection**
 
-### **Request Format**
+To verify that MongoDB is properly connected to Flask, send a `GET` request:
 
-Send the request with **FormData** containing:
+#### **Postman Setup**
 
-- `pdf` → A PDF resume file
-- `job_desc` → The job description text
+- **Method**: `GET`
+- **URL**: `http://localhost:5002/test-mongo`
 
-### **Example Using Postman or cURL**
+#### **cURL Example**
+
+```sh
+curl -X GET http://localhost:5002/test-mongo
+```
+
+### **Cover Letter Generation**
+
+To generate a cover letter, submit a `POST` request to **Flask** at:
+`POST http://localhost:5002/cover-letter`
 
 #### **Postman Setup**
 
 - **Method**: `POST`
-- **URL**: `http://localhost:3000/api/resume/cover-letter`
+- **URL**: `http://localhost:5002/cover-letter`
 - **Body**:
   - Select `form-data`
   - Upload `pdf` (a resume file)
@@ -87,7 +93,7 @@ Send the request with **FormData** containing:
 #### **cURL Example**
 
 ```sh
-curl -X POST http://localhost:3000/api/resume/cover-letter \
+curl -X POST http://localhost:5002/cover-letter \
   -F "pdf=@example.pdf" \
   -F "job_desc=We are looking for fullstack software engineers..."
 ```
@@ -105,7 +111,7 @@ curl -X POST http://localhost:3000/api/resume/cover-letter \
 
 ### **Hot Reloading**
 
-- Express, Flask, and Vite-React **automatically reload** when code changes.
+- Flask and Vite-React **automatically reload** when code changes.
 
 ### **Viewing Logs**
 
