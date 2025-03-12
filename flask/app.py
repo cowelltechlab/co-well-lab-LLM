@@ -1,15 +1,25 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_pymongo import MongoClient
 from dotenv import load_dotenv
 import os
 import langchain_openai as lcai
 import pdfplumber
 
 load_dotenv("project.env")
+
 app = Flask(__name__)
 
+#  CORS
 CORS(app)
 
+# MongoDB
+mongo_db_name = os.getenv('MONGO_DB_NAME')
+mongo_uri = os.getenv("MONGO_URI")
+client = MongoClient(mongo_uri)
+db = client.get_database(mongo_db_name)
+
+# LangChain
 llmchat = lcai.AzureChatOpenAI(
     openai_api_key=os.getenv("AZURE_OPENAI_KEY"),
     azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
@@ -67,6 +77,14 @@ def cover_letter():
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500
+    
+@app.route('/test-mongo')
+def test_mongo():
+    try:
+        db.command("ping")
+        return jsonify({"status": "Connected to MongoDB"})
+    except Exception as e:
+        return jsonify({"error": str(e)})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002)
