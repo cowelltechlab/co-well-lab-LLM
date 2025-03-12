@@ -1,4 +1,4 @@
-from app import mongo
+
 
 def save_user_request(resume_text, job_desc, cover_letter):
     try:

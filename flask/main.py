@@ -1,6 +1,8 @@
 from flask import Flask
 from config import Config  # No more 'app.' needed
 from routes.cover_letter import cover_letter_bp
+from routes.health import health_bp
+
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 
@@ -20,3 +22,4 @@ def create_app():
     return app
 
 app = create_app()
+app.register_blueprint(health_bp)
