@@ -10,6 +10,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: examplepassword
     volumes:
       - mongo_data:/data/db
+    command: mongod --quiet --logpath /dev/null
 
   flask:
     build: ./flask
@@ -25,11 +26,12 @@ services:
       PLATFORM_OPENAI_KEY: ${PLATFORM_OPENAI_KEY}
     ports:
       - "5002:5002"
+    command: gunicorn --bind 0.0.0.0:5002 main:app
 
   vite-react:
     build:
       context: ./vite-react
-      dockerfile: Dockerfile # Production Dockerfile that builds static files
+      dockerfile: Dockerfile
     container_name: vite-react
     ports:
       - "80:80"
