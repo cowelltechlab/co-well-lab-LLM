@@ -15,7 +15,6 @@ def cover_letter():
             return jsonify({"error": "Missing resume text or job description"}), 400
 
         cover_letter = generate_cover_letter(resume_text, job_desc)
-        save_user_request(resume_text, job_desc, cover_letter)
 
         return jsonify({"cover_letter": cover_letter})
     except Exception as e:
