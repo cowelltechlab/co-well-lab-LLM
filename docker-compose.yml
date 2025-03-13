@@ -10,20 +10,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: examplepassword
     volumes:
       - mongo_data:/data/db
-
-  express:
-    build: ./express
-    container_name: express
-    depends_on:
-      - mongodb
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: examplepassword
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_AUTH_SOURCE: admin
-    ports:
-      - "3000:3000"
+    command: mongod --quiet --logpath /dev/null
 
   flask:
     build: ./flask
@@ -31,22 +18,20 @@ services:
     depends_on:
       - mongodb
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: examplepassword
-      MONGO_HOST: mongodb
-      MONGO_PORT: 27017
-      MONGO_AUTH_SOURCE: admin
+      MONGO_URI: mongodb://root:examplepassword@mongodb:27017/?authSource=admin
+      MONGO_DB_NAME: mydatabase
       PYTHONUNBUFFERED: ${PYTHONUNBUFFERED}
       AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
       AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY}
       PLATFORM_OPENAI_KEY: ${PLATFORM_OPENAI_KEY}
     ports:
       - "5002:5002"
+    command: gunicorn --bind 0.0.0.0:5002 main:app
 
   vite-react:
     build:
       context: ./vite-react
-      dockerfile: Dockerfile # Production Dockerfile that builds static files
+      dockerfile: Dockerfile
     container_name: vite-react
     ports:
       - "80:80"

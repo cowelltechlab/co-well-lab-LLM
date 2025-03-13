@@ -1,0 +1,45 @@
+SIMON CLARK
+clark.si@northeastern.edu | 508-505-6480 | simonclark.dev
+EDUCATION
+Northeastern University Sep. ’17 — Dec. ’21
+Bachelor of Science in Computer Science, Minor in Professional Presentation
+• GPA: 3.99 / 4.00. Dean’s scholarship.
+• Courses: Computer Systems, Networks, Prob. and Stat., Object Oriented Design, Algorithms, Artificial Intelligence
+• Teaching Assistant: Discrete Structures (provided office hours, exam reviews, grading), Professional Development
+for Co-op (provided resume reviews, interview prep, mentorship)
+EXPERIENCE
+Seven Eight Capital Software Engineer
+Mar. ’22 — Present
+Seven Eight Capital Jun. ’21 — Aug. ’21
+Software Engineering / Quantitative Developer Intern - Python, Java
+• Integrated new code generation library, increasing developer efficiency and enabling more expressive generation
+• Analyzed calibration of US risk model on assets with certain properties
+Facebook Jan. ’21 — Apr. ’21
+Software Engineering Intern - PHP/Hack
+• Replaced script-based e-commerce order platform (that handles thousands of daily orders) with a state machine,
+leading to an 88% decrease in order processing time
+• Enabled orders to automatically resolve from certain broken states which previously required manual resolution
+Fidelity Labs Software Engineering Intern — Ruby on Rails, React
+• Developed a fintech product for financial advisors and their clients
+May ’20 — Aug. ’20
+Facebook Jan. ’20 — Mar. ’20
+Software Engineering Intern — PHP/Hack, React
+• Upgraded production copyright matching infrastructure to support evaluating test data, then built a visualization of
+how test matches would be evaluated based on real-world copyright policies
+• Upgraded tooling for viewing flagged copyrighted material to support new types of content
+Alignable Jan. ’19 — Aug. ’19
+Software Engineering Co-op — Ruby on Rails, Javascript
+• Increased forum email click-to-open rate from 22.2% to 65.3% by building aggregations into email infrastructure
+• Built new comments section for the forum adding nested comments and pagination while supporting conditionally
+hiding posts for certain users (shadowbanning)
+Alkermes May ’18 — Aug. ’18
+R&D Applications Intern — Python, Flask, Vue
+• Built web app with Flask and Vue, decreasing search and creation time of chemical procedures by 50%
+• Created script to reorganize nine years of specific experimental data, eliminating over 200 hours of manual work
+SKILLS
+Python, Java, C/C++ (familiar), Ruby on Rails, PHP/Hack, Javascript, React, Rust (familiar), Poker
+PROJECTS
+Sudoku Solver — Rust
+Parallel, memoized, low allocation DFS solver beating sudoku puzzles in 3ms
+Ray Tracer — Rust
+Parallel ray tracer implementing anti-aliasing, diffuse/metal/glass materials, and a movable camera

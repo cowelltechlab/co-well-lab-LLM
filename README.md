@@ -2,12 +2,34 @@
 
 A language model-powered backend for generating AI-assisted cover letters from resumes.
 
+## Table of Contents
+
+- [Development with Docker](#development-with-docker)
+- [Getting Started](#getting-started)
+  - [Clone the Repository](#1-clone-the-repository)
+  - [Set Up Environment Variables](#2-set-up-environment-variables)
+  - [Start the Services](#3-start-the-services)
+  - [Access the Services](#4-access-the-services)
+- [Testing API Endpoints](#testing-api-endpoints)
+  - [Test MongoDB Connection](#test-mongodb-connection)
+  - [Cover Letter Generation](#cover-letter-generation)
+  - [Fetching Cover Letter in React](#fetching-cover-letter-in-react)
+- [Running Tests](#running-tests)
+- [Working with Docker Containers](#working-with-docker-containers)
+  - [Hot Reloading](#hot-reloading)
+  - [Viewing Logs](#viewing-logs)
+  - [Stopping the Environment](#stopping-the-environment)
+  - [Rebuilding the Containers](#rebuilding-the-containers)
+- [Production Mode](#production-mode)
+- [License](#license)
+
+---
+
 ## Development with Docker
 
-This project uses Docker Compose to run four services in a containerized environment:
+This project uses Docker Compose to run three services in a containerized environment:
 
 - **MongoDB**: Database service (accessible on port `27017`)
-- **Express**: Backend service (hot reloading enabled via Nodemon, accessible on port `3000`)
 - **Flask**: Python backend service (hot reloading enabled via watchdog, handles resume processing and OpenAI calls, accessible on port `5002`)
 - **Vite-React**: Frontend service
   - **Development Mode**: Runs the Vite dev server with hot reloading on port `5173`
@@ -48,56 +70,99 @@ docker-compose up --build
 This will:
 
 - Build the Docker images
-- Start all services (`MongoDB`, `Express`, `Flask`, `Vite-React`)
+- Start all services (`MongoDB`, `Flask`, `Vite-React`)
 
 ### **4. Access the Services**
 
 Once running, the services can be accessed as follows:
 
 - **MongoDB** → localhost:27017 _(Use MongoDB Compass for visualization)_
-- **Express API** → http://localhost:3000
 - **Flask API** → http://localhost:5002
 - **Vite-React (Frontend)** → http://localhost:5173 _(Hot reloading enabled)_
 
 ---
 
-## **Resume Processing & Cover Letter Generation**
+## **Testing API Endpoints**
 
-To generate a cover letter, submit a `POST` request to **Express** at:
-`POST http://localhost:3000/api/resume/cover-letter`
+### **Test MongoDB Connection**
 
-### **Request Format**
-
-Send the request with **FormData** containing:
-
-- `pdf` → A PDF resume file
-- `job_desc` → The job description text
-
-### **Example Using Postman or cURL**
+To verify that MongoDB is properly connected to Flask, send a `GET` request:
 
 #### **Postman Setup**
 
-- **Method**: `POST`
-- **URL**: `http://localhost:3000/api/resume/cover-letter`
-- **Body**:
-  - Select `form-data`
-  - Upload `pdf` (a resume file)
-  - Add a `job_desc` field with the job description text
+- **Method**: `GET`
+- **URL**: `http://localhost:5002/test-mongo`
 
 #### **cURL Example**
 
 ```sh
-curl -X POST http://localhost:3000/api/resume/cover-letter \
-  -F "pdf=@example.pdf" \
-  -F "job_desc=We are looking for fullstack software engineers..."
+curl -X GET http://localhost:5002/test-mongo
 ```
 
-### **Example Files for Testing**
+### **Cover Letter Generation**
 
-- **Example Resume**: `example.pdf` (located in the root directory)
-- **Example Job Description**:
+To generate a cover letter, submit a `POST` request to **Flask** at:
+`POST http://localhost:5002/cover-letter`
 
-`We are looking for fullstack software engineers to join our product team and help build interfaces and APIs to interact with large language models. You will work with a team of engineers and researchers to design and implement key components of our product and platform.`
+#### **Postman Setup**
+
+- **Method**: `POST`
+- **URL**: `http://localhost:5002/cover-letter`
+- **Headers**:
+  - `Content-Type: application/json`
+- **Body**:
+  - Select `raw` → `JSON` format
+
+```json
+{
+  "resume_text": "Experienced software engineer with expertise in Python and backend development.",
+  "job_desc": "Looking for a backend engineer with experience in Flask and MongoDB."
+}
+```
+
+#### **cURL Example**
+
+```sh
+curl -X POST "http://localhost:5002/cover-letter" \
+     -H "Content-Type: application/json" \
+     -d '{"resume_text": "Experienced software engineer with expertise in Python and backend development.", "job_desc": "Looking for a backend engineer with experience in Flask and MongoDB."}'
+```
+
+### **Fetching Cover Letter in React**
+
+Example fetch request from the React frontend:
+
+```javascript
+async function generateCoverLetter(resumeText, jobDesc) {
+  const response = await fetch("http://localhost:5002/cover-letter", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ resume_text: resumeText, job_desc: jobDesc }),
+  });
+  const data = await response.json();
+  return data.cover_letter;
+}
+```
+
+---
+
+## **Running Tests**
+
+To ensure the Flask app and MongoDB are running correctly, you can execute tests inside the Flask container.
+
+### **Run All Tests**
+
+```sh
+docker-compose exec flask pytest tests/
+```
+
+### **Run a Specific Test File**
+
+```sh
+docker-compose exec flask pytest tests/test_flask.py
+```
 
 ---
 
@@ -105,7 +170,7 @@ curl -X POST http://localhost:3000/api/resume/cover-letter \
 
 ### **Hot Reloading**
 
-- Express, Flask, and Vite-React **automatically reload** when code changes.
+- Flask and Vite-React **automatically reload** when code changes.
 
 ### **Viewing Logs**
 

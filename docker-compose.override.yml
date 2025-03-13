@@ -10,27 +10,17 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
-  express:
-    build:
-      context: ./express
-      dockerfile: Dockerfile.dev
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./express:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=development
   flask:
     build:
       context: ./flask
       dockerfile: Dockerfile
     environment:
       - FLASK_ENV=development
-      - FLASK_APP=app.py
+      - FLASK_APP=main
       - FLASK_DEBUG=1
+      - PYTHONPATH=/app
     volumes:
       - ./flask:/app
     ports:
       - "5002:5002"
-    command: flask run --host=0.0.0.0 --port=5002
+    command: flask run --host=0.0.0.0 --port=5002 --reload
