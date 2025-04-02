@@ -15,6 +15,19 @@ import type { PDFDocumentProxy } from 'pdfjs-dist/types/src/display/api';
 // Set the worker path
 pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
+// Function to generate cover letter by calling the backend API
+async function generateCoverLetter(resumeText: string, jobDesc: string) {
+  const response = await fetch("http://localhost:5002/cover-letter", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ resume_text: resumeText, job_desc: jobDesc }),
+  });
+  const data = await response.json();
+  return data.cover_letter;
+}
+
 function App() {
   const [step, setStep] = useState<"intro" | "main">("intro");
   const [showResumePopup, setShowResumePopup] = useState(false);
@@ -28,11 +41,24 @@ function App() {
   const [jobFileWarning, setJobFileWarning] = useState("");
   const [isLoadingResume, setIsLoadingResume] = useState(false);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
+  const [isGeneratingCoverLetter, setIsGeneratingCoverLetter] = useState(false);
+  const [generationError, setGenerationError] = useState("");
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (resumeText && jobDescription) {
-      setGeneratedCoverLetter("Paste text");
-      setStep("main");
+      setIsGeneratingCoverLetter(true);
+      setGenerationError("");
+      
+      try {
+        const coverLetter = await generateCoverLetter(resumeText, jobDescription);
+        setGeneratedCoverLetter(coverLetter);
+        setStep("main");
+      } catch (error) {
+        console.error("Error generating cover letter:", error);
+        setGenerationError("Failed to generate cover letter. Please try again.");
+      } finally {
+        setIsGeneratingCoverLetter(false);
+      }
     } else {
       alert("Please provide both a resume and a job description.");
     }
@@ -142,40 +168,82 @@ function App() {
               Upload your resume or enter it manually, then provide a job description. Our AI will generate a tailored cover letter for you!
             </p>
             <div className="flex flex-col gap-4">
-              <Button variant="default" onClick={() => setShowResumePopup(true)}>
+              <Button 
+                variant="default" 
+                onClick={() => setShowResumePopup(true)}
+                disabled={isGeneratingCoverLetter}
+              >
                 Upload or Paste Your Resume
+                {resumeText && <span className="ml-2 text-green-500">✓</span>}
               </Button>
-              <Button variant="default" onClick={() => setShowJobPopup(true)}>
+              <Button 
+                variant="default" 
+                onClick={() => setShowJobPopup(true)}
+                disabled={isGeneratingCoverLetter}
+              >
                 Upload or Paste Job Description
+                {jobDescription && <span className="ml-2 text-green-500">✓</span>}
               </Button>
-              <Button variant="default" className="bg-blue-600 text-white hover:bg-blue-700" onClick={handleGenerate}>
-                Generate Cover Letter
+              <Button 
+                variant="default" 
+                className="bg-blue-600 text-white hover:bg-blue-700" 
+                onClick={handleGenerate}
+                disabled={isGeneratingCoverLetter || !resumeText || !jobDescription}
+              >
+                {isGeneratingCoverLetter ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Cover Letter"
+                )}
               </Button>
+              
+              {generationError && (
+                <Alert variant="destructive" className="mt-2">
+                  <AlertDescription>{generationError}</AlertDescription>
+                </Alert>
+              )}
             </div>
           </CardContent>
         </Card>
       ) : (
         <Card className="w-full max-w-4xl p-6 shadow-lg bg-white">
-        <Tabs defaultValue="review">
-          <TabsList className="flex border-b">
-            <TabsTrigger value="review">Review</TabsTrigger>
-            <TabsTrigger value="edit">Edit</TabsTrigger>
-          </TabsList>
-          <TabsContent value="review" className="flex gap-4 p-4">
-            <div className="w-1/2 border-r pr-4">
-              <h2 className="font-bold mb-2">Cover Letter:</h2>
-              <p>{generatedCoverLetter}</p>
-            </div>
-            <div className="w-1/2">
-              <h2 className="font-bold mb-2">Resume:</h2>
-              <p>{resumeText}</p>
-            </div>
-          </TabsContent>
-          <TabsContent value="edit" className="p-4">
-            <Textarea className="w-full h-64" defaultValue={generatedCoverLetter} />
-          </TabsContent>
-        </Tabs>
-      </Card>
+          <Tabs defaultValue="review">
+            <TabsList className="flex border-b">
+              <TabsTrigger value="review">Review</TabsTrigger>
+              <TabsTrigger value="edit">Edit</TabsTrigger>
+            </TabsList>
+            <TabsContent value="review" className="flex flex-col md:flex-row gap-4 p-4">
+              <div className="w-full md:w-1/2 md:border-r md:pr-4">
+                <h2 className="font-bold mb-2">Cover Letter:</h2>
+                <p className="whitespace-pre-line">{generatedCoverLetter}</p>
+              </div>
+              <div className="w-full md:w-1/2">
+                <h2 className="font-bold mb-2">Resume:</h2>
+                <p className="whitespace-pre-line">{resumeText}</p>
+              </div>
+            </TabsContent>
+            <TabsContent value="edit" className="p-4">
+              <Textarea 
+                className="w-full h-64" 
+                value={generatedCoverLetter} 
+                onChange={(e) => setGeneratedCoverLetter(e.target.value)} 
+              />
+              <div className="mt-4 flex justify-end">
+                <Button 
+                  variant="outline" 
+                  className="mr-2"
+                  onClick={() => setStep("intro")}
+                >
+                  Back
+                </Button>
+                <Button>Save Cover Letter</Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </Card>
       )}
 
       {/* Resume Upload/Paste Popup */}
