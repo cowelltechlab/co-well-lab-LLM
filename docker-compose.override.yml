@@ -10,6 +10,7 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    command: sh -c "npm install && npm run dev"
   flask:
     build:
       context: ./flask
