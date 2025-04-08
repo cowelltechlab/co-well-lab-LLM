@@ -49,12 +49,12 @@ def generate_cover_letter(resume_text, job_desc):
        Below is a resume and a job description. Break each into labeled segments using the exact wording from the documents. Ensure that each segment is self-contained and relevant for mapping to the cover letter bullet points.
        Format the output as JSON with two main keys:
        {{
-       "Resume Segments": {{
+       "resumeSegments": {{
        "R_1": "Managed a team of 5 engineers...",
        "R_2": "Developed RESTful APIs using Flask...",
        ...
        }},
-       "Job Description Segments": {{
+       "jobDescriptionSegments": {{
        "JD_1": "Looking for a candidate with strong backend API development experience...",
        "JD_2": "Experience leading technical teams preferred...",
        ...
