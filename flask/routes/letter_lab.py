@@ -51,7 +51,7 @@ def initialize():
         rationales_enactive = generate_rationales_for_enactive_mastery_bullet_points(
             resume, job_desc, enactive_mastery_bullet_points
         )
-        print("Rationale 1:", rationales_enactive.get("R_1"))
+        print("Enactive Mastery Rationale 1:", rationales_enactive.get("R_1"))
         sys.stdout.flush()
 
         # Task 5
