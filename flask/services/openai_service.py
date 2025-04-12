@@ -113,6 +113,31 @@ Job Description:
     except Exception as e:
         print("Error generating vicarious bullet points:", e)
         return "Error generating bullet points."
+    
+
+def generate_verbal_persuasion_bullet_points(resume, job_desc):
+    prompt = f"""
+You are helping a user build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET) as a framework. BSET suggests that self-efficacy — a person’s belief in their ability to succeed — is influenced by four key sources. One of those is **Verbal Persuasion**, which refers to boosting belief in our own abilities through encouragement, positive feedback, and managing our emotional state under pressure.
+Your task is to generate **3 bullet points** that align with this belief. Each bullet point should reflect a specific skill, experience, or achievement from the user's resume that demonstrates **direct success** in a way that aligns with the job description.
+Be specific, action-oriented, and concise. Your response should be strictly formatted as JSON like this:
+{{
+  "BP_1": "Successfully led a backend migration project, improving API response times by 40%.",
+  "BP_2": "...",
+  "BP_3": "..."
+}}
+Resume:
+{resume}
+Job Description:
+{job_desc}
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        parsed = json.loads(response.content.strip())
+        return parsed
+    except Exception as e:
+        print("Error generating verbal persuasion bullet points:", e)
+        return "Error generating bullet points."
 
 # Task 4
 def generate_rationales_for_enactive_mastery_bullet_points(resume, job_desc, bullet_points_dict):
