@@ -42,7 +42,6 @@ def initialize():
         print("Vicarious Experience Bullet Point 1:", vicarious_experience_bullet_points["BP_1"])
         sys.stdout.flush()
 
-        # Task 4
         # Task 4 - Rationales
         rationales_enactive = generate_rationales_for_enactive_mastery_bullet_points(
             resume, job_desc, enactive_mastery_bullet_points
