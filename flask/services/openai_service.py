@@ -139,6 +139,7 @@ Job Description:
         print("Error generating verbal persuasion bullet points:", e)
         return "Error generating bullet points."
 
+
 # Task 4
 def generate_rationales_for_enactive_mastery_bullet_points(resume, job_desc, bullet_points_dict):
     bullet_text = "\n".join(
