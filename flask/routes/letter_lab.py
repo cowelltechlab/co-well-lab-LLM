@@ -1,9 +1,10 @@
 from flask import Blueprint, request, jsonify
 
-from app.services.openai_service import generate_initial_cover_letter
-from app.services.openai_service import generate_review_all_view_intro
-from app.services.pipeline_service import generate_bullet_points_and_rationales
-from app.services.mongodb_service import save_initialization
+from services.openai_service import generate_initial_cover_letter
+from services.openai_service import generate_review_all_view_intro
+from services.pipeline_service import generate_bullet_points_and_rationales
+from services.mongodb_service import create_session
+from services.mongodb_service import update_session
 
 letter_lab_bp = Blueprint("letter_lab", __name__)
 
@@ -27,7 +28,7 @@ def initialize():
         bullet_points, rationales = generate_bullet_points_and_rationales(resume, job_desc)
 
         # Task 5
-        document_id = save_initialization(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
+        document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
 
 
         return jsonify({
@@ -40,6 +41,10 @@ def initialize():
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500
+
+@letter_lab_bp.route('/cover-letter', methods=['POST'])
+def cover_letter():
+    return
 
 @letter_lab_bp.route('/finalize', methods=['POST'])
 def finalize():
