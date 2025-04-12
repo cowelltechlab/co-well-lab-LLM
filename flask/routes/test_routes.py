@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from bson.errors import InvalidId
 from services.mongodb_service import create_session
 from services.mongodb_service import get_session
 from services.mongodb_service import update_session
@@ -13,9 +14,14 @@ def test_init():
 
 @test_bp.route("/test-get/<doc_id>")
 def test_get(doc_id):
-    doc = get_session(doc_id)
-    doc["_id"] = str(doc["_id"])
-    return jsonify(doc)
+    try:
+        doc = get_session(doc_id)
+        if doc is None:
+            return jsonify({"error": "Document not found"}), 404
+        doc["_id"] = str(doc["_id"])
+        return jsonify(doc)
+    except InvalidId:
+        return jsonify({"error": "Invalid document ID"}), 400
 
 @test_bp.route("/test-update/<doc_id>", methods=["POST"])
 def test_update(doc_id):
