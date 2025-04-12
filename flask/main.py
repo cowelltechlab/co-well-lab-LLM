@@ -1,6 +1,6 @@
 from flask import Flask
 from config import Config  # No more 'app.' needed
-from routes.cover_letter import cover_letter_bp
+from flask.routes.letter_lab import cover_letter_bp
 from routes.health import health_bp
 
 from flask_pymongo import PyMongo
