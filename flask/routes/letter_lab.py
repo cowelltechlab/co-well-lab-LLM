@@ -26,7 +26,9 @@ def initialize():
         sys.stdout.flush()
 
         # Task 2
-        # review_all_view_intro = generate_review_all_view_intro(job_desc)
+        review_all_view_intro = generate_review_all_view_intro(job_desc)
+        print(review_all_view_intro)
+        sys.stdout.flush()
 
         # Task 3 & 4
         # bullet_points, rationales = generate_bullet_points_and_rationales(resume, job_desc)
@@ -43,7 +45,7 @@ def initialize():
         #     "document_id": document_id
         # })
 
-        return jsonify({"status": "initial_cover_letter_generated"}), 200
+        return jsonify({"status": "initial_cover_letter generated, review_all_view_intro generated"}), 200
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500

@@ -34,7 +34,31 @@ Job Description:
 
 # Task 2
 def generate_review_all_view_intro(job_desc):
-    return
+    prompt = f"""
+You are helping build a friendly and helpful AI career assistant.
+
+Extract the job title and organization name from the job description below. Then, use them to write a short, welcoming intro message like the following:
+
+Example format:
+"Here’s a personalized cover letter outline we’ve created for you, tailored specifically for the [job title] role at [organization].
+
+As you read through each section, you’ll see the thinking behind the wording and structure — why certain skills are emphasized, how the language reflects the job description, and where your strengths shine through.
+
+Take some time to review each section. If something doesn’t feel quite right, let us know! You can agree with our choices or suggest changes — we’re here to build this with you, not just for you."
+
+Job description:
+{job_desc}
+
+Only return the final formatted message. Do not include any explanation.
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating review-all-view intro:", e)
+        return "Error generating intro text."
+
 
 # Task 3
 def generate_bullet_points(resume, job_desc):
