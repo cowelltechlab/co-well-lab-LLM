@@ -91,8 +91,40 @@ Job Description:
         return "Error generating bullet points."
 
 # Task 4
-def generate_rationales(resume, job_desc, bullet_points):
-    return
+def generate_rationales_for_enactive_mastery_bullet_points(resume, job_desc, bullet_points_dict):
+    bullet_text = "\n".join(
+        [f"{k}: {v}" for k, v in bullet_points_dict.items()]
+    )
+
+    prompt = f"""
+You are helping to build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET), specifically focusing on the belief category **Enactive Mastery Experience**, which highlights confidence developed through direct, successful personal experience.
+
+Given the bullet points below — which represent key achievements from the resume that align with the job description — write a **brief rationale** for each bullet point. The rationale should explain why this experience supports the candidate's self-efficacy and why it's a strong match for the job.
+
+Please format your output as JSON with keys R_1, R_2, and R_3 that map to the respective bullet points (BP_1, BP_2, BP_3). Example:
+
+{{
+  "R_1": "This statement reflects a successful leadership outcome in a directly relevant domain.",
+  "R_2": "...",
+  "R_3": "..."
+}}
+
+Resume:
+{resume}
+
+Job Description:
+{job_desc}
+
+Bullet Points:
+{bullet_text}
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        return json.loads(response.content.strip())
+    except Exception as e:
+        print("Error generating rationales for enactive mastery bullets:", e)
+        return {}
 
 # Below is old code that might be useful for reference
 

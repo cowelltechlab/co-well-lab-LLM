@@ -5,6 +5,8 @@ from flask import Blueprint, request, jsonify
 from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_review_all_view_intro
 from services.openai_service import generate_enactive_mastery_bullet_points
+from services.openai_service import generate_rationales_for_enactive_mastery_bullet_points
+
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
 
@@ -30,12 +32,17 @@ def initialize():
         # print(review_all_view_intro)
         # sys.stdout.flush()
 
-        # Task 3
+        # Task 3 - Bullet Points
         enactive_mastery_bullet_points = generate_enactive_mastery_bullet_points(resume, job_desc)
         print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
         sys.stdout.flush()
 
-        # Task 4
+        # Task 4 - Rationales
+        rationales_enactive = generate_rationales_for_enactive_mastery_bullet_points(
+            resume, job_desc, enactive_mastery_bullet_points
+        )
+        print("Rationale 1:", rationales_enactive.get("R_1"))
+        sys.stdout.flush()
 
         # Task 5
         # document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
