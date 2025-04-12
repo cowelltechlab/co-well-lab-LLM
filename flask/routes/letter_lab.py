@@ -32,7 +32,7 @@ def initialize():
 
         # Task 3
         enactive_mastery_bullet_points = generate_enactive_mastery_bullet_points(resume, job_desc)
-        print("Enactive Mastery Bullet Points:", enactive_mastery_bullet_points)
+        print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
         sys.stdout.flush()
 
         # Task 4

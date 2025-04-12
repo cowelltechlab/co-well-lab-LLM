@@ -84,7 +84,8 @@ Job Description:
 
     try:
         response = llmchat.invoke(prompt)
-        return response.content.strip()
+        parsed = json.loads(response.content.strip())
+        return parsed
     except Exception as e:
         print("Error generating enactive mastery bullet points:", e)
         return "Error generating bullet points."
