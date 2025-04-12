@@ -11,6 +11,13 @@ llmchat = lcai.AzureChatOpenAI(
     model_name="gpt-4o",
 )
 
+# Extract and parse JSON from chat completion
+def extract_and_parse(json_string):
+    match = re.search(r"```json\n(.*?)\n```", json_string, re.DOTALL)
+    if not match:
+        raise ValueError("No valid JSON block found in string.")
+    return json.loads(match.group(1))
+
 # Task 1
 def generate_initial_cover_letter(resume, job_desc):
     prompt = f"""
@@ -84,11 +91,15 @@ Job Description:
 
     try:
         response = llmchat.invoke(prompt)
-        parsed = json.loads(response.content.strip())
-        return parsed
+        content = response.content.strip()
+
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return extract_and_parse(content)
     except Exception as e:
         print("Error generating enactive mastery bullet points:", e)
-        return "Error generating bullet points."
+        return {}
     
 def generate_vicarious_experience_bullet_points(resume, job_desc):
     prompt = f"""
@@ -108,11 +119,15 @@ Job Description:
 
     try:
         response = llmchat.invoke(prompt)
-        parsed = json.loads(response.content.strip())
-        return parsed
+        content = response.content.strip()
+
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return extract_and_parse(content)
     except Exception as e:
-        print("Error generating vicarious bullet points:", e)
-        return "Error generating bullet points."
+        print("Error generating vicarious experience bullet points:", e)
+        return {}
     
 
 def generate_verbal_persuasion_bullet_points(resume, job_desc):
@@ -133,11 +148,15 @@ Job Description:
 
     try:
         response = llmchat.invoke(prompt)
-        parsed = json.loads(response.content.strip())
-        return parsed
+        content = response.content.strip()
+
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return extract_and_parse(content)
     except Exception as e:
         print("Error generating verbal persuasion bullet points:", e)
-        return "Error generating bullet points."
+        return {}
 
 
 # Task 4
@@ -171,9 +190,14 @@ Bullet Points:
 
     try:
         response = llmchat.invoke(prompt)
-        return json.loads(response.content.strip())
+        content = response.content.strip()
+
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return extract_and_parse(content)
     except Exception as e:
-        print("Error generating rationales for enactive mastery bullets:", e)
+        print("Error generating enactive mastery rationales:", e)
         return {}
 
 # Below is old code that might be useful for reference

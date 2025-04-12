@@ -12,6 +12,10 @@ from services.openai_service import generate_rationales_for_enactive_mastery_bul
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
 
+# bullet point validation
+def is_valid_bullet_output(data):
+    return isinstance(data, dict) and all(k.startswith("BP_") for k in data.keys())
+
 letter_lab_bp = Blueprint("letter_lab", __name__)
 
 @letter_lab_bp.route('/initialize', methods=['POST'])
@@ -36,6 +40,11 @@ def initialize():
 
         # Task 3 - Bullet Points
         enactive_mastery_bullet_points = generate_enactive_mastery_bullet_points(resume, job_desc)
+
+        if not is_valid_bullet_output(enactive_mastery_bullet_points):
+            print("Vicarious bullet point generation failed or returned invalid data.")
+            return jsonify({"error": "Vicarious bullet generation failed"}), 500
+
         print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
         sys.stdout.flush()
 
