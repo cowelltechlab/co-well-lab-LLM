@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify
 from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_review_all_view_intro
 from services.openai_service import generate_enactive_mastery_bullet_points
+from services.openai_service import generate_vicarious_experience_bullet_points
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
 
@@ -33,6 +34,10 @@ def initialize():
         # Task 3
         enactive_mastery_bullet_points = generate_enactive_mastery_bullet_points(resume, job_desc)
         print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
+        sys.stdout.flush()
+
+        vicarious_experience_bullet_points = generate_vicarious_experience_bullet_points(resume, job_desc)
+        print("Vicarious Experience Bullet Point 1:", vicarious_experience_bullet_points["BP_1"])
         sys.stdout.flush()
 
         # Task 4
