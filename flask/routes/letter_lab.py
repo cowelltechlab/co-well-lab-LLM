@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify
 
 from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_review_all_view_intro
-from services.pipeline_service import generate_bullet_points_and_rationales
+from services.openai_service import generate_enactive_mastery_bullet_points
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
 
@@ -22,16 +22,20 @@ def initialize():
 
         # Task 1
         initial_cover_letter = generate_initial_cover_letter(resume, job_desc)
-        print(initial_cover_letter)
-        sys.stdout.flush()
+        # print(initial_cover_letter)
+        # sys.stdout.flush()
 
         # Task 2
         review_all_view_intro = generate_review_all_view_intro(job_desc)
-        print(review_all_view_intro)
+        # print(review_all_view_intro)
+        # sys.stdout.flush()
+
+        # Task 3
+        enactive_mastery_bullet_points = generate_enactive_mastery_bullet_points(resume, job_desc)
+        print("Enactive Mastery Bullet Points:", enactive_mastery_bullet_points)
         sys.stdout.flush()
 
-        # Task 3 & 4
-        # bullet_points, rationales = generate_bullet_points_and_rationales(resume, job_desc)
+        # Task 4
 
         # Task 5
         # document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
@@ -45,7 +49,7 @@ def initialize():
         #     "document_id": document_id
         # })
 
-        return jsonify({"status": "initial_cover_letter generated, review_all_view_intro generated"}), 200
+        return jsonify({"status": "initialization completed"}), 200
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500
