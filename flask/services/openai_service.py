@@ -61,8 +61,34 @@ Only return the final formatted message. Do not include any explanation.
 
 
 # Task 3
-def generate_bullet_points(resume, job_desc):
-    return
+def generate_enactive_mastery_bullet_points(resume, job_desc):
+    prompt = f"""
+You are helping a user build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET) as a framework. BSET suggests that self-efficacy — a person’s belief in their ability to succeed — is influenced by four key sources. One of those is **Enactive Mastery Experience**, which refers to confidence gained through personal accomplishments and direct, successful experiences.
+
+Your task is to generate **3 bullet points** that align with this belief. Each bullet point should reflect a specific skill, experience, or achievement from the user's resume that demonstrates **direct success** in a way that aligns with the job description.
+
+Be specific, action-oriented, and concise. Your response should be strictly formatted as JSON like this:
+
+{{
+  "BP_1": "Successfully led a backend migration project, improving API response times by 40%.",
+  "BP_2": "...",
+  "BP_3": "..."
+}}
+
+Resume:
+{resume}
+
+Job Description:
+{job_desc}
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        parsed = json.loads(response.content.strip())
+        return parsed
+    except Exception as e:
+        print("Error generating enactive mastery bullet points:", e)
+        return "Error generating bullet points."
 
 # Task 4
 def generate_rationales(resume, job_desc, bullet_points):
