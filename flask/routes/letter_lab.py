@@ -1,3 +1,5 @@
+import sys
+
 from flask import Blueprint, request, jsonify
 
 from services.openai_service import generate_initial_cover_letter
@@ -20,24 +22,28 @@ def initialize():
 
         # Task 1
         initial_cover_letter = generate_initial_cover_letter(resume, job_desc)
+        print(initial_cover_letter)
+        sys.stdout.flush()
 
         # Task 2
-        review_all_view_intro = generate_review_all_view_intro(job_desc)
+        # review_all_view_intro = generate_review_all_view_intro(job_desc)
 
         # Task 3 & 4
-        bullet_points, rationales = generate_bullet_points_and_rationales(resume, job_desc)
+        # bullet_points, rationales = generate_bullet_points_and_rationales(resume, job_desc)
 
         # Task 5
-        document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
+        # document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
 
 
-        return jsonify({
-            "initial_cover_letter": initial_cover_letter,
-            "review_all_view_intro": review_all_view_intro,
-            "bullet_points": bullet_points,
-            "rationales": rationales,
-            "document_id": document_id
-        })
+        # return jsonify({
+        #     "initial_cover_letter": initial_cover_letter,
+        #     "review_all_view_intro": review_all_view_intro,
+        #     "bullet_points": bullet_points,
+        #     "rationales": rationales,
+        #     "document_id": document_id
+        # })
+
+        return jsonify({"status": "initial_cover_letter_generated"}), 200
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500

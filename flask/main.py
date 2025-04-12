@@ -17,7 +17,7 @@ def create_app():
     mongo.init_app(app)
 
     # Register Blueprints
-    app.register_blueprint(letter_lab_bp)
+    app.register_blueprint(letter_lab_bp, url_prefix="/lab")
     app.register_blueprint(test_bp)
 
     return app

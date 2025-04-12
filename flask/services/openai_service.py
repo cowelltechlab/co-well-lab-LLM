@@ -13,7 +13,24 @@ llmchat = lcai.AzureChatOpenAI(
 
 # Task 1
 def generate_initial_cover_letter(resume, job_desc):
-    return
+    prompt = f"""
+You are an expert career coach and professional writer. Based on the resume and job description provided below, write a compelling, concise, and personalized cover letter draft. The tone should be confident and clear, highlighting relevant skills and experiences that align with the job description.
+
+Use a standard cover letter structure: introduction, body paragraphs, and conclusion. Do not include any headers, addresses, or signatures.
+
+Resume:
+{resume}
+
+Job Description:
+{job_desc}
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating initial cover letter:", e)
+        return "Error generating initial cover letter."
 
 # Task 2
 def generate_review_all_view_intro(job_desc):
