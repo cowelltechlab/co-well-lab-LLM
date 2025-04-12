@@ -16,6 +16,7 @@ services:
       context: ./flask
       dockerfile: Dockerfile
     environment:
+      - FLASK_APP=flask.main
       - FLASK_ENV=development
       - FLASK_APP=main
       - FLASK_DEBUG=1

@@ -1,14 +1,21 @@
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+import os
 
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")  # assuming docker-compose service is 'mongo'
+client = MongoClient(MONGO_URI)
+db = client["cover_letter_app"]
+collection = db["sessions"]
 
-def save_initialization(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales):
-    try:
-        mongo.db.user_requests.insert_one({
-            "resume": resume,
-            "job_desc": job_desc,
-            "initial_cover_letter": initial_cover_letter,
-            "review_all_view_intro": review_all_view_intro,
-            "bullet_points": bullet_points,
-            "rationales": rationales
-        })
-    except Exception as e:
-        print(f"MongoDB Error: {str(e)}")
+def create_session(data):
+    result = collection.insert_one(data)
+    return str(result.inserted_id)
+
+def update_session(session_id, update_fields):
+    collection.update_one(
+        {"_id": ObjectId(session_id)},
+        {"$set": update_fields}
+    )
+
+def get_session(session_id):
+    return collection.find_one({"_id": ObjectId(session_id)})
