@@ -247,3 +247,45 @@ Bullet Points:
     except Exception as e:
         print("Error generating vicarious rationales:", e)
         return {}
+
+# VERBAL PERSUASION RATIONALES
+
+def generate_rationales_for_verbal_persuasion_bullet_points(resume, job_desc, bullet_points_dict):
+    bullet_text = "\n".join(
+        [f"{k}: {v}" for k, v in bullet_points_dict.items()]
+    )
+
+    prompt = f"""
+You are helping to build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET), specifically focusing on the belief category **Verbal Persuasion and Affective States**. This belief refers to confidence built through encouragement, affirmation, constructive feedback, or emotional conviction (e.g., feeling capable, passionate, or driven in response to external or internal cues).
+
+Given the bullet points below — which reflect experiences influenced by feedback, motivation, personal conviction, or emotional insight — write a **brief rationale** for each bullet point. The rationale should explain how the experience reflects verbal persuasion or affective states and why it aligns with the job description.
+
+Please format your output as JSON with keys R_1, R_2, and R_3 that map to the respective bullet points (BP_1, BP_2, BP_3). Example:
+
+{{
+  "R_1": "This bullet describes how the candidate grew in confidence after being recognized by leadership for strong communication skills.",
+  "R_2": "...",
+  "R_3": "..."
+}}
+
+Resume:
+{resume}
+
+Job Description:
+{job_desc}
+
+Bullet Points:
+{bullet_text}
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        content = response.content.strip()
+
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return extract_and_parse(content)
+    except Exception as e:
+        print("Error generating verbal persuasion rationales:", e)
+        return {}
