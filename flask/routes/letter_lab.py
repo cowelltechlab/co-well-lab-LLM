@@ -1,4 +1,5 @@
 import sys
+import json
 
 from flask import Blueprint, request, jsonify
 
@@ -19,10 +20,13 @@ from services.mongodb_service import update_session
 # UTILITIES
 from utils.generation_helpers import retry_generation
 from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output
+from utils.data_structuring import zip_bullets_and_rationales
+
 
 
 # DEBUG FLAGS
 DEBUG_GENERATION = False
+DEBUG_SESSION_OUTPUT = True
 
 # # bullet point JSON validation
 # def is_valid_bullet_output(data):
@@ -170,19 +174,37 @@ def initialize():
             print("Verbal Persuasion Rationale 1:", verbal_persuasion_rationales.get("R_1"))
             sys.stdout.flush()
 
-        # Task 5
-        # document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
+        ### DATA STRUCTURING
 
+        zipped_enactive = zip_bullets_and_rationales(
+            enactive_mastery_bullet_points, enactive_mastery_rationales
+        )
 
-        # return jsonify({
-        #     "initial_cover_letter": initial_cover_letter,
-        #     "review_all_view_intro": review_all_view_intro,
-        #     "bullet_points": bullet_points,
-        #     "rationales": rationales,
-        #     "document_id": document_id
-        # })
+        zipped_vicarious = zip_bullets_and_rationales(
+            vicarious_experience_bullet_points, vicarious_experience_rationales
+        )
+
+        zipped_verbal = zip_bullets_and_rationales(
+            verbal_persuasion_bullet_points, verbal_persuasion_rationales
+        )
+
+        session_data = {
+            "resume": resume,
+            "job_desc": job_desc,
+            "initial_cover_letter": initial_cover_letter,
+            "review_all_view_intro": review_all_view_intro,
+            "BSETB_enactive_mastery": zipped_enactive,
+            "BSETB_vicarious_experience": zipped_vicarious,
+            "BSETB_verbal_persuasion": zipped_verbal
+        }
+
+        if DEBUG_SESSION_OUTPUT:
+            print("Final session_data object:")
+            print(json.dumps(session_data, indent=2))
+            sys.stdout.flush()
 
         return jsonify({"status": "initialization completed"}), 200
+    
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500
