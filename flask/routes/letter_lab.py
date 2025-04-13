@@ -22,25 +22,16 @@ from utils.generation_helpers import retry_generation
 from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output
 from utils.data_structuring import zip_bullets_and_rationales
 
-
-
-# DEBUG FLAGS
-DEBUG_GENERATION = False
-DEBUG_SESSION_OUTPUT = True
-
-# # bullet point JSON validation
-# def is_valid_bullet_output(data):
-#     return isinstance(data, dict) and all(k.startswith("BP_") for k in data.keys())
-
-# # rationale JSON validation
-# def is_valid_rationale_output(data):
-#     return isinstance(data, dict) and all(k.startswith("R_") for k in data.keys())
-
-
 letter_lab_bp = Blueprint("letter_lab", __name__)
 
 @letter_lab_bp.route('/initialize', methods=['POST'])
 def initialize():
+    
+    # DEBUG FLAGS
+    DEBUG_GENERATION = False
+    DEBUG_SESSION_OUTPUT = False
+    DEBUG_MONGO_WRITE = True
+
     try:
         data = request.get_json()
         resume = data.get("resume_text")
@@ -201,6 +192,15 @@ def initialize():
         if DEBUG_SESSION_OUTPUT:
             print("Final session_data object:")
             print(json.dumps(session_data, indent=2))
+            sys.stdout.flush()
+
+        ### DATA STORAGE
+
+        document_id = create_session(session_data)
+
+        if DEBUG_MONGO_WRITE:
+            print("MongoDB document successfully created.")
+            print("Document ID:", document_id)
             sys.stdout.flush()
 
         return jsonify({"status": "initialization completed"}), 200
