@@ -1,0 +1,5 @@
+curl -X POST http://localhost:5002/lab/initialize \
+  -H "Content-Type: application/json" \
+  -d '{
+    "resume_text": "Experienced software engineer with 5+ years of backend development using Python, Flask, and MongoDB. Led API integrations and scalable system design projects.",
+    "job_desc": "Mayo Clinic is hiring a Kinney Executive Dean of Research. The ideal candidate will lead our research division and work closely with executive teams to advance clinical innovation and interdisciplinary research programs."}'
