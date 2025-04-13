@@ -1,0 +1,24 @@
+We are looking for proficient programmers to join our team to train our AI chatbots to code. You will work with the chatbots that we are building in order to measure their progress, as well as write and evaluate code.
+
+To apply to this role, you will need to be proficient in either Python and/or JavaScript. Your role will require proficiency in at least one programming language/framework (JavaScript, TypeScript, Python, C, C#, C++, HTML/CSS, React, Go, Java, Kotlin, SQL, or Swift) in order to solve coding problems (think LeetCode, HackerRank, etc). For each coding problem, you must be able to explain how your solution solves the problem.
+
+As part of the application process, you will be asked to complete an assessment. If you pass, you will gain access to projects. Based on the quality of your work, you will continue to receive projects regularly. We find our most successful candidates work between 5-20 hours per week, up to 40 hours.
+
+Benefits:
+
+This is a full-time or part-time REMOTE position
+You’ll be able to choose which projects you want to work on
+You can work on your own schedule
+Projects are paid hourly, with bonuses on high-quality and high-volume work
+Responsibilities:
+
+Come up with diverse problems and solutions for a coding chatbot
+Write high-quality answers and code snippets
+Evaluate code quality produced by AI models for correctness and performance
+Qualifications:
+
+Fluency in English
+Proficient in either Python and/or JavaScript
+Detail-oriented
+Excellent writing and grammar skills
+A bachelor's degree (completed or in progress)
