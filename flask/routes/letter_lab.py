@@ -203,8 +203,12 @@ def initialize():
             print("Document ID:", document_id)
             sys.stdout.flush()
 
-        return jsonify({"status": "initialization completed"}), 200
-    
+        ### RESPONSE TO FRONTEND
+
+        session_data["document_id"] = str(document_id)
+
+        return jsonify(session_data), 200
+
     except Exception as e:
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500
