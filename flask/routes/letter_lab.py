@@ -8,9 +8,13 @@ from services.openai_service import generate_enactive_mastery_bullet_points
 from services.openai_service import generate_vicarious_experience_bullet_points
 from services.openai_service import generate_verbal_persuasion_bullet_points
 from services.openai_service import generate_rationales_for_enactive_mastery_bullet_points
+from services.openai_service import generate_rationales_for_vicarious_bullet_points
 
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
+
+# DEBUG FLAGS
+DEBUG_GENERATION = True
 
 # bullet point JSON validation
 def is_valid_bullet_output(data):
@@ -35,15 +39,18 @@ def initialize():
 
         # INITIAL COVER LETTER
         initial_cover_letter = generate_initial_cover_letter(resume, job_desc)
-        # print(initial_cover_letter)
-        # sys.stdout.flush()
+        if DEBUG_GENERATION:
+            print(initial_cover_letter)
+            sys.stdout.flush()
 
         # REVIEW-ALL-VIEW INTRO
         review_all_view_intro = generate_review_all_view_intro(job_desc)
-        # print(review_all_view_intro)
-        # sys.stdout.flush()
 
-        # BULLET POINTS
+        if DEBUG_GENERATION:
+            print(review_all_view_intro)
+            sys.stdout.flush()
+
+        ### BULLET POINTS
 
         # ENACTIVE MASTERY BULLET POINTS
         enactive_mastery_bullet_points = generate_enactive_mastery_bullet_points(resume, job_desc)
@@ -52,8 +59,9 @@ def initialize():
             print("Enactive Mastery bullet point generation failed or returned invalid data.")
             return jsonify({"error": "Enactive Mastery bullet point generation failed"}), 500
 
-        print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
-        sys.stdout.flush()
+        if DEBUG_GENERATION:
+            print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
+            sys.stdout.flush()
 
         # VICARIOUS EXPERIENCE BULLET POINTS
         vicarious_experience_bullet_points = generate_vicarious_experience_bullet_points(resume, job_desc)
@@ -62,8 +70,9 @@ def initialize():
             print("Vicarious Experience bullet point generation failed or returned invalid data.")
             return jsonify({"error": "Vicarious Experience bullet point generation failed"}), 500
         
-        print("Vicarious Experience Bullet Point 1:", vicarious_experience_bullet_points["BP_1"])
-        sys.stdout.flush()
+        if DEBUG_GENERATION:
+            print("Vicarious Experience Bullet Point 1:", vicarious_experience_bullet_points["BP_1"])
+            sys.stdout.flush()
 
         # VERBAL PERSUASION BULLET POINTS
         verbal_persuasion_bullet_points = generate_verbal_persuasion_bullet_points(resume, job_desc)
@@ -72,10 +81,11 @@ def initialize():
             print("Verbal Persuasion bullet point generation failed or returned invalid data.")
             return jsonify({"error": "Verbal Persuasion bullet point generation failed"}), 500
         
-        print("Verbal Persuasion Bullet Point 1:", verbal_persuasion_bullet_points["BP_1"])
-        sys.stdout.flush()
+        if DEBUG_GENERATION:
+            print("Verbal Persuasion Bullet Point 1:", verbal_persuasion_bullet_points["BP_1"])
+            sys.stdout.flush()
 
-        # RATIONALES
+        ### RATIONALES
 
         # ENACTIVE MASTERY RATIONALES
         enactive_mastery_rationales = generate_rationales_for_enactive_mastery_bullet_points(
@@ -86,8 +96,23 @@ def initialize():
             print("Enactive Mastery rationale generation failed or returned invalid data.")
             return jsonify({"error": "Enactive Mastery rationale generation failed"}), 500
         
-        print("Enactive Mastery Rationale 1:", enactive_mastery_rationales.get("R_1"))
-        sys.stdout.flush()
+        if DEBUG_GENERATION:
+            print("Enactive Mastery Rationale 1:", enactive_mastery_rationales.get("R_1"))
+            sys.stdout.flush()
+
+        # VICARIOUS EXPERIENCE RATIONALES
+        vicarious_experience_rationales = generate_rationales_for_vicarious_bullet_points(
+            resume, job_desc, vicarious_experience_bullet_points
+        )
+
+        if not is_valid_rationale_output(vicarious_experience_rationales):
+            print("Vicarious rationale generation failed or returned invalid data.")
+            return jsonify({"error": "Vicarious rationale generation failed"}), 500
+
+        if DEBUG_GENERATION:
+            print("Vicarious Rationale 1:", vicarious_experience_rationales.get("R_1"))
+            sys.stdout.flush()
+
 
         # Task 5
         # document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)

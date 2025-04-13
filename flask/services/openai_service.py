@@ -68,6 +68,9 @@ Only return the final formatted message. Do not include any explanation.
 
 
 # Task 3
+### BULLET POINTS
+
+# ENACTIVE MASTERY BULLET POINTS
 def generate_enactive_mastery_bullet_points(resume, job_desc):
     prompt = f"""
 You are helping a user build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET) as a framework. BSET suggests that self-efficacy — a person’s belief in their ability to succeed — is influenced by four key sources. One of those is **Enactive Mastery Experience**, which refers to confidence gained through personal accomplishments and direct, successful experiences.
@@ -100,7 +103,8 @@ Job Description:
     except Exception as e:
         print("Error generating enactive mastery bullet points:", e)
         return {}
-    
+
+# VICARIOUS EXPERIENCE BULLET POINTS
 def generate_vicarious_experience_bullet_points(resume, job_desc):
     prompt = f"""
 You are helping a user build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET) as a framework. BSET suggests that self-efficacy — a person’s belief in their ability to succeed — is influenced by four key sources. One of those is **Vicarious Experience or Social Modeling**, which refers to believing in our own abilities by seeing others succeed through effort, especially those similar to oneself.
@@ -129,7 +133,7 @@ Job Description:
         print("Error generating vicarious experience bullet points:", e)
         return {}
     
-
+# VERBAL PERSUASION BULLET POINTS
 def generate_verbal_persuasion_bullet_points(resume, job_desc):
     prompt = f"""
 You are helping a user build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET) as a framework. BSET suggests that self-efficacy — a person’s belief in their ability to succeed — is influenced by four key sources. One of those is **Verbal Persuasion**, which refers to boosting belief in our own abilities through encouragement, positive feedback, and managing our emotional state under pressure.
@@ -160,6 +164,9 @@ Job Description:
 
 
 # Task 4
+### RATIONALES
+
+# ENACTIVE MASTERY RATIONALES
 def generate_rationales_for_enactive_mastery_bullet_points(resume, job_desc, bullet_points_dict):
     bullet_text = "\n".join(
         [f"{k}: {v}" for k, v in bullet_points_dict.items()]
@@ -200,97 +207,43 @@ Bullet Points:
         print("Error generating enactive mastery rationales:", e)
         return {}
 
-# Below is old code that might be useful for reference
+# VICARIOUS EXPERIENCE RATIONALES
+def generate_rationales_for_vicarious_bullet_points(resume, job_desc, bullet_points_dict):
+    bullet_text = "\n".join(
+        [f"{k}: {v}" for k, v in bullet_points_dict.items()]
+    )
 
-# def extract_and_parse(json_string):
-#     # Extract the content inside the triple backticks
-#     match = re.search(r"```json\n(.*?)\n```", json_string, re.DOTALL)
-#     if not match:
-#         raise ValueError("No valid JSON block found in string.")
-    
-#     json_content = match.group(1)
-#     return json.loads(json_content)
+    prompt = f"""
+You are helping to build a personalized cover letter using Bandura's Self-Efficacy Theory (BSET), specifically focusing on the belief category **Vicarious Experience**. This belief refers to confidence gained through observing others — such as mentors, team leaders, or successful peers — and applying those learnings to your own work.
 
-# def generate_cover_letter(resume_text, job_desc):
-#     try:
-#        prompt_1 = f"""
-#        Based on the following resume and job description, generate 5-7 bullet point statements suitable for a personalized cover letter. Each bullet point should reflect a specific qualification, experience, or skill that strongly aligns with the job requirements.
-#        Only output the JSON without any explanatory text. Format the output as JSON with this structure:
-#        {{
-#        "BP_1": "Demonstrated expertise in backend development using Flask.",
-#        "BP_2": "Bullet point statement 2",
-#        ...
-#        }}
-      
-#        Resume:
-#        {resume_text}
-      
-#        Job Description:
-#        {job_desc}
+Given the bullet points below — which represent experiences where the candidate has learned by observing or collaborating with others — write a **brief rationale** for each bullet point. The rationale should explain how the experience reflects vicarious learning and why it aligns with the job description.
 
+Please format your output as JSON with keys R_1, R_2, and R_3 that map to the respective bullet points (BP_1, BP_2, BP_3). Example:
 
-#        """
-#        response_1 = llmchat.invoke(prompt_1)
-#        bullet_points = response_1.content.strip()
+{{
+  "R_1": "This bullet highlights how the candidate developed best practices under the guidance of a senior engineer.",
+  "R_2": "...",
+  "R_3": "..."
+}}
 
+Resume:
+{resume}
 
-#        prompt_2 = f"""
-#        Below are the bullet points generated for a cover letter:
-#        {bullet_points}
-#        Below is a resume and a job description. Break each into labeled segments using the exact wording from the documents. Ensure that each segment is self-contained and relevant for mapping to the cover letter bullet points.
-#        Format the output as JSON with two main keys:
-#        {{
-#        "resumeSegments": {{
-#        "R_1": "Managed a team of 5 engineers...",
-#        "R_2": "Developed RESTful APIs using Flask...",
-#        ...
-#        }},
-#        "jobDescriptionSegments": {{
-#        "JD_1": "Looking for a candidate with strong backend API development experience...",
-#        "JD_2": "Experience leading technical teams preferred...",
-#        ...
-#        }}
-#        }}
+Job Description:
+{job_desc}
 
+Bullet Points:
+{bullet_text}
+"""
 
-#        Resume:
-#        {resume_text}
-      
-#        Job Description:
-#        {job_desc}
-#        """
+    try:
+        response = llmchat.invoke(prompt)
+        content = response.content.strip()
 
-
-#        response_2 = llmchat.invoke(prompt_2)
-#        segments = response_2.content.strip()
-      
-#        prompt_3 = f"""
-#        Below are the bullet points generated for a cover letter:
-#        {bullet_points}
-#        Below are the segments of the resume and job description:
-#        {segments}
-#        For each bullet point, identify which resume segments and job description segments best support it. If a bullet point aligns with more than one segment, list all applicable references.
-#        Format the output as JSON with this structure:
-#        {{
-#        "BP_1": {{
-#        "resume_refs": ["R_3", "R_7"],
-#        "job_desc_refs": ["JD_1"]
-#        }},
-#        ...
-#        }}
-#        """
-
-
-#        response_3 = llmchat.invoke(prompt_3)
-#        mapping = response_3.content.strip()
-
-#        combined_output = {
-#            "bullet_points": extract_and_parse(bullet_points),
-#            "segments": extract_and_parse(segments),
-#            "mapping": extract_and_parse(mapping)
-#        }
-
-#        return combined_output
-#     except Exception as e:
-#         print("Error generating cover letter:", str(e))
-#         return "Error generating cover letter."
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            return extract_and_parse(content)
+    except Exception as e:
+        print("Error generating vicarious rationales:", e)
+        return {}
