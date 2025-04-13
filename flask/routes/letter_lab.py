@@ -9,6 +9,7 @@ from services.openai_service import generate_vicarious_experience_bullet_points
 from services.openai_service import generate_verbal_persuasion_bullet_points
 from services.openai_service import generate_rationales_for_enactive_mastery_bullet_points
 from services.openai_service import generate_rationales_for_vicarious_bullet_points
+from services.openai_service import generate_rationales_for_verbal_persuasion_bullet_points
 
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
@@ -113,6 +114,18 @@ def initialize():
             print("Vicarious Rationale 1:", vicarious_experience_rationales.get("R_1"))
             sys.stdout.flush()
 
+        # VERBAL PERSUASION RATIONALES
+        verbal_persuasion_rationales = generate_rationales_for_verbal_persuasion_bullet_points(
+            resume, job_desc, verbal_persuasion_bullet_points
+        )
+
+        if not is_valid_rationale_output(verbal_persuasion_rationales):
+            print("Verbal Persuasion rationale generation failed or returned invalid data.")
+            return jsonify({"error": "Verbal Persuasion rationale generation failed"}), 500
+
+        if DEBUG_GENERATION:
+            print("Verbal Persuasion Rationale 1:", verbal_persuasion_rationales.get("R_1"))
+            sys.stdout.flush()
 
         # Task 5
         # document_id = create_session(resume, job_desc, initial_cover_letter, review_all_view_intro, bullet_points, rationales)
