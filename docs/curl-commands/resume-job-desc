@@ -1,0 +1,3 @@
+curl -X POST http://localhost:5002/lab/initialize \
+  -H "Content-Type: application/json" \
+  --data @resume-job-desc-payload.json
