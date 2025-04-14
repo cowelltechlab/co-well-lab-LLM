@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { useNavigate } from "react-router-dom";
@@ -7,17 +6,22 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { TextInputDialog } from "@/components/ui/TextInputDialog";
+import {
+  resumeTextPlaceholder,
+  jobDescriptionPlaceholder,
+} from "@/placeholders/placeholder_values";
 
 export function WelcomeInputView() {
   const navigate = useNavigate();
-  const { 
-    resumeText, 
-    jobDescription, 
-    setResumeText, 
+
+  const {
+    resumeText,
+    jobDescription,
+    setResumeText,
     setJobDescription,
     isGeneratingCoverLetter,
     generationError,
-    generateCoverLetter
+    generateCoverLetter,
   } = useAppContext();
 
   const [showResumePopup, setShowResumePopup] = useState(false);
@@ -25,8 +29,9 @@ export function WelcomeInputView() {
 
   const handleGenerate = async () => {
     const success = await generateCoverLetter();
+    console.log("resumeText", resumeText);
     if (success) {
-      navigate("/chatbot");
+      navigate("/review-all");
     }
   };
 
@@ -39,7 +44,8 @@ export function WelcomeInputView() {
       </CardHeader>
       <CardContent>
         <p className="text-gray-600 mb-4">
-          Enter your resume and job description to generate a tailored cover letter!
+          Enter your resume and job description to generate a tailored cover
+          letter!
         </p>
         <div className="flex flex-col gap-4">
           <Button
@@ -56,17 +62,13 @@ export function WelcomeInputView() {
             disabled={isGeneratingCoverLetter}
           >
             Paste Job Description
-            {jobDescription && (
-              <span className="ml-2 text-green-500">✓</span>
-            )}
+            {jobDescription && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
             variant="default"
             className="bg-blue-600 text-white hover:bg-blue-700"
             onClick={handleGenerate}
-            disabled={
-              isGeneratingCoverLetter || !resumeText || !jobDescription
-            }
+            disabled={isGeneratingCoverLetter || !resumeText || !jobDescription}
           >
             {isGeneratingCoverLetter ? (
               <>
@@ -91,7 +93,7 @@ export function WelcomeInputView() {
         open={showResumePopup}
         title="Your Resume"
         description="Paste your resume text below."
-        initialValue={resumeText}
+        initialValue={resumeTextPlaceholder}
         onSave={setResumeText}
         onClose={() => setShowResumePopup(false)}
       />
@@ -101,7 +103,7 @@ export function WelcomeInputView() {
         open={showJobPopup}
         title="Job Description"
         description="Paste the job description text below."
-        initialValue={jobDescription}
+        initialValue={jobDescriptionPlaceholder}
         onSave={setJobDescription}
         onClose={() => setShowJobPopup(false)}
       />

@@ -4,19 +4,28 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
-export function ReviewSectionView() {
+export function ReviewAllView() {
   const navigate = useNavigate();
   const { coverLetterData } = useAppContext();
+  const data = useAppContext();
 
-  if (!coverLetterData) {
-    navigate("/");
-    return null;
-  }
+  console.log("data", data);
+
+  // if (!coverLetterData) {
+  //   navigate("/");
+  //   return null;
+  // }
 
   const bullets = {
-    enactive_mastery: Object.values(coverLetterData.BSETB_enactive_mastery).map(b => b.text),
-    vicarious_experience: Object.values(coverLetterData.BSETB_vicarious_experience).map(b => b.text),
-    verbal_persuasion: Object.values(coverLetterData.BSETB_verbal_persuasion).map(b => b.text),
+    enactive_mastery: Object.values(coverLetterData.BSETB_enactive_mastery).map(
+      (b) => b.text
+    ),
+    vicarious_experience: Object.values(
+      coverLetterData.BSETB_vicarious_experience
+    ).map((b) => b.text),
+    verbal_persuasion: Object.values(
+      coverLetterData.BSETB_verbal_persuasion
+    ).map((b) => b.text),
   };
 
   return (
@@ -29,11 +38,15 @@ export function ReviewSectionView() {
 
         <TabsContent value="cover">
           <h2 className="text-xl font-semibold mb-2">Cover Letter</h2>
-          <p className="whitespace-pre-line">{coverLetterData.initial_cover_letter}</p>
+          <p className="whitespace-pre-line">
+            {coverLetterData.initial_cover_letter}
+          </p>
         </TabsContent>
 
         <TabsContent value="bullets">
-          <h2 className="text-xl font-semibold mb-2">Bullet Points by Bandura Category</h2>
+          <h2 className="text-xl font-semibold mb-2">
+            Bullet Points by Bandura Category
+          </h2>
 
           <div className="mt-4">
             {Object.entries(bullets).map(([key, points]) => (

@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface BulletPoint {
   text: string;
@@ -29,13 +35,13 @@ interface AppState {
   generatedCoverLetter: string;
   isGeneratingCoverLetter: boolean;
   generationError: string;
-  coverLetterData: CoverLetterResponse | null;
+  letterLabData: CoverLetterResponse | null;
   setResumeText: (text: string) => void;
   setJobDescription: (text: string) => void;
   setGeneratedCoverLetter: (text: string) => void;
   setIsGeneratingCoverLetter: (isLoading: boolean) => void;
   setGenerationError: (error: string) => void;
-  setCoverLetterData: (data: CoverLetterResponse | null) => void;
+  setLetterLabData: (data: CoverLetterResponse | null) => void;
   generateCoverLetter: () => Promise<boolean>;
 }
 
@@ -47,31 +53,38 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
   const [isGeneratingCoverLetter, setIsGeneratingCoverLetter] = useState(false);
   const [generationError, setGenerationError] = useState("");
-  const [coverLetterData, setCoverLetterData] = useState<CoverLetterResponse | null>(null);
+  const [letterLabData, setLetterLabData] =
+    useState<CoverLetterResponse | null>(() => {
+      const saved = localStorage.getItem("letterLabData");
+      return saved ? JSON.parse(saved) : null;
+    });
 
   async function generateCoverLetter(): Promise<boolean> {
     if (resumeText && jobDescription) {
       setIsGeneratingCoverLetter(true);
       setGenerationError("");
-  
+
       try {
         const response = await fetch("http://localhost:5002/lab/initialize", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ resume_text: resumeText, job_desc: jobDescription }),
+          body: JSON.stringify({
+            resume_text: resumeText,
+            job_desc: jobDescription,
+          }),
         });
-  
+
         if (!response.ok) {
           const err = await response.json();
           throw new Error(err.error || "Unknown server error");
         }
-  
+
         const data: CoverLetterResponse = await response.json();
-        setCoverLetterData(data);
+        setLetterLabData(data);
         setGeneratedCoverLetter(data.initial_cover_letter);
-  
+
         return true;
       } catch (error: any) {
         console.error("Error generating cover letter:", error);
@@ -85,7 +98,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }
-  
 
   const value: AppState = {
     resumeText,
@@ -93,13 +105,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     generatedCoverLetter,
     isGeneratingCoverLetter,
     generationError,
-    coverLetterData,
+    letterLabData,
     setResumeText,
     setJobDescription,
     setGeneratedCoverLetter,
     setIsGeneratingCoverLetter,
     setGenerationError,
-    setCoverLetterData,
+    setLetterLabData,
     generateCoverLetter,
   };
 
@@ -112,5 +124,4 @@ export function useAppContext() {
     throw new Error("useAppContext must be used within an AppProvider");
   }
   return context;
-
 }

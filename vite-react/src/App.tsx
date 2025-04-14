@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AppProvider } from "@/context/AppContext";
 import { WelcomeInputView } from "@/views/WelcomeInputView";
-import { ReviewSectionView } from "@/views/ReviewSectionView";
+import { ReviewAllView } from "@/views/ReviewAllView";
 
 function App() {
   return (
@@ -10,7 +10,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/" element={<WelcomeInputView />} />
-            <Route path="/chatbot" element={<ReviewSectionView />} />
+            <Route path="/review-all" element={<ReviewAllView />} />
           </Routes>
         </Router>
       </div>
