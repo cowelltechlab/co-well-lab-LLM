@@ -28,9 +28,9 @@ letter_lab_bp = Blueprint("letter_lab", __name__)
 def initialize():
     
     # DEBUG FLAGS
-    DEBUG_GENERATION = True
+    DEBUG_GENERATION = False
     DEBUG_SESSION_OUTPUT = False
-    DEBUG_MONGO_WRITE = True
+    DEBUG_MONGO_WRITE = False
 
     try:
         data = request.get_json()
