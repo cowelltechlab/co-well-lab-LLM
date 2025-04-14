@@ -29,7 +29,6 @@ export function WelcomeInputView() {
 
   const handleGenerate = async () => {
     const success = await generateCoverLetter();
-    console.log("resumeText", resumeText);
     if (success) {
       navigate("/review-all");
     }

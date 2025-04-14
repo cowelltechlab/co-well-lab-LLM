@@ -1,4 +1,5 @@
 // src/views/ReviewSectionView.tsx
+import { useEffect } from "react";
 import { useAppContext } from "@/context/AppContext";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -6,26 +7,26 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export function ReviewAllView() {
   const navigate = useNavigate();
-  const { coverLetterData } = useAppContext();
-  const data = useAppContext();
+  const { letterLabData } = useAppContext();
 
-  console.log("data", data);
+  useEffect(() => {
+    if (!letterLabData) {
+      navigate("/");
+    }
+  }, [letterLabData, navigate]);
 
-  // if (!coverLetterData) {
-  //   navigate("/");
-  //   return null;
-  // }
+  if (!letterLabData) return null;
 
   const bullets = {
-    enactive_mastery: Object.values(coverLetterData.BSETB_enactive_mastery).map(
+    enactive_mastery: Object.values(letterLabData.BSETB_enactive_mastery).map(
       (b) => b.text
     ),
     vicarious_experience: Object.values(
-      coverLetterData.BSETB_vicarious_experience
+      letterLabData.BSETB_vicarious_experience
     ).map((b) => b.text),
-    verbal_persuasion: Object.values(
-      coverLetterData.BSETB_verbal_persuasion
-    ).map((b) => b.text),
+    verbal_persuasion: Object.values(letterLabData.BSETB_verbal_persuasion).map(
+      (b) => b.text
+    ),
   };
 
   return (
@@ -39,7 +40,7 @@ export function ReviewAllView() {
         <TabsContent value="cover">
           <h2 className="text-xl font-semibold mb-2">Cover Letter</h2>
           <p className="whitespace-pre-line">
-            {coverLetterData.initial_cover_letter}
+            {letterLabData.initial_cover_letter}
           </p>
         </TabsContent>
 

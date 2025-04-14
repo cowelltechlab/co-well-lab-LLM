@@ -59,6 +59,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return saved ? JSON.parse(saved) : null;
     });
 
+  useEffect(() => {
+    if (letterLabData) {
+      localStorage.setItem("letterLabData", JSON.stringify(letterLabData));
+    }
+  }, [letterLabData]);
+
   async function generateCoverLetter(): Promise<boolean> {
     if (resumeText && jobDescription) {
       setIsGeneratingCoverLetter(true);
