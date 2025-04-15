@@ -1,51 +1,47 @@
-import {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import { useState, useEffect, ReactNode } from "react";
+import { AppContext } from "./AppContext";
+import type { AppState, CoverLetterResponse } from "./types";
 
-interface BulletPoint {
-  text: string;
-  rationale: string;
-  thumbs: string | null;
-  qualitative: string | null;
-}
+// interface BulletPoint {
+//   text: string;
+//   rationale: string;
+//   thumbs: string | null;
+//   qualitative: string | null;
+// }
 
-type BulletPointGroup = {
-  [key: string]: BulletPoint;
-};
+// type BulletPointGroup = {
+//   [key: string]: BulletPoint;
+// };
 
-interface CoverLetterResponse {
-  resume: string;
-  job_desc: string;
-  initial_cover_letter: string;
-  review_all_view_intro: string;
-  BSETB_enactive_mastery: BulletPointGroup;
-  BSETB_vicarious_experience: BulletPointGroup;
-  BSETB_verbal_persuasion: BulletPointGroup;
-  _id?: any;
-  document_id?: string;
-}
+// interface CoverLetterResponse {
+//   resume: string;
+//   job_desc: string;
+//   initial_cover_letter: string;
+//   review_all_view_intro: string;
+//   BSETB_enactive_mastery: BulletPointGroup;
+//   BSETB_vicarious_experience: BulletPointGroup;
+//   BSETB_verbal_persuasion: BulletPointGroup;
+//   _id?: any;
+//   document_id?: string;
+// }
 
-interface AppState {
-  resumeText: string;
-  jobDescription: string;
-  generatedCoverLetter: string;
-  isGeneratingCoverLetter: boolean;
-  generationError: string;
-  letterLabData: CoverLetterResponse | null;
-  setResumeText: (text: string) => void;
-  setJobDescription: (text: string) => void;
-  setGeneratedCoverLetter: (text: string) => void;
-  setIsGeneratingCoverLetter: (isLoading: boolean) => void;
-  setGenerationError: (error: string) => void;
-  setLetterLabData: (data: CoverLetterResponse | null) => void;
-  initialGeneration: () => Promise<boolean>;
-}
+// interface AppState {
+//   resumeText: string;
+//   jobDescription: string;
+//   generatedCoverLetter: string;
+//   isGeneratingCoverLetter: boolean;
+//   generationError: string;
+//   letterLabData: CoverLetterResponse | null;
+//   setResumeText: (text: string) => void;
+//   setJobDescription: (text: string) => void;
+//   setGeneratedCoverLetter: (text: string) => void;
+//   setIsGeneratingCoverLetter: (isLoading: boolean) => void;
+//   setGenerationError: (error: string) => void;
+//   setLetterLabData: (data: CoverLetterResponse | null) => void;
+//   initialGeneration: () => Promise<boolean>;
+// }
 
-const AppContext = createContext<AppState | undefined>(undefined);
+// const AppContext = createContext<AppState | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [resumeText, setResumeText] = useState("");
@@ -122,12 +118,4 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
-}
-
-export function useAppContext() {
-  const context = useContext(AppContext);
-  if (context === undefined) {
-    throw new Error("useAppContext must be used within an AppProvider");
-  }
-  return context;
 }
