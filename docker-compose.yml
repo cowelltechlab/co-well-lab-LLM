@@ -10,7 +10,7 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: examplepassword
     volumes:
       - mongo_data:/data/db
-    command: mongod --quiet --logpath /dev/null
+    command: mongod
 
   flask:
     build: ./flask
