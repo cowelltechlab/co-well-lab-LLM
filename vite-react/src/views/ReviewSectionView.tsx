@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/useAppContext";
 
@@ -41,6 +41,26 @@ export function ReviewSectionView() {
       qualitative: string;
     };
   }>({});
+
+  useEffect(() => {
+    if (!letterLabData || !sectionName) return;
+
+    const section = letterLabData[sectionName];
+
+    const restored = Object.entries(section).reduce((acc, [bpKey, bp]) => {
+      const thumbs = bp.thumbs;
+      const isValidThumb = thumbs === "up" || thumbs === "down";
+
+      acc[bpKey] = {
+        thumbs: isValidThumb ? thumbs : null,
+        qualitative: bp.qualitative ?? "",
+      };
+
+      return acc;
+    }, {} as typeof sectionFeedback);
+
+    setSectionFeedback(restored);
+  }, [letterLabData, sectionName]);
 
   if (!sectionName || !letterLabData || !beliefSectionMeta[sectionName]) {
     navigate("/review-all");
