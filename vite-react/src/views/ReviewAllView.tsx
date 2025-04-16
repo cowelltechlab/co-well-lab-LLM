@@ -83,7 +83,11 @@ Encouragement, positive feedback, and managing your emotional state under pressu
                 title={title}
                 tooltip={beliefTooltips[key]}
               />
-              <Button variant="outline" className="shrink-0">
+              <Button
+                variant="outline"
+                className="shrink-0"
+                onClick={() => navigate(`review-section/${key}`)}
+              >
                 Review Section
               </Button>
             </div>
