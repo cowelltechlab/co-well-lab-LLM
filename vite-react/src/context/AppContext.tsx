@@ -42,7 +42,7 @@ interface AppState {
   setIsGeneratingCoverLetter: (isLoading: boolean) => void;
   setGenerationError: (error: string) => void;
   setLetterLabData: (data: CoverLetterResponse | null) => void;
-  generateCoverLetter: () => Promise<boolean>;
+  initialGeneration: () => Promise<boolean>;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -65,7 +65,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }, [letterLabData]);
 
-  async function generateCoverLetter(): Promise<boolean> {
+  async function initialGeneration(): Promise<boolean> {
     if (resumeText && jobDescription) {
       setIsGeneratingCoverLetter(true);
       setGenerationError("");
@@ -118,7 +118,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setIsGeneratingCoverLetter,
     setGenerationError,
     setLetterLabData,
-    generateCoverLetter,
+    initialGeneration,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -21,16 +21,16 @@ export function WelcomeInputView() {
     setJobDescription,
     isGeneratingCoverLetter,
     generationError,
-    generateCoverLetter,
+    initialGeneration,
   } = useAppContext();
 
   const [showResumePopup, setShowResumePopup] = useState(false);
   const [showJobPopup, setShowJobPopup] = useState(false);
 
   const handleGenerate = async () => {
-    const success = await generateCoverLetter();
+    const success = await initialGeneration();
     if (success) {
-      navigate("/chatbot");
+      navigate("/review-all");
     }
   };
 
