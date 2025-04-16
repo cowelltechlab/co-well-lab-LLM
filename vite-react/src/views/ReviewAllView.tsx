@@ -86,7 +86,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               <Button
                 variant="outline"
                 className="shrink-0"
-                onClick={() => navigate(`review-section/${key}`)}
+                onClick={() => navigate(`/review-section/${key}`)}
               >
                 Review Section
               </Button>
