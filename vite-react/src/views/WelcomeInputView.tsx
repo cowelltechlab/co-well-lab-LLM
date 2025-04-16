@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { TextInputDialog } from "@/components/ui/TextInputDialog";
+import { TextInputDialog } from "@/components/TextInputDialog";
 import {
   resumeTextPlaceholder,
   jobDescriptionPlaceholder,

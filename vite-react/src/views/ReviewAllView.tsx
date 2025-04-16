@@ -1,9 +1,13 @@
 import { useEffect } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
-import type { CoverLetterResponse } from "@/context/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
+
+import { BeliefHeaderWithTooltip } from "@/components/BeliefHeaderWithTooltip";
+
+import type { CoverLetterResponse } from "@/context/types";
 
 export function ReviewAllView() {
   const navigate = useNavigate();
@@ -54,6 +58,39 @@ export function ReviewAllView() {
     return Object.values(group).map((b) => b.text);
   }
 
+  const beliefTooltips: Record<BSETBeliefKey, string> = {
+    BSETB_enactive_mastery: `What it means:
+This refers to the confidence that comes from successfully accomplishing tasks in the past. It's the most powerful source of self-efficacy — when you've done something before and done it well, you're more likely to believe you can do it again.`,
+    BSETB_vicarious_experience: `What it means:
+We build belief in our own abilities by observing others (especially similar to us) succeed through effort. When we model leadership or collaboration, we also boost others' self-efficacy.`,
+    BSETB_verbal_persuasion: `What it means:
+Encouragement, positive feedback, and managing your emotional state under pressure can boost your belief in your abilities. Calmness, confidence, and resilience matter.`,
+  };
+
+  function isSectionComplete(sectionKey: BSETBeliefKey): boolean {
+    if (!letterLabData) return false;
+
+    const section = letterLabData[sectionKey];
+    return Object.values(section).every(
+      (bp) =>
+        (bp.thumbs === "up" || bp.thumbs === "down") &&
+        typeof bp.qualitative === "string" &&
+        bp.qualitative.trim().length > 0
+    );
+  }
+
+  function allSectionsComplete(): boolean {
+    return beliefs.every((belief) => isSectionComplete(belief.key));
+  }
+
+  function handleFinalize() {
+    console.log(
+      "🎉 Finalization complete. LetterLabData ready:",
+      letterLabData
+    );
+    navigate("/some-next-step"); // or just show a toast or confirmation banner
+  }
+
   return (
     <Card className="w-full max-w-4xl p-6 bg-white shadow-lg space-y-8">
       <h2 className="text-2xl font-bold mb-4">
@@ -63,18 +100,24 @@ export function ReviewAllView() {
         {letterLabData.review_all_view_intro}
       </p>
 
-      {beliefs.map(({ key, title, label }) => {
+      {beliefs.map(({ key, title }) => {
         const bullets = getBulletTexts(letterLabData, key);
 
         return (
           <div key={key} className="relative border-t pt-6 mt-6 space-y-4">
             <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-bold">
-                  {title} <span className="italic text-gray-600">{label}</span>
-                </h3>
-              </div>
-              <Button variant="outline" className="shrink-0">
+              <BeliefHeaderWithTooltip
+                title={title}
+                tooltip={beliefTooltips[key]}
+              />
+              <Button
+                variant="outline"
+                className="shrink-0"
+                onClick={() => navigate(`/review-section/${key}`)}
+              >
+                {isSectionComplete(key) && (
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                )}
                 Review Section
               </Button>
             </div>
@@ -87,6 +130,16 @@ export function ReviewAllView() {
           </div>
         );
       })}
+      <Button
+        className="mt-8 w-full"
+        onClick={handleFinalize}
+        disabled={!allSectionsComplete()}
+      >
+        {allSectionsComplete() && (
+          <CheckCircle className="w-5 h-5 text-green-600" />
+        )}
+        Finalize Cover Letter
+      </Button>
     </Card>
   );
 }

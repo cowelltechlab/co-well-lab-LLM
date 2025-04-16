@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { AppProvider } from "@/context/AppProvider";
 import { WelcomeInputView } from "@/views/WelcomeInputView";
 import { ReviewAllView } from "@/views/ReviewAllView";
+import { ReviewSectionView } from "@/views/ReviewSectionView";
 
 function App() {
   return (
@@ -11,6 +12,10 @@ function App() {
           <Routes>
             <Route path="/" element={<WelcomeInputView />} />
             <Route path="/review-all" element={<ReviewAllView />} />
+            <Route
+              path="/review-section/:sectionName"
+              element={<ReviewSectionView />}
+            />
           </Routes>
         </div>
       </AppProvider>
