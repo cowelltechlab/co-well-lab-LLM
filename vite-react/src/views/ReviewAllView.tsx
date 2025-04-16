@@ -1,10 +1,13 @@
 import { useEffect } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
-import type { CoverLetterResponse } from "@/context/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
+
 import { BeliefHeaderWithTooltip } from "@/components/BeliefHeaderWithTooltip";
+
+import type { CoverLetterResponse } from "@/context/types";
 
 export function ReviewAllView() {
   const navigate = useNavigate();
@@ -76,6 +79,18 @@ Encouragement, positive feedback, and managing your emotional state under pressu
     );
   }
 
+  function allSectionsComplete(): boolean {
+    return beliefs.every((belief) => isSectionComplete(belief.key));
+  }
+
+  function handleFinalize() {
+    console.log(
+      "🎉 Finalization complete. LetterLabData ready:",
+      letterLabData
+    );
+    navigate("/some-next-step"); // or just show a toast or confirmation banner
+  }
+
   return (
     <Card className="w-full max-w-4xl p-6 bg-white shadow-lg space-y-8">
       <h2 className="text-2xl font-bold mb-4">
@@ -101,7 +116,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
                 onClick={() => navigate(`/review-section/${key}`)}
               >
                 {isSectionComplete(key) && (
-                  <span className="text-green-600">✅</span>
+                  <CheckCircle className="w-5 h-5 text-green-600" />
                 )}
                 Review Section
               </Button>
@@ -115,6 +130,16 @@ Encouragement, positive feedback, and managing your emotional state under pressu
           </div>
         );
       })}
+      <Button
+        className="mt-8 w-full"
+        onClick={handleFinalize}
+        disabled={!allSectionsComplete()}
+      >
+        {allSectionsComplete() && (
+          <CheckCircle className="w-5 h-5 text-green-600" />
+        )}
+        Finalize Cover Letter
+      </Button>
     </Card>
   );
 }

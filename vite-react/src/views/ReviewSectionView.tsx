@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Accordion } from "@radix-ui/react-accordion";
 import { BulletAccordionItem } from "@/components/BulletAccordionItem";
+import { CheckCircle } from "lucide-react";
 
 type BSETBeliefKey =
   | "BSETB_enactive_mastery"
@@ -134,7 +135,8 @@ export function ReviewSectionView() {
         ))}
       </Accordion>
       <Button onClick={handleComplete} disabled={!allComplete} className="mt-8">
-        ✅ Complete Section Review
+        {allComplete && <CheckCircle className="w-5 h-5 text-green-600" />}
+        Complete Section Review
       </Button>
     </Card>
   );
