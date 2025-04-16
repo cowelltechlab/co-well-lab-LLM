@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import { AppProvider } from "@/context/AppContext";
+import { AppProvider } from "@/context/AppProvider";
 import { WelcomeInputView } from "@/views/WelcomeInputView";
 import { ReviewAllView } from "@/views/ReviewAllView";
 

@@ -1,6 +1,7 @@
 import { useEffect } from "react";
-import { useAppContext } from "@/context/AppContext";
+import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
+import type { CoverLetterResponse } from "@/context/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -16,7 +17,11 @@ export function ReviewAllView() {
 
   if (!letterLabData) return null;
 
-  const beliefs = [
+  const beliefs: {
+    key: BSETBeliefKey;
+    title: string;
+    label: string;
+  }[] = [
     {
       key: "BSETB_enactive_mastery",
       title: "I. Demonstrating Mastery & Strategic Vision",
@@ -36,6 +41,19 @@ export function ReviewAllView() {
     },
   ];
 
+  type BSETBeliefKey =
+    | "BSETB_enactive_mastery"
+    | "BSETB_vicarious_experience"
+    | "BSETB_verbal_persuasion";
+
+  function getBulletTexts(
+    data: CoverLetterResponse,
+    beliefKey: BSETBeliefKey
+  ): string[] {
+    const group = data[beliefKey];
+    return Object.values(group).map((b) => b.text);
+  }
+
   return (
     <Card className="w-full max-w-4xl p-6 bg-white shadow-lg space-y-8">
       <h2 className="text-2xl font-bold mb-4">
@@ -45,8 +63,8 @@ export function ReviewAllView() {
         {letterLabData.review_all_view_intro}
       </p>
 
-      {beliefs.map(({ key, title, label }, index) => {
-        const bullets = Object.values(letterLabData[key]).map((b) => b.text);
+      {beliefs.map(({ key, title, label }) => {
+        const bullets = getBulletTexts(letterLabData, key);
 
         return (
           <div key={key} className="relative border-t pt-6 mt-6 space-y-4">
