@@ -1,12 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/useAppContext";
 import { Card } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@radix-ui/react-accordion"; // or wherever you installed accordion
+
+import { Accordion } from "@radix-ui/react-accordion";
+
+import { BulletAccordionItem } from "@/components/BulletAccordionItem";
 
 type BSETBeliefKey =
   | "BSETB_enactive_mastery"
@@ -53,33 +51,12 @@ export function ReviewSectionView() {
 
       <Accordion type="multiple" className="space-y-4">
         {Object.entries(bulletPoints).map(([key, bp]) => (
-          <AccordionItem
+          <BulletAccordionItem
             key={key}
-            value={key}
-            className="border rounded p-4 bg-gray-50 shadow-sm"
-          >
-            <AccordionTrigger className="font-medium text-left">
-              <li>{bp.text}</li>
-            </AccordionTrigger>
-            <AccordionContent className="pt-3 text-sm text-gray-700">
-              <div className="font-semibold mb-1">
-                A strategic, high-impact domain aligned with [placeholder]:
-              </div>
-              <div className="text-sm whitespace-pre-line mb-3">
-                {bp.rationale}
-              </div>
-              <div className="text-base">
-                <p className="mb-2">
-                  Does this rationale align with your understanding of yourself
-                  and your experience?
-                </p>
-                <div className="flex gap-3">
-                  <span className="text-xl cursor-pointer">👍</span>
-                  <span className="text-xl cursor-pointer">👎</span>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
+            bulletKey={key}
+            bulletText={bp.text}
+            rationaleText={bp.rationale}
+          />
         ))}
       </Accordion>
     </Card>
