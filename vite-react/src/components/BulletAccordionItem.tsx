@@ -1,6 +1,3 @@
-// src/components/BulletAccordionItem.tsx
-
-import { useState } from "react";
 import {
   AccordionItem,
   AccordionTrigger,
@@ -12,16 +9,37 @@ interface BulletAccordionItemProps {
   bulletKey: string;
   bulletText: string;
   rationaleText: string;
+  feedback: {
+    thumbs: "up" | "down" | null;
+    qualitative: string;
+  };
+  onFeedbackChange: (update: {
+    thumbs: "up" | "down";
+    qualitative: string;
+  }) => void;
 }
 
 export function BulletAccordionItem({
   bulletKey,
   bulletText,
   rationaleText,
+  feedback,
+  onFeedbackChange,
 }: BulletAccordionItemProps) {
-  const [thumbDirection, setThumbDirection] = useState<"up" | "down" | null>(
-    null
-  );
+  const handleThumbClick = (direction: "up" | "down") => {
+    onFeedbackChange({
+      thumbs: direction,
+      qualitative: feedback.qualitative,
+    });
+  };
+
+  const handleTextChange = (text: string) => {
+    if (!feedback.thumbs) return; // avoid capturing feedback if no thumb selected
+    onFeedbackChange({
+      thumbs: feedback.thumbs,
+      qualitative: text,
+    });
+  };
 
   return (
     <AccordionItem
@@ -46,27 +64,33 @@ export function BulletAccordionItem({
 
         <div className="flex gap-3 mb-2">
           <button
-            onClick={() => setThumbDirection("up")}
-            className={`text-xl ${
-              thumbDirection === "up" ? "text-green-600" : ""
+            onClick={() => handleThumbClick("up")}
+            className={`text-xl p-1 rounded ${
+              feedback.thumbs === "up"
+                ? "bg-green-100 text-green-600"
+                : "text-gray-500 hover:text-green-600"
             }`}
           >
             <ThumbsUp className="w-5 h-5" />
           </button>
           <button
-            onClick={() => setThumbDirection("down")}
-            className={`text-xl ${
-              thumbDirection === "down" ? "text-red-600" : ""
+            onClick={() => handleThumbClick("down")}
+            className={`text-xl p-1 rounded ${
+              feedback.thumbs === "down"
+                ? "bg-red-100 text-red-600"
+                : "text-gray-500 hover:text-red-600"
             }`}
           >
             <ThumbsDown className="w-5 h-5" />
           </button>
         </div>
 
-        {thumbDirection && (
+        {feedback.thumbs && (
           <textarea
+            value={feedback.qualitative}
+            onChange={(e) => handleTextChange(e.target.value)}
             placeholder={
-              thumbDirection === "up"
+              feedback.thumbs === "up"
                 ? "Great! Do you have any feedback for additional comments about this snippet?"
                 : "Uh oh, let’s fix this. What about this reasoning do you not agree with? How would you re-write this snippet?"
             }
