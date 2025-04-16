@@ -64,6 +64,18 @@ We build belief in our own abilities by observing others (especially similar to 
 Encouragement, positive feedback, and managing your emotional state under pressure can boost your belief in your abilities. Calmness, confidence, and resilience matter.`,
   };
 
+  function isSectionComplete(sectionKey: BSETBeliefKey): boolean {
+    if (!letterLabData) return false;
+
+    const section = letterLabData[sectionKey];
+    return Object.values(section).every(
+      (bp) =>
+        (bp.thumbs === "up" || bp.thumbs === "down") &&
+        typeof bp.qualitative === "string" &&
+        bp.qualitative.trim().length > 0
+    );
+  }
+
   return (
     <Card className="w-full max-w-4xl p-6 bg-white shadow-lg space-y-8">
       <h2 className="text-2xl font-bold mb-4">
@@ -88,6 +100,9 @@ Encouragement, positive feedback, and managing your emotional state under pressu
                 className="shrink-0"
                 onClick={() => navigate(`/review-section/${key}`)}
               >
+                {isSectionComplete(key) && (
+                  <span className="text-green-600">✅</span>
+                )}
                 Review Section
               </Button>
             </div>
