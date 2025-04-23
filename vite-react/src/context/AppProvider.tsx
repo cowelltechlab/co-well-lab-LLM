@@ -26,7 +26,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGenerationError("");
 
       try {
-        const response = await fetch("http://localhost:5002/lab/initialize", {
+        const response = await fetch("/lab/initialize", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

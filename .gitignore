@@ -2,3 +2,4 @@ node_modules
 .env
 .DS_Store
 .env.prod
+.env.production
