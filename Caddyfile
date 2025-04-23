@@ -1,7 +1,7 @@
-app.yourdomain.com {
+app.letterlab.me {
   reverse_proxy vite-react:80
 }
 
-api.yourdomain.com {
+api.letterlab.me {
   reverse_proxy flask:5002
 }
