@@ -1,0 +1,2 @@
+docker system prune --all --volumes --force
+docker-compose -f docker-compose.prod.yml up --build

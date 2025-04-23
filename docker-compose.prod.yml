@@ -19,7 +19,7 @@ services:
       - ./flask/.env.prod
     expose:
       - "5002"
-    command: gunicorn --bind 0.0.0.0:5002 main:app
+    command: gunicorn --bind 0.0.0.0:5002 --timeout 300 main:app
     # healthcheck:
     #   test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
     #   interval: 30s
