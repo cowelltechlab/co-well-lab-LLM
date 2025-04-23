@@ -25,6 +25,8 @@ services:
     #   interval: 30s
     #   timeout: 10s
     #   retries: 3
+    networks:
+      - app
 
   vite-react:
     build:
@@ -33,6 +35,8 @@ services:
     container_name: vite-react
     expose:
       - "80"
+    networks:
+      - app
 
   caddy:
     image: caddy:2
