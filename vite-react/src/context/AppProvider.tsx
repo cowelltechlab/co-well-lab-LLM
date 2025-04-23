@@ -1,6 +1,7 @@
 import { useState, useEffect, ReactNode } from "react";
 import { AppContext } from "./AppContext";
 import type { AppState, CoverLetterResponse } from "./types";
+const apiBase = import.meta.env.VITE_API_BASE_URL;
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [resumeText, setResumeText] = useState("");
@@ -26,7 +27,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setGenerationError("");
 
       try {
-        const response = await fetch("/lab/initialize", {
+        const response = await fetch(`${apiBase}/lab/initialize`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
