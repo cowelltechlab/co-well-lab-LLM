@@ -1,0 +1,62 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: examplepassword
+    volumes:
+      - mongo_data:/data/db
+    command: mongod
+
+  flask:
+    build: ./flask
+    container_name: flask
+    depends_on:
+      - mongodb
+    env_file:
+      - ./flask/.env.prod
+    expose:
+      - "5002"
+    command: gunicorn --bind 0.0.0.0:5002 main:app
+    # healthcheck:
+    #   test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+
+  vite-react:
+    build:
+      context: ./vite-react
+      dockerfile: Dockerfile
+    container_name: vite-react
+    expose:
+      - "80"
+
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - vite-react
+      - flask
+    networks:
+      - app
+
+volumes:
+  mongo_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  app:

@@ -1,0 +1,7 @@
+app.yourdomain.com {
+  reverse_proxy vite-react:80
+}
+
+api.yourdomain.com {
+  reverse_proxy flask:5002
+}
