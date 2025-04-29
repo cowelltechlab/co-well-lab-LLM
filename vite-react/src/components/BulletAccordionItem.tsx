@@ -14,10 +14,7 @@ interface BulletAccordionItemProps {
     rating: number | null;
     qualitative: string;
   };
-  onFeedbackChange: (update: {
-    rating: number;
-    qualitative: string;
-  }) => void;
+  onFeedbackChange: (update: { rating: number; qualitative: string }) => void;
 }
 
 export function BulletAccordionItem({
@@ -27,8 +24,9 @@ export function BulletAccordionItem({
   feedback,
   onFeedbackChange,
 }: BulletAccordionItemProps) {
-
-  const [localRating, setLocalRating] = useState<number | null>(feedback.rating);
+  const [localRating, setLocalRating] = useState<number | null>(
+    feedback.rating
+  );
 
   useEffect(() => {
     setLocalRating(feedback.rating);
@@ -64,17 +62,15 @@ export function BulletAccordionItem({
           A strategic, high-impact domain aligned with [placeholder]:
         </div>
 
-        <div className="text-sm whitespace-pre-line mb-3">
-          {rationaleText}
-        </div>
+        <div className="text-sm whitespace-pre-line mb-3">{rationaleText}</div>
 
         <p className="mb-2">
-          How well does this rationale align with your understanding of yourself and your
-          experience?
+          How well does this rationale align with your understanding of yourself
+          and your experience?
         </p>
 
         <div className="flex items-center gap-1 mb-2">
-          {[1, 2, 3, 4, 5].map((star) => {
+          {[1, 2, 3, 4, 5, 6, 7].map((star) => {
             const isSelected = localRating !== null && localRating >= star;
             return (
               <Star
