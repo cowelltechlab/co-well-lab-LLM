@@ -38,7 +38,7 @@ export function ReviewSectionView() {
 
   const [sectionFeedback, setSectionFeedback] = useState<{
     [bpKey: string]: {
-      thumbs: "up" | "down" | null;
+      rating: number | null;
       qualitative: string;
     };
   }>({});
@@ -49,11 +49,8 @@ export function ReviewSectionView() {
     const section = letterLabData[sectionName];
 
     const restored = Object.entries(section).reduce((acc, [bpKey, bp]) => {
-      const thumbs = bp.thumbs;
-      const isValidThumb = thumbs === "up" || thumbs === "down";
-
       acc[bpKey] = {
-        thumbs: isValidThumb ? thumbs : null,
+        rating: typeof bp.rating === "number" ? bp.rating : null,
         qualitative: bp.qualitative ?? "",
       };
 
@@ -73,12 +70,12 @@ export function ReviewSectionView() {
 
   const updateFeedback = (
     bpKey: string,
-    update: { thumbs: "up" | "down"; qualitative: string }
+    update: { rating: number; qualitative: string }
   ) => {
     setSectionFeedback((prev) => ({
       ...prev,
       [bpKey]: {
-        thumbs: update.thumbs,
+        rating: update.rating,
         qualitative: update.qualitative,
       },
     }));
@@ -86,7 +83,7 @@ export function ReviewSectionView() {
 
   const allComplete = Object.keys(bulletPoints).every(
     (bpKey) =>
-      sectionFeedback[bpKey]?.thumbs &&
+      sectionFeedback[bpKey]?.rating &&
       sectionFeedback[bpKey]?.qualitative.trim().length > 0
   );
 
@@ -97,7 +94,7 @@ export function ReviewSectionView() {
       (acc, [bpKey, original]) => {
         acc[bpKey] = {
           ...original,
-          thumbs: sectionFeedback[bpKey]?.thumbs ?? null,
+          rating: sectionFeedback[bpKey]?.rating ?? null,
           qualitative: sectionFeedback[bpKey]?.qualitative ?? "",
         };
         return acc;

@@ -1,22 +1,20 @@
+import { useState, useEffect } from "react";
 import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import { ThumbsUp, ThumbsDown } from "lucide-react";
+import { Star } from "lucide-react";
 
 interface BulletAccordionItemProps {
   bulletKey: string;
   bulletText: string;
   rationaleText: string;
   feedback: {
-    thumbs: "up" | "down" | null;
+    rating: number | null;
     qualitative: string;
   };
-  onFeedbackChange: (update: {
-    thumbs: "up" | "down";
-    qualitative: string;
-  }) => void;
+  onFeedbackChange: (update: { rating: number; qualitative: string }) => void;
 }
 
 export function BulletAccordionItem({
@@ -26,17 +24,26 @@ export function BulletAccordionItem({
   feedback,
   onFeedbackChange,
 }: BulletAccordionItemProps) {
-  const handleThumbClick = (direction: "up" | "down") => {
+  const [localRating, setLocalRating] = useState<number | null>(
+    feedback.rating
+  );
+
+  useEffect(() => {
+    setLocalRating(feedback.rating);
+  }, [feedback.rating]);
+
+  const handleStarClick = (rating: number) => {
+    setLocalRating(rating);
     onFeedbackChange({
-      thumbs: direction,
+      rating,
       qualitative: feedback.qualitative,
     });
   };
 
   const handleTextChange = (text: string) => {
-    if (!feedback.thumbs) return; // avoid capturing feedback if no thumb selected
+    if (localRating === null) return;
     onFeedbackChange({
-      thumbs: feedback.thumbs,
+      rating: localRating,
       qualitative: text,
     });
   };
@@ -58,42 +65,33 @@ export function BulletAccordionItem({
         <div className="text-sm whitespace-pre-line mb-3">{rationaleText}</div>
 
         <p className="mb-2">
-          Does this rationale align with your understanding of yourself and your
-          experience?
+          How well does this rationale align with your understanding of yourself
+          and your experience?
         </p>
 
-        <div className="flex gap-3 mb-2">
-          <button
-            onClick={() => handleThumbClick("up")}
-            className={`text-xl p-1 rounded ${
-              feedback.thumbs === "up"
-                ? "bg-green-100 text-green-600"
-                : "text-gray-500 hover:text-green-600"
-            }`}
-          >
-            <ThumbsUp className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => handleThumbClick("down")}
-            className={`text-xl p-1 rounded ${
-              feedback.thumbs === "down"
-                ? "bg-red-100 text-red-600"
-                : "text-gray-500 hover:text-red-600"
-            }`}
-          >
-            <ThumbsDown className="w-5 h-5" />
-          </button>
+        <div className="flex items-center gap-1 mb-2">
+          {[1, 2, 3, 4, 5, 6, 7].map((star) => {
+            const isSelected = localRating !== null && localRating >= star;
+            return (
+              <Star
+                key={star}
+                onClick={() => handleStarClick(star)}
+                fill={isSelected ? "currentColor" : "none"}
+                stroke="currentColor"
+                strokeWidth={2}
+                className={`w-6 h-6 cursor-pointer ${
+                  isSelected ? "text-yellow-400" : "text-gray-300"
+                } hover:text-yellow-500`}
+              />
+            );
+          })}
         </div>
 
-        {feedback.thumbs && (
+        {localRating !== null && (
           <textarea
             value={feedback.qualitative}
             onChange={(e) => handleTextChange(e.target.value)}
-            placeholder={
-              feedback.thumbs === "up"
-                ? "Great! Do you have any feedback for additional comments about this snippet?"
-                : "Uh oh, let’s fix this. What about this reasoning do you not agree with? How would you re-write this snippet?"
-            }
+            placeholder="Any additional comments?"
             className="w-full p-3 border border-gray-300 rounded shadow-inner bg-gray-50 text-sm"
             rows={4}
           />
