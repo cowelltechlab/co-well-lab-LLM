@@ -1,7 +1,7 @@
 export interface BulletPoint {
   text: string;
   rationale: string;
-  thumbs: string | null;
+  rating: number | null;
   qualitative: string | null;
 }
 
