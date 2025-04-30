@@ -289,3 +289,39 @@ Bullet Points:
     except Exception as e:
         print("Error generating verbal persuasion rationales:", e)
         return {}
+
+def generate_final_cover_letter(resume, job_desc, all_bullets, feedback):
+    prompt = f"""
+You are an expert career coach and writer using Albert Bandura's Self-Efficacy Theory (BSET) to craft personalized cover letters. BSET consists of three beliefs:
+- Enactive Mastery: confidence gained through direct experience
+- Vicarious Experience: confidence gained through observing others
+- Verbal Persuasion: confidence gained through encouragement or affirmation
+
+Use the user's resume, job description, and structured reflection (bullet points + feedback) to generate a compelling, final cover letter. This letter should reflect the user's strengths, insights, and confidence, and should align closely with the job description.
+
+Structure:
+- Introduction
+- Key paragraphs that integrate relevant achievements and confidence insights
+- Strong, optimistic conclusion
+
+Use a confident but sincere tone. Do not include headers or sign-offs.
+
+Resume:
+{resume}
+
+Job Description:
+{job_desc}
+
+User Bullet Points and Feedback:
+{json.dumps(all_bullets, indent=2)}
+
+Ratings and Reflections:
+{json.dumps(feedback, indent=2)}
+"""
+
+    try:
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating final cover letter:", e)
+        return "Error generating final cover letter."

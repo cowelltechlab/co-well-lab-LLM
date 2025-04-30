@@ -40,7 +40,16 @@ def update_session(doc_id, feedback_payload):
         print("Mongo update error:", e)
         return None
 
-
-
 def get_session(session_id):
     return collection.find_one({"_id": ObjectId(session_id)})
+
+def set_fields(doc_id, fields: dict):
+    try:
+        result = collection.update_one(
+            {"_id": ObjectId(doc_id)},
+            {"$set": fields}
+        )
+        return result
+    except Exception as e:
+        print("Mongo update error:", e)
+        return None

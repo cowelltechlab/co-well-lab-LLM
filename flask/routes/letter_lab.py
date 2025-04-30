@@ -12,10 +12,13 @@ from services.openai_service import generate_verbal_persuasion_bullet_points
 from services.openai_service import generate_rationales_for_enactive_mastery_bullet_points
 from services.openai_service import generate_rationales_for_vicarious_bullet_points
 from services.openai_service import generate_rationales_for_verbal_persuasion_bullet_points
+from services.openai_service import generate_final_cover_letter
 
 # MONGODB SERVICE FUNCTIONS
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
+from services.mongodb_service import get_session
+from services.mongodb_service import set_fields
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
@@ -226,7 +229,33 @@ def final_cover_letter():
         result = update_session(document_id, section_feedback)
         if not result:
             raise ValueError("update_session() returned None")
-        return jsonify({"status": "success", "updated": result.acknowledged})
+        
+        print(f"Updated session with feedback: {document_id}")
+        
+        document = get_session(document_id)
+        if not document:
+            return jsonify({"error": "Document not found"}), 404
+        
+        resume = document.get("resume")
+        job_desc = document.get("job_desc")
+
+        all_bullets = {
+            "BSETB_enactive_mastery": document.get("BSETB_enactive_mastery"),
+            "BSETB_vicarious_experience": document.get("BSETB_vicarious_experience"),
+            "BSETB_verbal_persuasion": document.get("BSETB_verbal_persuasion"),
+        }
+
+        final_letter = retry_generation(
+            generate_final_cover_letter,
+            validator_fn=is_valid_string_output,
+            args=(resume, job_desc, all_bullets, section_feedback),
+            debug_label="Final Cover Letter"
+        )
+
+        set_fields(document_id, {"final_cover_letter": final_letter})
+        print(f"Updated session with final cover letter: {document_id}")
+
+        return jsonify({"final_cover_letter": final_letter}), 200
 
     except Exception as e:
         print("Error updating final feedback:", e)
