@@ -219,11 +219,6 @@ def final_cover_letter():
         payload = request.get_json()
         document_id = payload.get("document_id")
         section_feedback = payload.get("section_feedback")
-        print("Received section_feedback payload:")
-        print("Document ID:", document_id)
-
-        print(json.dumps(section_feedback, indent=2))
-
 
         if not document_id or not section_feedback:
             return jsonify({"error": "Missing document_id or section_feedback"}), 400
