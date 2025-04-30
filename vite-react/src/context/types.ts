@@ -1,8 +1,15 @@
 export interface BulletPoint {
   text: string;
   rationale: string;
-  thumbs: string | null;
+  rating: number | null;
   qualitative: string | null;
+}
+
+export type Rating = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+export interface BulletPointFeedback {
+  rating: Rating | null;
+  qualitative: string;
 }
 
 export type BulletPointGroup = {

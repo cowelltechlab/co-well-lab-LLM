@@ -73,7 +73,9 @@ Encouragement, positive feedback, and managing your emotional state under pressu
     const section = letterLabData[sectionKey];
     return Object.values(section).every(
       (bp) =>
-        (bp.thumbs === "up" || bp.thumbs === "down") &&
+        typeof bp.rating === "number" &&
+        bp.rating >= 1 &&
+        bp.rating <= 7 &&
         typeof bp.qualitative === "string" &&
         bp.qualitative.trim().length > 0
     );
