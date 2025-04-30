@@ -12,10 +12,12 @@ from services.openai_service import generate_verbal_persuasion_bullet_points
 from services.openai_service import generate_rationales_for_enactive_mastery_bullet_points
 from services.openai_service import generate_rationales_for_vicarious_bullet_points
 from services.openai_service import generate_rationales_for_verbal_persuasion_bullet_points
+from services.openai_service import generate_final_cover_letter
 
 # MONGODB SERVICE FUNCTIONS
 from services.mongodb_service import create_session
 from services.mongodb_service import update_session
+from services.mongodb_service import get_session
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
