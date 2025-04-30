@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 import { BeliefHeaderWithTooltip } from "@/components/BeliefHeaderWithTooltip";
 
@@ -12,6 +12,7 @@ import type { CoverLetterResponse } from "@/context/types";
 export function ReviewAllView() {
   const navigate = useNavigate();
   const { letterLabData } = useAppContext();
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   useEffect(() => {
     if (!letterLabData) {
@@ -105,6 +106,8 @@ Encouragement, positive feedback, and managing your emotional state under pressu
   async function handleFeedbackSubmission() {
     if (!letterLabData) return;
 
+    setIsFinalizing(true);
+
     const feedbackOnly = {
       BSETB_enactive_mastery: extractFeedback(
         letterLabData.BSETB_enactive_mastery
@@ -139,6 +142,8 @@ Encouragement, positive feedback, and managing your emotional state under pressu
     } catch (err) {
       console.error("Error submitting feedback:", err);
       alert("There was a problem submitting your feedback.");
+    } finally {
+      setIsFinalizing(false);
     }
   }
 
@@ -186,10 +191,19 @@ Encouragement, positive feedback, and managing your emotional state under pressu
         onClick={handleFeedbackSubmission}
         disabled={!allSectionsComplete()}
       >
-        {allSectionsComplete() && (
-          <CheckCircle className="w-5 h-5 text-green-600" />
+        {isFinalizing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating Cover Letter...
+          </>
+        ) : (
+          allSectionsComplete() && (
+            <>
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              Finalize Cover Letter
+            </>
+          )
         )}
-        Finalize Cover Letter
       </Button>
     </Card>
   );
