@@ -86,7 +86,10 @@ Encouragement, positive feedback, and managing your emotional state under pressu
   }
 
   function extractFeedback(
-    section: Record<string, { rating: number | null; qualitative: string }>
+    section: Record<
+      string,
+      { rating: number | null; qualitative: string | null }
+    >
   ): Record<string, { rating: number | null; qualitative: string }> {
     return Object.fromEntries(
       Object.entries(section).map(([bpKey, bp]) => [
@@ -131,10 +134,10 @@ Encouragement, positive feedback, and managing your emotional state under pressu
         throw new Error("Failed to submit feedback.");
       }
 
-      console.log("✅ All section feedback successfully saved.");
+      console.log("All section feedback successfully saved.");
       navigate("/cover-letter-comparison");
     } catch (err) {
-      console.error("❌ Error submitting feedback:", err);
+      console.error("Error submitting feedback:", err);
       alert("There was a problem submitting your feedback.");
     }
   }
