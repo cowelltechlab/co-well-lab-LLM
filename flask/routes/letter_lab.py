@@ -213,9 +213,24 @@ def initialize():
         print("Error processing cover letter:", str(e))
         return jsonify({"error": "Error processing cover letter"}), 500
 
-@letter_lab_bp.route('/cover-letter', methods=['POST'])
-def cover_letter():
-    return
+@letter_lab_bp.route("/final-cover-letter", methods=["POST"])
+def final_cover_letter():
+    try:
+        payload = request.get_json()
+        document_id = payload.get("document_id")
+        section_feedback = payload.get("section_feedback")
+
+        if not document_id or not section_feedback:
+            return jsonify({"error": "Missing document_id or section_feedback"}), 400
+
+        result = update_session(document_id, {"section_feedback": section_feedback})
+        if not result:
+            raise ValueError("update_session() returned None")
+        return jsonify({"status": "success", "updated": result.acknowledged})
+
+    except Exception as e:
+        print("Error updating final feedback:", e)
+        return jsonify({"error": "Internal server error"}), 500
 
 @letter_lab_bp.route('/finalize', methods=['POST'])
 def finalize():
