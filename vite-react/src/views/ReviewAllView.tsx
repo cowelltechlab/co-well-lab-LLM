@@ -11,7 +11,7 @@ import type { CoverLetterResponse } from "@/context/types";
 
 export function ReviewAllView() {
   const navigate = useNavigate();
-  const { letterLabData } = useAppContext();
+  const { letterLabData, setLetterLabData } = useAppContext();
   const [isFinalizing, setIsFinalizing] = useState(false);
 
   useEffect(() => {
@@ -138,6 +138,14 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       }
 
       console.log("All section feedback successfully saved.");
+
+      const data = await response.json();
+      const finalCoverLetter = data.final_cover_letter;
+
+      setLetterLabData((prev) =>
+        prev ? { ...prev, final_cover_letter: finalCoverLetter } : prev
+      );
+
       navigate("/cover-letter-comparison");
     } catch (err) {
       console.error("Error submitting feedback:", err);
