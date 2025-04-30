@@ -7,7 +7,7 @@ def zip_bullets_and_rationales(bullet_points, rationales):
       "BP_1": {
         "text": "...",
         "rationale": "...",
-        "thumbs": None,
+        "rating": None,
         "qualitative": None
       },
       ...
@@ -21,7 +21,7 @@ def zip_bullets_and_rationales(bullet_points, rationales):
         zipped[bp_key] = {
             "text": bullet_points.get(bp_key, ""),
             "rationale": rationales.get(r_key, ""),
-            "thumbs": None,
+            "rating": None,
             "qualitative": None
         }
 
