@@ -200,7 +200,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
           allSectionsComplete() && (
             <>
               <CheckCircle className="w-5 h-5 text-green-600" />
-              Finalize Cover Letter
+              Generate Cover Letter
             </>
           )
         )}
