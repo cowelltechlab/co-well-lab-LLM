@@ -26,6 +26,7 @@ export interface CoverLetterResponse {
   BSETB_verbal_persuasion: BulletPointGroup;
   _id?: string;
   document_id?: string;
+  final_cover_letter: string;
 }
 
 export interface AppState {
@@ -40,6 +41,8 @@ export interface AppState {
   setGeneratedCoverLetter: (text: string) => void;
   setIsGeneratingCoverLetter: (isLoading: boolean) => void;
   setGenerationError: (error: string) => void;
-  setLetterLabData: (data: CoverLetterResponse | null) => void;
+  setLetterLabData: React.Dispatch<
+    React.SetStateAction<CoverLetterResponse | null>
+  >;
   initialGeneration: () => Promise<boolean>;
 }
