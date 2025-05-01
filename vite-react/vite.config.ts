@@ -14,8 +14,8 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      "/api": {
-        target: "http://localhost:3000",
+      "/lab": {
+        target: "http://flask:5002",
         changeOrigin: true,
         secure: false,
       },

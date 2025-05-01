@@ -1,9 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 import { BeliefHeaderWithTooltip } from "@/components/BeliefHeaderWithTooltip";
 
@@ -11,7 +11,8 @@ import type { CoverLetterResponse } from "@/context/types";
 
 export function ReviewAllView() {
   const navigate = useNavigate();
-  const { letterLabData } = useAppContext();
+  const { letterLabData, setLetterLabData } = useAppContext();
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   useEffect(() => {
     if (!letterLabData) {
@@ -85,12 +86,73 @@ Encouragement, positive feedback, and managing your emotional state under pressu
     return beliefs.every((belief) => isSectionComplete(belief.key));
   }
 
-  function handleFinalize() {
-    console.log(
-      "🎉 Finalization complete. LetterLabData ready:",
-      letterLabData
+  function extractFeedback(
+    section: Record<
+      string,
+      { rating: number | null; qualitative: string | null }
+    >
+  ): Record<string, { rating: number | null; qualitative: string }> {
+    return Object.fromEntries(
+      Object.entries(section).map(([bpKey, bp]) => [
+        bpKey,
+        {
+          rating: bp.rating ?? null,
+          qualitative: bp.qualitative ?? "",
+        },
+      ])
     );
-    navigate("/some-next-step"); // or just show a toast or confirmation banner
+  }
+
+  async function handleFeedbackSubmission() {
+    if (!letterLabData) return;
+
+    setIsFinalizing(true);
+
+    const feedbackOnly = {
+      BSETB_enactive_mastery: extractFeedback(
+        letterLabData.BSETB_enactive_mastery
+      ),
+      BSETB_vicarious_experience: extractFeedback(
+        letterLabData.BSETB_vicarious_experience
+      ),
+      BSETB_verbal_persuasion: extractFeedback(
+        letterLabData.BSETB_verbal_persuasion
+      ),
+    };
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/lab/final-cover-letter`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            document_id: letterLabData.document_id || letterLabData._id,
+            section_feedback: feedbackOnly,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to submit feedback.");
+      }
+
+      console.log("All section feedback successfully saved.");
+
+      const data = await response.json();
+      const finalCoverLetter = data.final_cover_letter;
+
+      setLetterLabData((prev) =>
+        prev ? { ...prev, final_cover_letter: finalCoverLetter } : prev
+      );
+
+      navigate("/cover-letter-comparison");
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+      alert("There was a problem submitting your feedback.");
+    } finally {
+      setIsFinalizing(false);
+    }
   }
 
   return (
@@ -134,13 +196,22 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       })}
       <Button
         className="mt-8 w-full"
-        onClick={handleFinalize}
+        onClick={handleFeedbackSubmission}
         disabled={!allSectionsComplete()}
       >
-        {allSectionsComplete() && (
-          <CheckCircle className="w-5 h-5 text-green-600" />
+        {isFinalizing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating Cover Letter...
+          </>
+        ) : (
+          allSectionsComplete() && (
+            <>
+              <CheckCircle className="w-5 h-5 text-green-600" />
+              Generate Cover Letter
+            </>
+          )
         )}
-        Finalize Cover Letter
       </Button>
     </Card>
   );

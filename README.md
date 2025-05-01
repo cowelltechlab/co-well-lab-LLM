@@ -4,54 +4,51 @@ A language model-powered backend for generating AI-assisted cover letters from r
 
 ## Table of Contents
 
-- [Development with Docker](#development-with-docker)
-- [Getting Started](#getting-started)
-  - [Clone the Repository](#1-clone-the-repository)
-  - [Set Up Environment Variables](#2-set-up-environment-variables)
-  - [Start the Services](#3-start-the-services)
-  - [Access the Services](#4-access-the-services)
-- [Testing API Endpoints](#testing-api-endpoints)
-  - [Test MongoDB Connection](#test-mongodb-connection)
-  - [Cover Letter Generation](#cover-letter-generation)
-  - [Fetching Cover Letter in React](#fetching-cover-letter-in-react)
-- [Running Tests](#running-tests)
-- [Working with Docker Containers](#working-with-docker-containers)
+- [Development](#development)
+  - [Clone the Repository](#clone-the-repository)
+  - [Set Up Environment Variables](#set-up-environment-variables)
+  - [Start the Services](#start-the-services)
+  - [Access the Services](#access-the-services)
+- [Production](#production)
+  - [Prepare Environment Files](#prepare-environment-files)
+  - [Run the Production Build](#run-the-production-build)
+  - [Post-Deployment Maintenance](#post-deployment-maintenance)
+- [Working with Docker](#working-with-docker)
   - [Hot Reloading](#hot-reloading)
   - [Viewing Logs](#viewing-logs)
   - [Stopping the Environment](#stopping-the-environment)
-  - [Rebuilding the Containers](#rebuilding-the-containers)
-- [Production Mode](#production-mode)
+  - [Rebuilding Containers](#rebuilding-containers)
+  - [Pruning Docker System](#pruning-docker-system)
 - [License](#license)
 
 ---
 
-## Development with Docker
+## Development
 
-This project uses Docker Compose to run three services in a containerized environment:
+### Clone the Repository
 
-- **MongoDB**: Database service (accessible on port `27017`)
-- **Flask**: Python backend service (hot reloading enabled via watchdog, handles resume processing and OpenAI calls, accessible on port `5002`)
-- **Vite-React**: Frontend service
-  - **Development Mode**: Runs the Vite dev server with hot reloading on port `5173`
-  - **Production Mode**: (if needed) builds and serves static files via Nginx on port `80`
-
----
-
-## **Getting Started**
-
-### **1. Clone the Repository**
-
-```sh
+```bash
 git clone https://github.com/your-repo/co-well-lab-LLM.git
 cd co-well-lab-LLM
 ```
 
-### **2. Set Up Environment Variables**
+### Set Up Environment Variables
 
-Create a `.env` file in the root directory and add the necessary credentials.  
-There is an example `.env` file called `.env copy` with the following variables:
+**Frontend (`vite-react`)**
 
-```env
+Create a `.env` file in `vite-react/`:
+
+```dotenv
+VITE_API_BASE_URL=""
+```
+
+This enables development proxying to Flask during local development.
+
+**Backend (`flask`)**
+
+Create a `.env` file in `flask/` or use the provided `.env copy`:
+
+```dotenv
 PYTHONUNBUFFERED=1
 AZURE_OPENAI_ENDPOINT=https://vds-openai-test-001.openai.azure.com/
 AZURE_OPENAI_KEY=
@@ -59,161 +56,128 @@ PLATFORM_OPENAI_KEY=
 AZURE_OPENAI_DEPLOYMENT=TEST-Embedding
 ```
 
-### **3. Start the Services**
+### Start the Services
 
-Run the following command from the project root:
+Run in the root directory:
 
-```sh
+```bash
 docker-compose up --build
 ```
 
-This will:
+This uses:
 
-- Build the Docker images
-- Start all services (`MongoDB`, `Flask`, `Vite-React`)
+- `docker-compose.yml`
+- `docker-compose.override.yml` (automatically loaded)
 
-### **4. Access the Services**
+### Access the Services
 
-Once running, the services can be accessed as follows:
-
-- **MongoDB** → localhost:27017 _(Use MongoDB Compass for visualization)_
-- **Flask API** → http://localhost:5002
-- **Vite-React (Frontend)** → http://localhost:5173 _(Hot reloading enabled)_
+- **Frontend**: http://localhost:5173
+- **API (Flask)**: http://localhost:5002
+- **MongoDB**: localhost:27017 (use Compass or another DB client)
 
 ---
 
-## **Testing API Endpoints**
+## Production
 
-### **Test MongoDB Connection**
+### Prepare Environment Files
 
-To verify that MongoDB is properly connected to Flask, send a `GET` request:
+**Frontend**
 
-#### **Postman Setup**
+Create a `.env.production` in `vite-react/`:
 
-- **Method**: `GET`
-- **URL**: `http://localhost:5002/test-mongo`
-
-#### **cURL Example**
-
-```sh
-curl -X GET http://localhost:5002/test-mongo
+```dotenv
+VITE_API_BASE_URL=https://api.letterlab.me
 ```
 
-### **Cover Letter Generation**
+**Backend**
 
-To generate a cover letter, submit a `POST` request to **Flask** at:
-`POST http://localhost:5002/cover-letter`
+Create a `.env.prod` file in `flask/` with all required keys. This will be used by `docker-compose.prod.yml`.
 
-#### **Postman Setup**
+### Run the Production Build
 
-- **Method**: `POST`
-- **URL**: `http://localhost:5002/cover-letter`
-- **Headers**:
-  - `Content-Type: application/json`
-- **Body**:
-  - Select `raw` → `JSON` format
+Use the production compose file:
 
-```json
-{
-  "resume_text": "Experienced software engineer with expertise in Python and backend development.",
-  "job_desc": "Looking for a backend engineer with experience in Flask and MongoDB."
-}
+```bash
+docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
-#### **cURL Example**
+This spins up:
 
-```sh
-curl -X POST "http://localhost:5002/cover-letter" \
-     -H "Content-Type: application/json" \
-     -d '{"resume_text": "Experienced software engineer with expertise in Python and backend development.", "job_desc": "Looking for a backend engineer with experience in Flask and MongoDB."}'
+- Flask behind Gunicorn
+- Vite build served with Nginx
+- MongoDB with volume persistence
+- Caddy as HTTPS reverse proxy
+
+### Post-Deployment Maintenance
+
+You’ll find a helper file with commands under:
+
+```
+docs/docker-commands
 ```
 
-### **Fetching Cover Letter in React**
+Be sure to review this for:
 
-Example fetch request from the React frontend:
-
-```javascript
-async function generateCoverLetter(resumeText, jobDesc) {
-  const response = await fetch("http://localhost:5002/cover-letter", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ resume_text: resumeText, job_desc: jobDesc }),
-  });
-  const data = await response.json();
-  return data.cover_letter;
-}
-```
+- Port pruning
+- Backup suggestions
+- Docker health check ideas
 
 ---
 
-## **Running Tests**
+## Working with Docker
 
-To ensure the Flask app and MongoDB are running correctly, you can execute tests inside the Flask container.
+### Hot Reloading
 
-### **Run All Tests**
+- Development mode auto-reloads Flask and Vite when code changes.
 
-```sh
-docker-compose exec flask pytest tests/
-```
+### Viewing Logs
 
-### **Run a Specific Test File**
-
-```sh
-docker-compose exec flask pytest tests/test_flask.py
-```
-
----
-
-## **Working with Docker Containers**
-
-### **Hot Reloading**
-
-- Flask and Vite-React **automatically reload** when code changes.
-
-### **Viewing Logs**
-
-To view logs from all services:
-
-```sh
+```bash
 docker-compose logs -f
 ```
 
-### **Stopping the Environment**
+For production:
 
-Press `CTRL+C` in the terminal where Docker Compose is running.
+```bash
+docker-compose -f docker-compose.prod.yml logs -f
+```
 
-If needed, shut down the services completely:
+### Stopping the Environment
 
-```sh
+```bash
 docker-compose down
 ```
 
-### **Rebuilding the Containers**
+Production:
 
-If dependencies change and need reinstalling:
+```bash
+docker-compose -f docker-compose.prod.yml down
+```
 
-```sh
-docker-compose down
+### Rebuilding Containers
+
+```bash
 docker-compose build --no-cache
-docker-compose up
 ```
+
+Production:
+
+```bash
+docker-compose -f docker-compose.prod.yml build --no-cache
+```
+
+### Pruning Docker System
+
+If you run into persistent container issues on the server:
+
+```bash
+docker system prune -a --volumes
+```
+
+⚠️ This will remove all stopped containers, networks, volumes, and images not in use. Use with care.
 
 ---
 
-## **Production Mode**
+## License
 
-The default setup is for **development**. To run a **production build**, use:
-
-```sh
-docker-compose -f docker-compose.yml up --build
-```
-
-- In production, the Vite-React frontend is served via **Nginx** on port `80`.
-
----
-
-## **License**
-
-_(Optional)_ TBD
+TBD

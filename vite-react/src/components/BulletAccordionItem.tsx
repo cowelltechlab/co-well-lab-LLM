@@ -58,10 +58,6 @@ export function BulletAccordionItem({
       </AccordionTrigger>
 
       <AccordionContent className="pt-3 text-sm text-gray-700">
-        <div className="font-semibold mb-1">
-          A strategic, high-impact domain aligned with [placeholder]:
-        </div>
-
         <div className="text-sm whitespace-pre-line mb-3">{rationaleText}</div>
 
         <p className="mb-2">
