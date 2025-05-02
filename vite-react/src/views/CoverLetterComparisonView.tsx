@@ -31,117 +31,39 @@ export function CoverLetterComparisonView() {
   };
 
   return (
-    <div className="h-[80vh]">
-      <Card className="w-full h-full max-w-6xl p-6 bg-white shadow-lg space-y-6">
+    <div className="min-h-screen flex items-center justify-center">
+      {/* Fixed canvas */}
+      <Card className="w-[80vw] h-[80vh] bg-white rounded-lg shadow-lg overflow-hidden flex flex-col">
         <Tabs
           value={activeTab}
           onValueChange={setActiveTab}
-          className="w-full h-full"
+          className="flex flex-col h-full"
         >
-          <div className="flex h-full min-h-[600px]">
-            {/* Sidebar */}
-            <div className="w-1/5 pr-4 h-full">
-              <TabsList className="flex flex-col items-center justify-center h-full w-full gap-4 bg-muted rounded p-2">
-                <TabsTrigger value="intro">1. Introduction</TabsTrigger>
-                <TabsTrigger
-                  value="draft1"
-                  disabled={!completedTabs.includes("intro")}
-                >
-                  2. Draft 1
-                </TabsTrigger>
-                <TabsTrigger
-                  value="draft2"
-                  disabled={!completedTabs.includes("draft1")}
-                >
-                  3. Draft 2
-                </TabsTrigger>
-                <TabsTrigger
-                  value="final"
-                  disabled={!completedTabs.includes("draft2")}
-                >
-                  4. Final Preference
-                </TabsTrigger>
-              </TabsList>
-            </div>
-
-            {/* Main content panel */}
-            <div className="flex-1 h-full border rounded p-6 bg-white shadow-sm">
-              <TabsContent value="intro">
-                <div className="flex items-center justify-center h-full min-h-[600px]">
-                  <div className="max-w-xl w-full text-left space-y-4 text-gray-700 leading-relaxed">
-                    <p>
-                      Welcome! 🎉 You’ve already done the hard part by getting
-                      started — now let’s refine your cover letter so it truly
-                      represents you.
-                    </p>
-                    <p>
-                      In this next step, we’ll ask you to read and respond to
-                      two drafts of your cover letter.
-                    </p>
-                    <ul className="list-disc ml-6 space-y-1">
-                      <li>
-                        📝 Each draft is built from your resume and the job
-                        description, but with different stylistic choices.
-                      </li>
-                      <li>
-                        👍👎 As you review, mark what you like and what you’d
-                        change.
-                      </li>
-                      <li>
-                        💬 You’ll also explain your preferences so we can
-                        improve the next version.
-                      </li>
-                      <li>
-                        ⭐ At the end, you’ll pick the draft you prefer — and
-                        we’ll use that feedback to generate your final letter.
-                      </li>
-                    </ul>
-                    <p>
-                      Your feedback helps shape a letter that’s not only
-                      professional, but also a true reflection of your voice.
-                    </p>
-                    <div className="pt-4 text-center">
-                      <button
-                        onClick={() => {
-                          setCompletedTabs((prev) => [...prev, "intro"]);
-                          setActiveTab("draft1");
-                        }}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                      >
-                        Ok, Let’s Begin
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="draft1" className="h-full overflow-hidden">
-                <div className="flex gap-6 h-full">
-                  <div className="w-1/2 h-full max-h-full overflow-auto border rounded p-4 whitespace-pre-wrap">
-                    {getDraftText("draft1")}
-                  </div>
-                  <div className="w-1/2 border rounded p-4">
-                    {/* Chat component */}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="draft2">
-                <div className="flex gap-6 h-full">
-                  <div className="w-1/2 h-full max-h-full overflow-auto border rounded p-4 whitespace-pre-wrap">
-                    {getDraftText("draft2")}
-                  </div>
-                  <div className="w-1/2 border rounded p-4">
-                    {/* Chat component */}
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="final">
-                <div className="h-full">{/* Final comparison view */}</div>
-              </TabsContent>
-            </div>
+          {/* Content fills most of the canvas */}
+          <div className="flex-1 overflow-auto p-6">
+            <TabsContent value="intro">
+              {/* Intro content goes here */}
+            </TabsContent>
+            <TabsContent value="draft1">{/* Draft 1 content */}</TabsContent>
+            <TabsContent value="draft2">{/* Draft 2 content */}</TabsContent>
+            <TabsContent value="final">{/* Final content */}</TabsContent>
           </div>
+
+          {/* Tab list at the bottom */}
+          <TabsList className="flex justify-evenly border-t py-10 px-6">
+            <TabsTrigger className="py-4 px-8" value="intro">
+              Introduction
+            </TabsTrigger>
+            <TabsTrigger className="py-4 px-8" value="draft1">
+              1. Draft 1
+            </TabsTrigger>
+            <TabsTrigger className="py-4 px-8" value="draft2">
+              2. Draft 2
+            </TabsTrigger>
+            <TabsTrigger className="py-4 px-8" value="final">
+              3. Final Preference
+            </TabsTrigger>
+          </TabsList>
         </Tabs>
       </Card>
     </div>
