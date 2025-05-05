@@ -3,6 +3,7 @@ import { AppProvider } from "@/context/AppProvider";
 import { WelcomeInputView } from "@/views/WelcomeInputView";
 import { ReviewAllView } from "@/views/ReviewAllView";
 import { ReviewSectionView } from "@/views/ReviewSectionView";
+import { CoverLetterComparisonView } from "@/views/CoverLetterComparisonView";
 
 function App() {
   return (
@@ -15,6 +16,10 @@ function App() {
             <Route
               path="/review-section/:sectionName"
               element={<ReviewSectionView />}
+            />
+            <Route
+              path="/cover-letter-comparison"
+              element={<CoverLetterComparisonView />}
             />
           </Routes>
         </div>
