@@ -122,7 +122,7 @@ export function CoverLetterComparisonView() {
                     <div className="pt-4 text-right">
                       <Button
                         onClick={() => {
-                          setDraft1Complete(true);
+                          setDraft2Complete(true);
                           setActiveTab("draft2");
                         }}
                       >
