@@ -3,6 +3,7 @@ import { useAppContext } from "@/context/useAppContext";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import ChatPanel from "@/components/ChatPanel";
 import { useNavigate } from "react-router-dom";
 
 export function CoverLetterComparisonView() {
@@ -110,19 +111,15 @@ export function CoverLetterComparisonView() {
                   </div>
 
                   {/* Right panel: placeholder for chat feedback */}
-                  <div className="flex-1 border rounded p-4 flex flex-col justify-between">
-                    {/* Placeholder chat content */}
-                    <div className="flex-1 overflow-auto">
-                      <p className="text-gray-500 italic">
-                        Chat feedback or commenting functionality goes here.
-                      </p>
+                  <div className="flex-1 border rounded p-4 flex flex-col overflow-hidden">
+                    <div className="flex-1 overflow-hidden">
+                      <ChatPanel draftKey="draft1" />
                     </div>
-
                     {/* Optional footer (e.g., input or buttons) */}
                     <div className="pt-4 text-right">
                       <Button
                         onClick={() => {
-                          setDraft2Complete(true);
+                          setDraft1Complete(true);
                           setActiveTab("draft2");
                         }}
                       >
@@ -143,19 +140,15 @@ export function CoverLetterComparisonView() {
                   </div>
 
                   {/* Right panel: placeholder for chat feedback */}
-                  <div className="flex-1 border rounded p-4 flex flex-col justify-between">
-                    {/* Placeholder chat content */}
-                    <div className="flex-1 overflow-auto">
-                      <p className="text-gray-500 italic">
-                        Chat feedback or commenting functionality goes here.
-                      </p>
+                  <div className="flex-1 border rounded p-4 flex flex-col overflow-hidden">
+                    <div className="flex-1 overflow-hidden">
+                      <ChatPanel draftKey="draft2" />
                     </div>
-
                     {/* Optional footer (e.g., input or buttons) */}
                     <div className="pt-4 text-right">
                       <Button
                         onClick={() => {
-                          setDraft1Complete(true);
+                          setDraft2Complete(true);
                           setActiveTab("final");
                         }}
                       >
