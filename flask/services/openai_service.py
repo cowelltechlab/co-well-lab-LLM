@@ -325,3 +325,15 @@ Ratings and Reflections:
     except Exception as e:
         print("Error generating final cover letter:", e)
         return "Error generating final cover letter."
+
+def chat_with_user(messages):
+    """
+    Accepts a list of chat messages with roles ('user' or 'assistant').
+    Returns the assistant's next reply using Azure OpenAI.
+    """
+    try:
+        response = llmchat.invoke(messages)
+        return response.content.strip()
+    except Exception as e:
+        print("Error during chat_with_user:", e)
+        return "Sorry, I ran into a problem trying to respond."

@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export function CoverLetterComparisonView() {
   const { letterLabData } = useAppContext();
@@ -9,6 +11,10 @@ export function CoverLetterComparisonView() {
   const [selectedFinalDraft, setSelectedFinalDraft] = useState<
     "draft1" | "draft2" | null
   >(null);
+  const [draft1Complete, setDraft1Complete] = useState(false);
+  const [draft2Complete, setDraft2Complete] = useState(false);
+
+  const navigate = useNavigate();
 
   const [draftMap, setDraftMap] = useState<{
     draft1: "initial" | "final";
@@ -84,12 +90,12 @@ export function CoverLetterComparisonView() {
                   </div>
 
                   <div className="pt-4 text-center">
-                    <button
+                    <Button
                       onClick={() => setActiveTab("draft1")}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      variant="default"
                     >
                       Proceed
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </TabsContent>
@@ -114,9 +120,14 @@ export function CoverLetterComparisonView() {
 
                     {/* Optional footer (e.g., input or buttons) */}
                     <div className="pt-4 text-right">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Submit Feedback
-                      </button>
+                      <Button
+                        onClick={() => {
+                          setDraft2Complete(true);
+                          setActiveTab("draft2");
+                        }}
+                      >
+                        Done Chatting
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -142,9 +153,14 @@ export function CoverLetterComparisonView() {
 
                     {/* Optional footer (e.g., input or buttons) */}
                     <div className="pt-4 text-right">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Submit Feedback
-                      </button>
+                      <Button
+                        onClick={() => {
+                          setDraft1Complete(true);
+                          setActiveTab("final");
+                        }}
+                      >
+                        Done Chatting
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -166,12 +182,12 @@ export function CoverLetterComparisonView() {
                       {getDraftText("draft1")}
                     </div>
                     <div className="pt-4 text-center">
-                      <button
+                      <Button
                         onClick={() => setSelectedFinalDraft("draft1")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        variant="default"
                       >
                         Choose
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -187,14 +203,34 @@ export function CoverLetterComparisonView() {
                       {getDraftText("draft2")}
                     </div>
                     <div className="pt-4 text-center">
-                      <button
+                      <Button
                         onClick={() => setSelectedFinalDraft("draft2")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        variant="default"
                       >
                         Choose
-                      </button>
+                      </Button>
                     </div>
                   </div>
+                </div>
+              </TabsContent>
+            )}
+
+            {activeTab && (
+              <TabsContent
+                value="submit"
+                className="h-full w-full flex items-center justify-center"
+              >
+                <div className="text-center space-y-6 max-w-lg">
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    🎉 Thank you for participating!
+                  </h2>
+                  <p className="text-gray-600">
+                    Your feedback helps us craft better, more authentic cover
+                    letters. We're grateful for your time and insights.
+                  </p>
+                  <Button onClick={() => navigate("/")} className="mt-4">
+                    Return Home
+                  </Button>
                 </div>
               </TabsContent>
             )}
@@ -211,8 +247,11 @@ export function CoverLetterComparisonView() {
             <TabsTrigger className="py-4 px-8" value="draft2">
               2. Draft 2
             </TabsTrigger>
-            <TabsTrigger className="py-4 px-8" value="final">
-              3. Final Preference
+            <TabsTrigger
+              value="final"
+              disabled={!(draft1Complete && draft2Complete)}
+            >
+              Final Preference
             </TabsTrigger>
             <TabsTrigger
               className={`py-4 px-8 transition-colors ${
