@@ -6,7 +6,6 @@ import { Card } from "@/components/ui/card";
 export function CoverLetterComparisonView() {
   const { letterLabData } = useAppContext();
   const [activeTab, setActiveTab] = useState("intro");
-  const [completedTabs, setCompletedTabs] = useState<string[]>([]);
   const [selectedFinalDraft, setSelectedFinalDraft] = useState<
     "draft1" | "draft2" | null
   >(null);
