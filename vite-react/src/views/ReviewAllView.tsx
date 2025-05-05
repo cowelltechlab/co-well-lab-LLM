@@ -204,13 +204,14 @@ Encouragement, positive feedback, and managing your emotional state under pressu
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Generating Cover Letter...
           </>
+        ) : allSectionsComplete() ? (
+          <>
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            Generate Cover Letter
+          </>
         ) : (
-          allSectionsComplete() && (
-            <>
-              <CheckCircle className="w-5 h-5 text-green-600" />
-              Generate Cover Letter
-            </>
-          )
+          // Placeholder or faded label while disabled
+          <>Generate Cover Letter</>
         )}
       </Button>
     </Card>
