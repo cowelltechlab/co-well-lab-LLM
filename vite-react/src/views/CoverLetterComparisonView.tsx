@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export function CoverLetterComparisonView() {
   const { letterLabData } = useAppContext();
@@ -84,12 +85,12 @@ export function CoverLetterComparisonView() {
                   </div>
 
                   <div className="pt-4 text-center">
-                    <button
+                    <Button
                       onClick={() => setActiveTab("draft1")}
-                      className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      variant="default"
                     >
                       Proceed
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </TabsContent>
@@ -114,9 +115,7 @@ export function CoverLetterComparisonView() {
 
                     {/* Optional footer (e.g., input or buttons) */}
                     <div className="pt-4 text-right">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Submit Feedback
-                      </button>
+                      <Button variant="default">Submit Feedback</Button>
                     </div>
                   </div>
                 </div>
@@ -142,9 +141,7 @@ export function CoverLetterComparisonView() {
 
                     {/* Optional footer (e.g., input or buttons) */}
                     <div className="pt-4 text-right">
-                      <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-                        Submit Feedback
-                      </button>
+                      <Button variant="default">Submit Feedback</Button>
                     </div>
                   </div>
                 </div>
@@ -166,12 +163,12 @@ export function CoverLetterComparisonView() {
                       {getDraftText("draft1")}
                     </div>
                     <div className="pt-4 text-center">
-                      <button
+                      <Button
                         onClick={() => setSelectedFinalDraft("draft1")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        variant="default"
                       >
                         Choose
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
@@ -187,12 +184,12 @@ export function CoverLetterComparisonView() {
                       {getDraftText("draft2")}
                     </div>
                     <div className="pt-4 text-center">
-                      <button
+                      <Button
                         onClick={() => setSelectedFinalDraft("draft2")}
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        variant="default"
                       >
                         Choose
-                      </button>
+                      </Button>
                     </div>
                   </div>
                 </div>
