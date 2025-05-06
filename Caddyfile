@@ -2,7 +2,7 @@
   email max.ohsawa@gmail.com
 }
 
-app.letterlab.me {
+letterlab.me {
   reverse_proxy vite-react:80
 }
 
