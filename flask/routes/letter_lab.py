@@ -1,5 +1,6 @@
 import sys
 import json
+from bson.objectid import ObjectId
 
 from flask import Blueprint, request, jsonify
 
@@ -25,7 +26,7 @@ from utils.generation_helpers import retry_generation
 from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output
 from utils.data_structuring import zip_bullets_and_rationales
 
-letter_lab_bp = Blueprint("letter_lab", __name__)
+letter_lab_bp = Blueprint("letter_lab_bp", __name__)
 
 @letter_lab_bp.route('/initialize', methods=['POST'])
 def initialize():
@@ -261,6 +262,27 @@ def final_cover_letter():
         print("Error updating final feedback:", e)
         return jsonify({"error": "Internal server error"}), 500
 
-@letter_lab_bp.route('/finalize', methods=['POST'])
-def finalize():
-    return
+@letter_lab_bp.route("/submit-final-data", methods=["POST"])
+def submit_final_data():
+    try:
+        data = request.get_json()
+        doc_id = data.get("document_id")
+
+        if not doc_id or not ObjectId.is_valid(doc_id):
+            return jsonify({"error": "Invalid or missing document_id"}), 400
+
+        # Remove doc_id before updating fields
+        update_fields = {k: v for k, v in data.items() if k != "document_id"}
+
+        result = set_fields(doc_id, update_fields)
+
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "No document updated"}), 404
+        
+        print(f"Updated session with final data: {doc_id}")
+
+        return jsonify({"status": "success"}), 200
+
+    except Exception as e:
+        print("❌ Error submitting final data:", e)
+        return jsonify({"error": "Server error"}), 500
