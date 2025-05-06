@@ -60,7 +60,7 @@ export function BulletAccordionItem({
       <AccordionContent className="pt-3 text-sm text-gray-700">
         <div className="text-sm whitespace-pre-line mb-3">{rationaleText}</div>
 
-        <p className="mb-2">
+        <p className="mb-2 text-base font-semibold">
           How well does this rationale align with your understanding of yourself
           and your experience?
         </p>
