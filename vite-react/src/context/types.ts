@@ -16,6 +16,11 @@ export type BulletPointGroup = {
   [key: string]: BulletPoint;
 };
 
+export interface Message {
+  role: "user" | "assistant";
+  content: string;
+}
+
 export interface CoverLetterResponse {
   resume: string;
   job_desc: string;
@@ -27,6 +32,10 @@ export interface CoverLetterResponse {
   _id?: string;
   document_id?: string;
   final_cover_letter: string;
+  chatMessages?: {
+    draft1?: Message[];
+    draft2?: Message[];
+  };
 }
 
 export interface AppState {

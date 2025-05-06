@@ -179,7 +179,7 @@ export function CoverLetterComparisonView() {
                         onClick={() => setSelectedFinalDraft("draft1")}
                         variant="default"
                       >
-                        Choose
+                        Choose Draft 1
                       </Button>
                     </div>
                   </div>
@@ -200,7 +200,7 @@ export function CoverLetterComparisonView() {
                         onClick={() => setSelectedFinalDraft("draft2")}
                         variant="default"
                       >
-                        Choose
+                        Choose Draft 2
                       </Button>
                     </div>
                   </div>

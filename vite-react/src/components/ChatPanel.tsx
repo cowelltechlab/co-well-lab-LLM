@@ -13,22 +13,27 @@ interface ChatPanelProps {
 export default function ChatPanel({ draftKey }: ChatPanelProps) {
   const { letterLabData, setLetterLabData } = useAppContext();
 
-  const initialMessages = letterLabData.chatMessages?.[draftKey] ?? [
-    {
-      role: "assistant",
-      content: "Is there any content in this letter you feel isn't accurate?",
-    },
-  ];
-
-  const [messages, setMessages] = useState<Message[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (!letterLabData) return [];
+    return (
+      letterLabData.chatMessages?.[draftKey] ?? [
+        {
+          role: "assistant",
+          content:
+            "Is there any content in this letter you feel isn't accurate?",
+        },
+      ]
+    );
+  });
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
   const updateContext = (updatedMessages: Message[]) => {
+    if (!letterLabData) return;
     setLetterLabData({
       ...letterLabData,
       chatMessages: {
-        ...letterLabData.chatMessages,
+        ...(letterLabData?.chatMessages ?? {}),
         [draftKey]: updatedMessages,
       },
     });
@@ -37,7 +42,9 @@ export default function ChatPanel({ draftKey }: ChatPanelProps) {
   const sendMessage = async () => {
     if (!input.trim()) return;
 
-    const newMessages = [...messages, { role: "user", content: input }];
+    const userMessage: Message = { role: "user", content: input };
+    const newMessages: Message[] = [...messages, userMessage];
+
     setMessages(newMessages);
     updateContext(newMessages);
     setInput("");
@@ -51,19 +58,25 @@ export default function ChatPanel({ draftKey }: ChatPanelProps) {
       });
 
       const data = await res.json();
-      const updated = [
-        ...newMessages,
-        { role: "assistant", content: data.message },
-      ];
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: data.message,
+      };
+
+      const updated = [...newMessages, assistantMessage];
       setMessages(updated);
       updateContext(updated);
     } catch (err) {
-      const fallback = [
-        ...newMessages,
-        { role: "assistant", content: "Sorry, something went wrong." },
-      ];
-      setMessages(fallback);
-      updateContext(fallback);
+      console.error("Chat send error:", err);
+      const fallback: Message = {
+        role: "assistant",
+        content: "Sorry, something went wrong.",
+      };
+
+      const failed = [...newMessages, fallback];
+      setMessages(failed);
+      updateContext(failed);
     } finally {
       setLoading(false);
     }
