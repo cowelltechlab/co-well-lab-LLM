@@ -25,6 +25,37 @@ export function CoverLetterComparisonView() {
   } | null>(null);
 
   useEffect(() => {
+    if (activeTab === "submit") {
+      const submitFeedback = async () => {
+        if (!letterLabData || !selectedFinalDraft) return;
+
+        const payload = {
+          chatMessages: letterLabData.chatMessages ?? {},
+          chatRating: letterLabData.chatRating ?? {},
+          selectedFinalDraft,
+          resume: letterLabData.resume,
+          job_desc: letterLabData.job_desc,
+        };
+
+        try {
+          const res = await fetch("/api/submit-feedback", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (!res.ok) throw new Error("Server error");
+          console.log("✅ Feedback submitted successfully");
+        } catch (err) {
+          console.error("❌ Feedback submission failed:", err);
+        }
+      };
+
+      submitFeedback();
+    }
+  }, [activeTab, letterLabData, selectedFinalDraft]);
+
+  useEffect(() => {
     if (!letterLabData || draftMap) return;
 
     const random = Math.random() < 0.5;
