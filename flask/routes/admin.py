@@ -5,6 +5,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required
 from models.admin_user import AdminUser
 from services.mongodb_service import get_all_sessions
+from services.openai_service import check_openai_health
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
@@ -55,3 +56,26 @@ def export_sessions_csv():
     output.headers["Content-Type"] = "text/csv"
     return output
 
+from flask import jsonify
+import openai
+from services.mongodb_service import collection
+from flask_login import login_required
+
+@admin_bp.route("/health", methods=["GET"])
+@login_required
+def health_check():
+    health = {
+        "flask": "ok",
+        "mongodb": "ok",
+        "openai": "ok"
+    }
+
+    try:
+        collection.estimated_document_count()
+    except Exception as e:
+        print("MongoDB health check failed:", e)
+        health["mongodb"] = "error"
+
+    health["openai"] = check_openai_health()
+
+    return jsonify(health), 200

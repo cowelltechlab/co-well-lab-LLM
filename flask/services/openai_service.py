@@ -337,3 +337,14 @@ def chat_with_user(messages):
     except Exception as e:
         print("Error during chat_with_user:", e)
         return "Sorry, I ran into a problem trying to respond."
+
+def check_openai_health():
+    """
+    Sends a minimal request to the Azure OpenAI model to check availability.
+    """
+    try:
+        response = llmchat.invoke("ping")
+        return "ok" if response.content.strip() else "error"
+    except Exception as e:
+        print("Azure OpenAI health check failed:", e)
+        return "error"
