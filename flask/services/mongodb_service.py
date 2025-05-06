@@ -1,7 +1,7 @@
+import os
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-import os
-
+from utils.flatten import flatten_dict
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")  # assuming docker-compose service is 'mongo'
 client = MongoClient(MONGO_URI)
 db = client["cover_letter_app"]
@@ -53,3 +53,21 @@ def set_fields(doc_id, fields: dict):
     except Exception as e:
         print("Mongo update error:", e)
         return None
+
+def get_all_sessions():
+    try:
+        sessions = list(collection.find())
+        flattened_sessions = []
+
+        for s in sessions:
+            s["document_id"] = str(s["_id"])
+            del s["_id"]
+            flat = flatten_dict(s)
+            flattened_sessions.append(flat)
+
+        return flattened_sessions
+    except Exception as e:
+        print("Mongo fetch error:", e)
+        return []
+
+
