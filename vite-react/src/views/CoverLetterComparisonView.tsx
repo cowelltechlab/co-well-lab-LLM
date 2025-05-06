@@ -49,14 +49,6 @@ export function CoverLetterComparisonView() {
     });
   };
 
-  const handleStarClick = (value: number) => {
-    setRating(value);
-    setLetterLabData({
-      ...letterLabData,
-      chatRating: value,
-    });
-  };
-
   const getDraftText = (which: "draft1" | "draft2") => {
     if (!letterLabData || !draftMap) return "";
     return draftMap[which] === "initial"
@@ -212,7 +204,7 @@ export function CoverLetterComparisonView() {
                       </div>
                       <Button
                         onClick={() => {
-                          setDraft1Complete(true);
+                          setDraft2Complete(true);
                           setActiveTab("final");
                         }}
                         disabled={getRating("draft2") === null}
