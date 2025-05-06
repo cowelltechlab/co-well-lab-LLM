@@ -38,7 +38,7 @@ export function CoverLetterComparisonView() {
         };
 
         try {
-          const res = await fetch("/api/submit-feedback", {
+          const res = await fetch("/api/submit-final-data", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
