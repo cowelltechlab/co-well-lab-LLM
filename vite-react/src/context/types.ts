@@ -36,6 +36,10 @@ export interface CoverLetterResponse {
     draft1?: Message[];
     draft2?: Message[];
   };
+  chatRating?: {
+    draft1?: number;
+    draft2?: number;
+  };
 }
 
 export interface AppState {
