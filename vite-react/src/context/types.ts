@@ -40,6 +40,10 @@ export interface CoverLetterResponse {
     draft1?: number;
     draft2?: number;
   };
+  draftMapping?: {
+    draft1?: "initial" | "final";
+    draft2?: "initial" | "final";
+  };
 }
 
 export interface AppState {

@@ -25,24 +25,48 @@ export function CoverLetterComparisonView() {
   } | null>(null);
 
   useEffect(() => {
+    if (!letterLabData || draftMap) return;
+
+    const random = Math.random() < 0.5;
+
+    const map = {
+      draft1: random ? "initial" : "final",
+      draft2: random ? "final" : "initial",
+    } as const;
+
+    setDraftMap(map);
+
+    // ✅ Persist to context
+    setLetterLabData({
+      ...letterLabData,
+      draftMapping: map,
+    });
+  }, [letterLabData, setLetterLabData, draftMap]);
+
+  useEffect(() => {
     if (activeTab === "submit") {
       const submitFeedback = async () => {
         if (!letterLabData || !selectedFinalDraft) return;
 
         const payload = {
+          document_id: letterLabData.document_id,
           chatMessages: letterLabData.chatMessages ?? {},
           chatRating: letterLabData.chatRating ?? {},
           selectedFinalDraft,
+          draftMapping: letterLabData.draftMapping ?? {}, // ✅ Add this
           resume: letterLabData.resume,
           job_desc: letterLabData.job_desc,
         };
 
         try {
-          const res = await fetch("/api/submit-final-data", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          });
+          const res = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/lab/submit-final-data`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            }
+          );
 
           if (!res.ok) throw new Error("Server error");
           console.log("✅ Feedback submitted successfully");
@@ -54,16 +78,6 @@ export function CoverLetterComparisonView() {
       submitFeedback();
     }
   }, [activeTab, letterLabData, selectedFinalDraft]);
-
-  useEffect(() => {
-    if (!letterLabData || draftMap) return;
-
-    const random = Math.random() < 0.5;
-    setDraftMap({
-      draft1: random ? "initial" : "final",
-      draft2: random ? "final" : "initial",
-    });
-  }, [letterLabData, draftMap]);
 
   const getRating = (draftKey: "draft1" | "draft2"): number | null => {
     return letterLabData?.chatRating?.[draftKey] ?? null;
