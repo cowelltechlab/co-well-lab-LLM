@@ -1,13 +1,15 @@
 import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/useAppContext";
+import { useNavigate } from "react-router-dom";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ChatPanel from "@/components/ChatPanel";
-import { useNavigate } from "react-router-dom";
+import { Star } from "lucide-react";
 
 export function CoverLetterComparisonView() {
-  const { letterLabData } = useAppContext();
+  const { letterLabData, setLetterLabData } = useAppContext();
   const [activeTab, setActiveTab] = useState("intro");
   const [selectedFinalDraft, setSelectedFinalDraft] = useState<
     "draft1" | "draft2" | null
@@ -31,6 +33,29 @@ export function CoverLetterComparisonView() {
       draft2: random ? "final" : "initial",
     });
   }, [letterLabData, draftMap]);
+
+  const getRating = (draftKey: "draft1" | "draft2"): number | null => {
+    return letterLabData?.chatRating?.[draftKey] ?? null;
+  };
+
+  const setRating = (draftKey: "draft1" | "draft2", value: number) => {
+    if (!letterLabData) return;
+    setLetterLabData({
+      ...letterLabData,
+      chatRating: {
+        ...letterLabData.chatRating,
+        [draftKey]: value,
+      },
+    });
+  };
+
+  const handleStarClick = (value: number) => {
+    setRating(value);
+    setLetterLabData({
+      ...letterLabData,
+      chatRating: value,
+    });
+  };
 
   const getDraftText = (which: "draft1" | "draft2") => {
     if (!letterLabData || !draftMap) return "";
@@ -116,12 +141,32 @@ export function CoverLetterComparisonView() {
                       <ChatPanel draftKey="draft1" />
                     </div>
                     {/* Optional footer (e.g., input or buttons) */}
-                    <div className="pt-4 text-right">
+                    <div className="pt-4 flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7].map((star) => {
+                          const isSelected =
+                            getRating("draft1") !== null &&
+                            getRating("draft1")! >= star;
+                          return (
+                            <Star
+                              key={star}
+                              onClick={() => setRating("draft1", star)}
+                              fill={isSelected ? "currentColor" : "none"}
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              className={`w-6 h-6 cursor-pointer ${
+                                isSelected ? "text-yellow-400" : "text-gray-300"
+                              } hover:text-yellow-500`}
+                            />
+                          );
+                        })}
+                      </div>
                       <Button
                         onClick={() => {
                           setDraft1Complete(true);
                           setActiveTab("draft2");
                         }}
+                        disabled={getRating("draft1") === null}
                       >
                         Done Chatting
                       </Button>
@@ -145,12 +190,32 @@ export function CoverLetterComparisonView() {
                       <ChatPanel draftKey="draft2" />
                     </div>
                     {/* Optional footer (e.g., input or buttons) */}
-                    <div className="pt-4 text-right">
+                    <div className="pt-4 flex items-center justify-between">
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5, 6, 7].map((star) => {
+                          const isSelected =
+                            getRating("draft2") !== null &&
+                            getRating("draft2")! >= star;
+                          return (
+                            <Star
+                              key={star}
+                              onClick={() => setRating("draft2", star)}
+                              fill={isSelected ? "currentColor" : "none"}
+                              stroke="currentColor"
+                              strokeWidth={2}
+                              className={`w-6 h-6 cursor-pointer ${
+                                isSelected ? "text-yellow-400" : "text-gray-300"
+                              } hover:text-yellow-500`}
+                            />
+                          );
+                        })}
+                      </div>
                       <Button
                         onClick={() => {
-                          setDraft2Complete(true);
+                          setDraft1Complete(true);
                           setActiveTab("final");
                         }}
+                        disabled={getRating("draft2") === null}
                       >
                         Done Chatting
                       </Button>
@@ -242,9 +307,10 @@ export function CoverLetterComparisonView() {
             </TabsTrigger>
             <TabsTrigger
               value="final"
+              className="py-4 px-8"
               disabled={!(draft1Complete && draft2Complete)}
             >
-              Final Preference
+              4. Final Preference
             </TabsTrigger>
             <TabsTrigger
               className={`py-4 px-8 transition-colors ${
