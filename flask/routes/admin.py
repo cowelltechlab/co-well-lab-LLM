@@ -1,5 +1,6 @@
 import csv
 import io
+import requests
 from flask import make_response
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required
@@ -56,26 +57,46 @@ def export_sessions_csv():
     output.headers["Content-Type"] = "text/csv"
     return output
 
+import requests
 from flask import jsonify
-import openai
-from services.mongodb_service import collection
 from flask_login import login_required
+from services.mongodb_service import collection
+from services.openai_service import llmchat  # or import a minimal ping helper if you prefer
 
 @admin_bp.route("/health", methods=["GET"])
 @login_required
 def health_check():
     health = {
-        "flask": "ok",
-        "mongodb": "ok",
-        "openai": "ok"
+        "frontend": "ok",
+        "backend": "ok",
+        "database": "ok",
+        "openai": "ok",
     }
 
+    # MongoDB
     try:
         collection.estimated_document_count()
     except Exception as e:
         print("MongoDB health check failed:", e)
-        health["mongodb"] = "error"
+        health["database"] = "error"
 
-    health["openai"] = check_openai_health()
+    # Azure OpenAI
+    try:
+        response = llmchat.invoke("ping")
+        if not response.content.strip():
+            health["openai"] = "error"
+    except Exception as e:
+        print("Azure OpenAI health check failed:", e)
+        health["openai"] = "error"
+
+    # Frontend
+    try:
+        res = requests.get("https://letterlab.me", timeout=2)  # 🔁 Adjust for prod
+        if res.status_code != 200 or "text/html" not in res.headers.get("Content-Type", ""):
+            health["frontend"] = "error"
+    except Exception as e:
+        print("Frontend health check failed:", e)
+        health["frontend"] = "error"
 
     return jsonify(health), 200
+
