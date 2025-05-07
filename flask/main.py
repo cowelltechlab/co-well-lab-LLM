@@ -28,7 +28,7 @@ def create_app():
     app.config.from_object(Config)
 
     # Initialize extensions
-    CORS(app)
+    CORS(app, supports_credentials=True, origins=["https://letterlab.me"])
     mongo.init_app(app)
 
     login_manager.init_app(app)

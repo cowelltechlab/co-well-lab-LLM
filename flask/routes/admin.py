@@ -17,6 +17,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
 @admin_bp.route("/login", methods=["POST"])
 def login():
+    print("🔐 Admin login endpoint called")
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
