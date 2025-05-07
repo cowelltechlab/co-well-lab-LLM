@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useAdminContext } from "@/context/useAdminContext";
+import { Navigate } from "react-router-dom";
 
 // Health status component
 function HealthStatusCard() {
@@ -41,7 +42,7 @@ export function AdminDashboardView() {
   const { isAdmin } = useAdminContext();
 
   if (!isAdmin) {
-    return <p>Access denied. Please log in as admin.</p>;
+    return <Navigate to="/admin/login" replace />;
   }
   return (
     <div className="min-h-screen w-[80%] p-6 bg-gray-50 flex justify-center">
