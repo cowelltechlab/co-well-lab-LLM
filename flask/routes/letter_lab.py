@@ -326,5 +326,9 @@ def validate_token():
 
     return jsonify({"status": "authorized"}), 200
 
+@letter_lab_bp.route("/logout", methods=["POST"])
+def logout_participant():
+    session.pop("token", None)
+    return jsonify({"status": "logged_out"}), 200
 
 

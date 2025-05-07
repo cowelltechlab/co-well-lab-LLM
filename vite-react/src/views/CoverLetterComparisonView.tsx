@@ -329,8 +329,22 @@ export function CoverLetterComparisonView() {
                     Your feedback helps us craft better, more authentic cover
                     letters. We're grateful for your time and insights.
                   </p>
-                  <Button onClick={() => navigate("/")} className="mt-4">
-                    Return Home
+                  <Button
+                    onClick={async () => {
+                      await fetch(
+                        `${import.meta.env.VITE_API_BASE_URL}/lab/logout`,
+                        {
+                          method: "POST",
+                          credentials: "include",
+                        }
+                      );
+                      localStorage.removeItem("letterLabData");
+                      window.location.href = "/enter";
+                    }}
+                    variant="destructive"
+                    className="mt-4"
+                  >
+                    Log Out
                   </Button>
                 </div>
               </TabsContent>
