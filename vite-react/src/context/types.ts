@@ -22,16 +22,16 @@ export interface Message {
 }
 
 export interface CoverLetterResponse {
-  resume: string;
-  job_desc: string;
-  initial_cover_letter: string;
-  review_all_view_intro: string;
-  BSETB_enactive_mastery: BulletPointGroup;
-  BSETB_vicarious_experience: BulletPointGroup;
-  BSETB_verbal_persuasion: BulletPointGroup;
+  resume?: string;
+  job_desc?: string;
+  initial_cover_letter?: string;
+  review_all_view_intro?: string;
+  BSETB_enactive_mastery?: BulletPointGroup;
+  BSETB_vicarious_experience?: BulletPointGroup;
+  BSETB_verbal_persuasion?: BulletPointGroup;
   _id?: string;
   document_id?: string;
-  final_cover_letter: string;
+  final_cover_letter?: string;
   chatMessages?: {
     draft1?: Message[];
     draft2?: Message[];
@@ -44,6 +44,8 @@ export interface CoverLetterResponse {
     draft1?: "initial" | "final";
     draft2?: "initial" | "final";
   };
+  token?: string;
+  hasAccess?: boolean;
 }
 
 export interface AppState {

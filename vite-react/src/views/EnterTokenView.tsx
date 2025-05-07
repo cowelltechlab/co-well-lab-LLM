@@ -26,9 +26,19 @@ export function EnterTokenView() {
         throw new Error("Invalid or used token");
       }
 
-      setLetterLabData((prev) => ({ ...prev, token, hasAccess: true }));
-      navigate("/lab");
+      setLetterLabData((prev) => {
+        if (!prev) return { token, hasAccess: true };
+
+        return {
+          ...prev,
+          token,
+          hasAccess: true,
+        };
+      });
+
+      navigate("/");
     } catch (err) {
+      console.error("Token submit error:", err);
       setError("❌ Invalid or used token. Please try again.");
     }
   };

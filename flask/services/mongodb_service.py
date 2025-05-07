@@ -83,13 +83,12 @@ def create_token(token_str):
 def validate_token(token_str):
     return db["tokens"].find_one({"token": token_str, "used": False})
 
-def mark_token_used(token_str, session_id):
-    return db["tokens"].update_one(
-        {"token": token_str},
+def mark_token_used(token):
+    db["tokens"].update_one(
+        {"token": token},
         {"$set": {
             "used": True,
-            "used_at": datetime.utcnow(),
-            "session_id": session_id
+            "used_at": datetime.now()
         }}
     )
 

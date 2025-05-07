@@ -302,10 +302,13 @@ def validate_token():
     if not token or not is_valid_token(token):
         return jsonify({"error": "Invalid or expired token"}), 401
 
-    # Mark as used, if you want one-time tokens
+    # Store in session so @token_required works
+    session["token"] = token
+
+    # Optional: mark it as used here if you're enforcing one-time usage
     mark_token_used(token)
 
-    # Store in session
-    session["participant_token"] = token
     return jsonify({"status": "authorized"}), 200
+
+
 

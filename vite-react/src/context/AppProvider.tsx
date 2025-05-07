@@ -32,6 +32,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           headers: {
             "Content-Type": "application/json",
           },
+          credentials: "include",
           body: JSON.stringify({
             resume_text: resumeText,
             job_desc: jobDescription,
@@ -44,7 +45,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
 
         const data: CoverLetterResponse = await response.json();
-        setLetterLabData(data);
+        setLetterLabData({ ...letterLabData, data });
         setGeneratedCoverLetter(data.initial_cover_letter);
 
         return true;
