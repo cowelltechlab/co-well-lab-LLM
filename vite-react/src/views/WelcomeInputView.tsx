@@ -13,6 +13,13 @@ import {
 
 export function WelcomeInputView() {
   const navigate = useNavigate();
+  const { letterLabData } = useAppContext();
+
+  useEffect(() => {
+    if (!letterLabData?.hasAccess) {
+      navigate("/enter");
+    }
+  }, [letterLabData, navigate]);
 
   const {
     resumeText,

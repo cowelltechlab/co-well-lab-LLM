@@ -3,6 +3,7 @@ import json
 from bson.objectid import ObjectId
 
 from flask import Blueprint, request, jsonify
+from flask import session
 
 # GENERATION SERVICE FUNCTIONS
 from services.openai_service import generate_initial_cover_letter
@@ -20,16 +21,19 @@ from services.mongodb_service import create_session
 from services.mongodb_service import update_session
 from services.mongodb_service import get_session
 from services.mongodb_service import set_fields
-from services.mongodb_service import validate_token
+from services.mongodb_service import is_valid_token
+from services.mongodb_service import mark_token_used
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
 from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output
 from utils.data_structuring import zip_bullets_and_rationales
+from utils.auth_decorators import token_required
 
 letter_lab_bp = Blueprint("letter_lab_bp", __name__)
 
 @letter_lab_bp.route('/initialize', methods=['POST'])
+@token_required
 def initialize():
     
     # DEBUG FLAGS
@@ -219,6 +223,7 @@ def initialize():
         return jsonify({"error": "Error processing cover letter"}), 500
 
 @letter_lab_bp.route("/final-cover-letter", methods=["POST"])
+@token_required
 def final_cover_letter():
     try:
         payload = request.get_json()
@@ -264,6 +269,7 @@ def final_cover_letter():
         return jsonify({"error": "Internal server error"}), 500
 
 @letter_lab_bp.route("/submit-final-data", methods=["POST"])
+@token_required
 def submit_final_data():
     try:
         data = request.get_json()
@@ -289,9 +295,17 @@ def submit_final_data():
         return jsonify({"error": "Server error"}), 500
     
 @letter_lab_bp.route("/validate-token", methods=["POST"])
-def validate_token_endpoint():
-    token = request.json.get("token")
-    token_doc = validate_token(token)
-    if not token_doc:
-        return jsonify({"valid": False}), 404
-    return jsonify({"valid": True})
+def validate_token():
+    data = request.get_json()
+    token = data.get("token", "").strip()
+
+    if not token or not is_valid_token(token):
+        return jsonify({"error": "Invalid or expired token"}), 401
+
+    # Mark as used, if you want one-time tokens
+    mark_token_used(token)
+
+    # Store in session
+    session["participant_token"] = token
+    return jsonify({"status": "authorized"}), 200
+

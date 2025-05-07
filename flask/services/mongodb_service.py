@@ -93,3 +93,6 @@ def mark_token_used(token_str, session_id):
         }}
     )
 
+def is_valid_token(token: str) -> bool:
+    entry = db["tokens"].find_one({"token": token, "used": False})
+    return entry is not None
