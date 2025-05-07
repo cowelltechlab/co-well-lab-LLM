@@ -220,6 +220,7 @@ def initialize():
         ### RESPONSE TO FRONTEND
 
         session_data["document_id"] = str(document_id)
+        session_data["completed"] = False
 
         return jsonify(session_data), 200
 
@@ -299,7 +300,8 @@ def submit_final_data():
             return jsonify({"error": "No document updated"}), 404
         
         print(f"Updated session with final data: {doc_id}")
-        
+
+        set_fields(doc_id, {"completed": True})
         log_progress_event("final_update_success", session_id=doc_id)
 
         return jsonify({"status": "success"}), 200

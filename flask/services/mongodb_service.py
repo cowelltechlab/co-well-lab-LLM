@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.flatten import flatten_dict
@@ -76,7 +76,7 @@ def create_token(token_str):
     return db["tokens"].insert_one({
         "token": token_str,
         "used": False,
-        "created_at": datetime.now(),
+        "created_at": datetime.now(timezone.utc),
         "session_id": None
     })
 
@@ -88,7 +88,7 @@ def mark_token_used(token):
         {"token": token},
         {"$set": {
             "used": True,
-            "used_at": datetime.now()
+            "used_at": datetime.now(timezone.utc)
         }}
     )
 
@@ -111,7 +111,7 @@ def get_all_progress_events():
 def log_progress_event(event_name, session_id=None):
     log_entry = {
         "event_name": event_name,
-        "timestamp": datetime.now(),
+        "timestamp": datetime.now(timezone.utc),
     }
     if session_id:
         log_entry["session_id"] = session_id

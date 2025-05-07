@@ -10,6 +10,7 @@ interface ProgressEvent {
 export function ProgressLogPanel() {
   const [events, setEvents] = useState<ProgressEvent[]>([]);
   const [loading, setLoading] = useState(false);
+  const [completedCount, setCompletedCount] = useState<number | null>(null);
 
   const fetchProgressLog = async () => {
     setLoading(true);
@@ -23,6 +24,7 @@ export function ProgressLogPanel() {
       const data = await res.json();
       if (res.ok) {
         setEvents(data.events);
+        setCompletedCount(data.completed);
       } else {
         console.error("Failed to load progress log:", data.error);
       }
@@ -36,17 +38,24 @@ export function ProgressLogPanel() {
   return (
     <div className="border rounded p-4 bg-white shadow h-full overflow-auto">
       <div className="flex justify-between items-center mb-2">
-        <h2 className="text-lg font-semibold">Progress Log</h2>
+        <h2 className="text-lg font-semibold">
+          Progress Log
+          {completedCount !== null && (
+            <span className="text-sm text-gray-600 ml-2">
+              ({completedCount} completed)
+            </span>
+          )}
+        </h2>
         <Button onClick={fetchProgressLog} disabled={loading}>
           {loading ? "Loading..." : "Refresh"}
         </Button>
       </div>
 
-      <ul className="text-sm space-y-2">
+      <ul className="text-sm space-y-2 overflow-auto max-h-80 pr-2">
         {events.map((event, index) => (
           <li key={index} className="text-gray-700">
             <span className="font-mono text-xs text-gray-500">
-              {new Date(event.timestamp).toLocaleString()}
+              {new Date(event.timestamp + "Z").toLocaleString()}
             </span>
             <br />
             <strong>{event.event_name}</strong>

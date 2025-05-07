@@ -124,7 +124,8 @@ def create_token_endpoint():
 def get_progress_log():
     try:
         events = get_all_progress_events()
-        return jsonify({"events": events}), 200
+        completed_count = collection.count_documents({"completed": True})
+        return jsonify({"events": events, "completed": completed_count}), 200
     except Exception as e:
         print("Error fetching progress log:", e)
         return jsonify({"error": "Failed to fetch progress log"}), 500
