@@ -8,4 +8,5 @@ class AdminUser(UserMixin):
         
     def check_password(self, password):
         expected = os.getenv("ADMIN_PASSWORD")
+        print("ADMIN_PASSWORD from env:", expected)
         return expected and password == expected
