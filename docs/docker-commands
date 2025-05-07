@@ -1,5 +1,5 @@
 Deployment
-docker-compose down -v --remove-orphans
+docker-compose down --remove-orphans
 docker system prune --all --volumes --force
 docker-compose -f docker-compose.prod.yml up --build
 
