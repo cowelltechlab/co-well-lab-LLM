@@ -45,8 +45,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
 
         const data: CoverLetterResponse = await response.json();
-        setLetterLabData({ ...letterLabData, data });
-        setGeneratedCoverLetter(data.initial_cover_letter);
+        setLetterLabData((prev) => ({ ...prev, ...data }));
+
+        setGeneratedCoverLetter(data.initial_cover_letter ?? "");
 
         return true;
       } catch (error: unknown) {
