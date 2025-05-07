@@ -1,5 +1,5 @@
 import os
-import datetime
+from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.flatten import flatten_dict

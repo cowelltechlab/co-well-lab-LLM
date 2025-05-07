@@ -36,6 +36,8 @@ function HealthStatusCard() {
 
 // Main admin dashboard layout
 export function AdminDashboardView() {
+  const [newToken, setNewToken] = useState<string | null>(null);
+
   return (
     <div className="min-h-screen w-[80%] p-6 bg-gray-50 flex justify-center">
       <div className="">
@@ -48,9 +50,30 @@ export function AdminDashboardView() {
           </div>
 
           {/* 2. Participant Tokens */}
-          <div className="border rounded p-6 shadow bg-white h-full">
-            <h2 className="text-lg font-semibold mb-4">Participant Tokens</h2>
-            <p className="text-gray-500 italic">Coming soon...</p>
+          <div className="border rounded p-6 shadow bg-white h-full flex flex-col justify-between">
+            <div>
+              <h2 className="text-lg font-semibold mb-4">Participant Tokens</h2>
+              <Button
+                onClick={async () => {
+                  const res = await fetch("/api/admin/tokens/create", {
+                    method: "POST",
+                    credentials: "include",
+                  });
+                  const data = await res.json();
+                  setNewToken(data.token);
+                }}
+              >
+                Generate Token
+              </Button>
+            </div>
+            {newToken && (
+              <div className="mt-4 text-center">
+                <p className="text-sm text-gray-600">Latest Token:</p>
+                <div className="text-xl font-mono bg-gray-100 px-4 py-2 rounded mt-1">
+                  {newToken}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 3. Progress Log */}
