@@ -65,6 +65,12 @@ export function ReviewSectionView() {
     setSectionFeedback(restored);
   }, [letterLabData, sectionName]);
 
+  useEffect(() => {
+    if (!letterLabData?.hasAccess) {
+      navigate("/enter");
+    }
+  }, [letterLabData, navigate]);
+
   if (!sectionName || !letterLabData || !beliefSectionMeta[sectionName]) {
     navigate("/review-all");
     return null;

@@ -25,6 +25,12 @@ export function CoverLetterComparisonView() {
   } | null>(null);
 
   useEffect(() => {
+    if (!letterLabData?.hasAccess) {
+      navigate("/enter");
+    }
+  }, [letterLabData, navigate]);
+
+  useEffect(() => {
     if (!letterLabData || draftMap) return;
 
     const random = Math.random() < 0.5;
