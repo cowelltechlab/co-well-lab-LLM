@@ -56,7 +56,7 @@ export function ReviewAllView() {
     beliefKey: BSETBeliefKey
   ): string[] {
     const group = data[beliefKey];
-    return Object.values(group).map((b) => b.text);
+    return Object.values(group ?? {}).map((b) => b.text);
   }
 
   const beliefTooltips: Record<BSETBeliefKey, string> = {
@@ -72,7 +72,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
     if (!letterLabData) return false;
 
     const section = letterLabData[sectionKey];
-    return Object.values(section).every(
+    return Object.values(section ?? {}).every(
       (bp) =>
         typeof bp.rating === "number" &&
         bp.rating >= 1 &&
@@ -93,7 +93,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
     >
   ): Record<string, { rating: number | null; qualitative: string }> {
     return Object.fromEntries(
-      Object.entries(section).map(([bpKey, bp]) => [
+      Object.entries(section ?? {}).map(([bpKey, bp]) => [
         bpKey,
         {
           rating: bp.rating ?? null,
@@ -110,13 +110,13 @@ Encouragement, positive feedback, and managing your emotional state under pressu
 
     const feedbackOnly = {
       BSETB_enactive_mastery: extractFeedback(
-        letterLabData.BSETB_enactive_mastery
+        letterLabData.BSETB_enactive_mastery ?? {}
       ),
       BSETB_vicarious_experience: extractFeedback(
-        letterLabData.BSETB_vicarious_experience
+        letterLabData.BSETB_vicarious_experience ?? {}
       ),
       BSETB_verbal_persuasion: extractFeedback(
-        letterLabData.BSETB_verbal_persuasion
+        letterLabData.BSETB_verbal_persuasion ?? {}
       ),
     };
 
