@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { useAdminContext } from "@/context/useAdminContext";
 import { Navigate } from "react-router-dom";
 
+const apiBase = import.meta.env.VITE_API_BASE_URL;
+
 // Health status component
 function HealthStatusCard() {
   const [health, setHealth] = useState<Record<string, string> | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/health", { credentials: "include" })
+    fetch(`${apiBase}/api/admin/health`, { credentials: "include" })
       .then((res) => res.json())
       .then((data) => setHealth(data))
       .catch(() => setHealth(null));
@@ -93,7 +95,7 @@ export function AdminDashboardView() {
             <h2 className="text-lg font-semibold mb-4">Download Sessions</h2>
             <Button
               onClick={() =>
-                window.open("/api/admin/sessions/export", "_blank")
+                window.open(`${apiBase}/api/admin/sessions/export`, "_blank")
               }
               className=""
             >
