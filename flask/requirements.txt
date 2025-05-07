@@ -16,3 +16,4 @@ langchain_openai
 langchain_core
 pytest
 gunicorn
+flask-login==0.6.3

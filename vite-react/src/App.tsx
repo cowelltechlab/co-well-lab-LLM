@@ -4,6 +4,9 @@ import { WelcomeInputView } from "@/views/WelcomeInputView";
 import { ReviewAllView } from "@/views/ReviewAllView";
 import { ReviewSectionView } from "@/views/ReviewSectionView";
 import { CoverLetterComparisonView } from "@/views/CoverLetterComparisonView";
+import { AdminLoginView } from "@/views/AdminLoginView";
+import { AdminDashboardView } from "@/views/AdminDashboardView";
+import { EnterTokenView } from "@/views/EnterTokenView";
 
 function App() {
   return (
@@ -21,6 +24,9 @@ function App() {
               path="/cover-letter-comparison"
               element={<CoverLetterComparisonView />}
             />
+            <Route path="/admin/login" element={<AdminLoginView />} />
+            <Route path="/admin" element={<AdminDashboardView />} />
+            <Route path="/enter" element={<EnterTokenView />} />
           </Routes>
         </div>
       </AppProvider>

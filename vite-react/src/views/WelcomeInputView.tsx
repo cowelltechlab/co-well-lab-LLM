@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,13 @@ import {
 
 export function WelcomeInputView() {
   const navigate = useNavigate();
+  const { letterLabData } = useAppContext();
+
+  useEffect(() => {
+    if (!letterLabData?.hasAccess) {
+      navigate("/enter");
+    }
+  }, [letterLabData, navigate]);
 
   const {
     resumeText,

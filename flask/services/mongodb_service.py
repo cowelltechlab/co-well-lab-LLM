@@ -1,8 +1,10 @@
+import os
+from datetime import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-import os
+from utils.flatten import flatten_dict
 
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")  # assuming docker-compose service is 'mongo'
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")
 client = MongoClient(MONGO_URI)
 db = client["cover_letter_app"]
 collection = db["sessions"]
@@ -53,3 +55,43 @@ def set_fields(doc_id, fields: dict):
     except Exception as e:
         print("Mongo update error:", e)
         return None
+
+def get_all_sessions():
+    try:
+        sessions = list(collection.find())
+        flattened_sessions = []
+
+        for s in sessions:
+            s["document_id"] = str(s["_id"])
+            del s["_id"]
+            flat = flatten_dict(s)
+            flattened_sessions.append(flat)
+
+        return flattened_sessions
+    except Exception as e:
+        print("Mongo fetch error:", e)
+        return []
+
+def create_token(token_str):
+    return db["tokens"].insert_one({
+        "token": token_str,
+        "used": False,
+        "created_at": datetime.utcnow(),
+        "session_id": None
+    })
+
+def validate_token(token_str):
+    return db["tokens"].find_one({"token": token_str, "used": False})
+
+def mark_token_used(token):
+    db["tokens"].update_one(
+        {"token": token},
+        {"$set": {
+            "used": True,
+            "used_at": datetime.now()
+        }}
+    )
+
+def is_valid_token(token: str) -> bool:
+    entry = db["tokens"].find_one({"token": token, "used": False})
+    return entry is not None
