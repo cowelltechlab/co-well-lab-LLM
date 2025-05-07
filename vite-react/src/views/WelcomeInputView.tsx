@@ -6,10 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { TextInputDialog } from "@/components/TextInputDialog";
-import {
-  resumeTextPlaceholder,
-  jobDescriptionPlaceholder,
-} from "@/placeholders/placeholder_values";
 
 export function WelcomeInputView() {
   const navigate = useNavigate();
@@ -131,7 +127,7 @@ export function WelcomeInputView() {
         open={showResumePopup}
         title="Your Resume"
         description="Paste your resume text below."
-        initialValue={resumeTextPlaceholder}
+        initialValue=""
         onSave={setResumeText}
         onClose={() => setShowResumePopup(false)}
       />
@@ -141,7 +137,7 @@ export function WelcomeInputView() {
         open={showJobPopup}
         title="Job Description"
         description="Paste the job description text below."
-        initialValue={jobDescriptionPlaceholder}
+        initialValue=""
         onSave={setJobDescription}
         onClose={() => setShowJobPopup(false)}
       />
