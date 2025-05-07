@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { useAdminContext } from "@/context/useAdminContext";
 import { Navigate } from "react-router-dom";
 
+import { ProgressLogPanel } from "@/components/ProgressLogPanel";
+
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 
 // Health status component
@@ -89,8 +91,7 @@ export function AdminDashboardView() {
 
           {/* 3. Progress Log */}
           <div className="border rounded p-6 shadow bg-white h-full">
-            <h2 className="text-lg font-semibold mb-4">Progress Log</h2>
-            <p className="text-gray-500 italic">Coming soon...</p>
+            <ProgressLogPanel />
           </div>
 
           {/* 4. Download Sessions */}
