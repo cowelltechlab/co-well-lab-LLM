@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 interface ProgressEvent {
@@ -34,6 +34,10 @@ export function ProgressLogPanel() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchProgressLog();
+  }, []);
 
   return (
     <div className="border rounded p-4 bg-white shadow h-full overflow-auto">
