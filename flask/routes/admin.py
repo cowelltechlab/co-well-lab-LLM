@@ -1,13 +1,17 @@
 import csv
 import io
 import requests
+import random
+import string
 from flask import make_response
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required
 from models.admin_user import AdminUser
 from services.mongodb_service import get_all_sessions
+from services.mongodb_service import create_token
+from services.mongodb_service import collection
+from services.openai_service import llmchat
 from services.openai_service import check_openai_health
-
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -57,11 +61,7 @@ def export_sessions_csv():
     output.headers["Content-Type"] = "text/csv"
     return output
 
-import requests
-from flask import jsonify
-from flask_login import login_required
-from services.mongodb_service import collection
-from services.openai_service import llmchat  # or import a minimal ping helper if you prefer
+
 
 @admin_bp.route("/health", methods=["GET"])
 @login_required
@@ -99,4 +99,18 @@ def health_check():
         health["frontend"] = "error"
 
     return jsonify(health), 200
+
+def generate_token():
+    letters = ''.join(random.choices(string.ascii_lowercase, k=3))
+    digits = ''.join(random.choices(string.digits, k=3))
+    return letters + digits
+
+@admin_bp.route("/tokens/create", methods=["POST"])
+@login_required
+def create_token_endpoint():
+    token = generate_token()
+    if not token:
+        return jsonify({"error": "Invalid token"}), 400
+    create_token(token)
+    return jsonify({"status": "created", "token": token})
 

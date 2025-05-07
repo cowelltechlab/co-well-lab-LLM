@@ -1,8 +1,10 @@
 import os
+import datetime
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.flatten import flatten_dict
-MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")  # assuming docker-compose service is 'mongo'
+
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")
 client = MongoClient(MONGO_URI)
 db = client["cover_letter_app"]
 collection = db["sessions"]
@@ -70,4 +72,24 @@ def get_all_sessions():
         print("Mongo fetch error:", e)
         return []
 
+def create_token(token_str):
+    return db["tokens"].insert_one({
+        "token": token_str,
+        "used": False,
+        "created_at": datetime.utcnow(),
+        "session_id": None
+    })
+
+def validate_token(token_str):
+    return db["tokens"].find_one({"token": token_str, "used": False})
+
+def mark_token_used(token_str, session_id):
+    return db["tokens"].update_one(
+        {"token": token_str},
+        {"$set": {
+            "used": True,
+            "used_at": datetime.utcnow(),
+            "session_id": session_id
+        }}
+    )
 

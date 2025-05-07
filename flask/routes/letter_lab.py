@@ -20,6 +20,7 @@ from services.mongodb_service import create_session
 from services.mongodb_service import update_session
 from services.mongodb_service import get_session
 from services.mongodb_service import set_fields
+from services.mongodb_service import validate_token
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
@@ -286,3 +287,11 @@ def submit_final_data():
     except Exception as e:
         print("❌ Error submitting final data:", e)
         return jsonify({"error": "Server error"}), 500
+    
+@letter_lab_bp.route("/validate-token", methods=["POST"])
+def validate_token_endpoint():
+    token = request.json.get("token")
+    token_doc = validate_token(token)
+    if not token_doc:
+        return jsonify({"valid": False}), 404
+    return jsonify({"valid": True})
