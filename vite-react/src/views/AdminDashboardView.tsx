@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
+import { useAdminContext } from "@/context/useAdminContext";
 
 // Health status component
 function HealthStatusCard() {
@@ -37,7 +38,11 @@ function HealthStatusCard() {
 // Main admin dashboard layout
 export function AdminDashboardView() {
   const [newToken, setNewToken] = useState<string | null>(null);
+  const { isAdmin } = useAdminContext();
 
+  if (!isAdmin) {
+    return <p>Access denied. Please log in as admin.</p>;
+  }
   return (
     <div className="min-h-screen w-[80%] p-6 bg-gray-50 flex justify-center">
       <div className="">
