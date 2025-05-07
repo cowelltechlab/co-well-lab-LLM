@@ -9,7 +9,7 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: examplepassword
     volumes:
-      - mongo_data:/data/db
+      - ./mongo-data:/data/db
     command: mongod
 
   flask:
