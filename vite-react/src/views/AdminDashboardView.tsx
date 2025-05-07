@@ -63,10 +63,13 @@ export function AdminDashboardView() {
               <h2 className="text-lg font-semibold mb-4">Participant Tokens</h2>
               <Button
                 onClick={async () => {
-                  const res = await fetch("/api/admin/tokens/create", {
-                    method: "POST",
-                    credentials: "include",
-                  });
+                  const res = await fetch(
+                    `${apiBase}/api/admin/tokens/create`,
+                    {
+                      method: "POST",
+                      credentials: "include",
+                    }
+                  );
                   const data = await res.json();
                   setNewToken(data.token);
                 }}
