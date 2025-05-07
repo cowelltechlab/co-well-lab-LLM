@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAdminContext } from "@/context/useAdminContext";
 
 export function AdminLoginView() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { setIsAdmin } = useAdminContext();
 
   const handleLogin = async () => {
     setError("");
@@ -21,6 +23,7 @@ export function AdminLoginView() {
       );
 
       if (!res.ok) throw new Error("Login failed");
+      setIsAdmin(true); // ✅ sets context AND localStorage
       navigate("/admin");
     } catch (err) {
       console.error("Bad admin login:", err);
