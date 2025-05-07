@@ -1,6 +1,9 @@
 from flask import Flask
 from config import Config  # No more 'app.' needed
 
+from dotenv import load_dotenv
+load_dotenv()
+
 from routes.letter_lab import letter_lab_bp
 from routes.test_routes import test_bp
 from routes.chat import chat_bp
