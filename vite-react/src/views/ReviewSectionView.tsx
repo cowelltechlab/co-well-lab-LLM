@@ -8,6 +8,8 @@ import { Accordion } from "@radix-ui/react-accordion";
 import { BulletAccordionItem } from "@/components/BulletAccordionItem";
 import { CheckCircle } from "lucide-react";
 
+import { BulletPointGroup } from "@/context/types";
+
 type BSETBeliefKey =
   | "BSETB_enactive_mastery"
   | "BSETB_vicarious_experience"
@@ -48,14 +50,17 @@ export function ReviewSectionView() {
 
     const section = letterLabData[sectionName];
 
-    const restored = Object.entries(section).reduce((acc, [bpKey, bp]) => {
-      acc[bpKey] = {
-        rating: typeof bp.rating === "number" ? bp.rating : null,
-        qualitative: bp.qualitative ?? "",
-      };
+    const restored = Object.entries(section ?? {}).reduce(
+      (acc, [bpKey, bp]) => {
+        acc[bpKey] = {
+          rating: typeof bp.rating === "number" ? bp.rating : null,
+          qualitative: bp.qualitative ?? "",
+        };
 
-      return acc;
-    }, {} as typeof sectionFeedback);
+        return acc;
+      },
+      {} as typeof sectionFeedback
+    );
 
     setSectionFeedback(restored);
   }, [letterLabData, sectionName]);
@@ -81,7 +86,7 @@ export function ReviewSectionView() {
     }));
   };
 
-  const allComplete = Object.keys(bulletPoints).every(
+  const allComplete = Object.keys(bulletPoints ?? {}).every(
     (bpKey) =>
       sectionFeedback[bpKey]?.rating &&
       sectionFeedback[bpKey]?.qualitative.trim().length > 0
@@ -90,17 +95,16 @@ export function ReviewSectionView() {
   const handleComplete = () => {
     if (!letterLabData || !sectionName) return;
 
-    const updatedSection = Object.entries(letterLabData[sectionName]).reduce(
-      (acc, [bpKey, original]) => {
-        acc[bpKey] = {
-          ...original,
-          rating: sectionFeedback[bpKey]?.rating ?? null,
-          qualitative: sectionFeedback[bpKey]?.qualitative ?? "",
-        };
-        return acc;
-      },
-      {} as (typeof letterLabData)[BSETBeliefKey]
-    );
+    const updatedSection: BulletPointGroup = Object.entries(
+      letterLabData[sectionName] ?? {}
+    ).reduce((acc, [bpKey, original]) => {
+      acc[bpKey] = {
+        ...original,
+        rating: sectionFeedback[bpKey]?.rating ?? null,
+        qualitative: sectionFeedback[bpKey]?.qualitative ?? "",
+      };
+      return acc;
+    }, {} as BulletPointGroup);
 
     setLetterLabData({
       ...letterLabData,
@@ -118,7 +122,7 @@ export function ReviewSectionView() {
       <h3 className="text-lg font-semibold mt-6"> {title} </h3>
 
       <Accordion type="multiple" className="space-y-4">
-        {Object.entries(bulletPoints).map(([bpKey, bp]) => (
+        {Object.entries(bulletPoints ?? {}).map(([bpKey, bp]) => (
           <BulletAccordionItem
             key={bpKey}
             bulletKey={bpKey}
