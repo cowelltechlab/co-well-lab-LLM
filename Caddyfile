@@ -3,9 +3,6 @@
 }
 
 letterlab.me {
-  reverse_proxy vite-react:80
-}
-
-api.letterlab.me {
-  reverse_proxy flask:5002
+  reverse_proxy /api/* flask:5002
+  reverse_proxy /* vite-react:80
 }

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAdminContext } from "@/context/useAdminContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function AdminLoginView() {
   const [username, setUsername] = useState("");
@@ -9,21 +11,24 @@ export function AdminLoginView() {
   const navigate = useNavigate();
   const { setIsAdmin } = useAdminContext();
 
-  const handleLogin = async () => {
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault(); // important for Enter to trigger this
     setError("");
+
     try {
       const res = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/api/admin/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          credentials: "include", // important for session cookie
+          credentials: "include",
           body: JSON.stringify({ username, password }),
         }
       );
 
       if (!res.ok) throw new Error("Login failed");
-      setIsAdmin(true); // ✅ sets context AND localStorage
+
+      setIsAdmin(true);
       navigate("/admin");
     } catch (err) {
       console.error("Bad admin login:", err);
@@ -34,15 +39,15 @@ export function AdminLoginView() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center">
       <h1 className="text-xl font-semibold mb-4">Admin Login</h1>
-      <div className="w-64 space-y-4">
-        <input
+      <form onSubmit={handleLogin} className="w-64 space-y-4">
+        <Input
           type="text"
           placeholder="Username"
           className="w-full px-3 py-2 border rounded"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
-        <input
+        <Input
           type="password"
           placeholder="Password"
           className="w-full px-3 py-2 border rounded"
@@ -50,13 +55,13 @@ export function AdminLoginView() {
           onChange={(e) => setPassword(e.target.value)}
         />
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        <button
-          onClick={handleLogin}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+        <Button
+          type="submit"
+          className="w-full text-white py-2 rounded hover:bg-blue-700"
         >
           Login
-        </button>
-      </div>
+        </Button>
+      </form>
     </div>
   );
 }
