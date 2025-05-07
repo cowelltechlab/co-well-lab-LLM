@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 from utils.flatten import flatten_dict
@@ -76,7 +76,7 @@ def create_token(token_str):
     return db["tokens"].insert_one({
         "token": token_str,
         "used": False,
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
         "session_id": None
     })
 
@@ -88,10 +88,32 @@ def mark_token_used(token):
         {"token": token},
         {"$set": {
             "used": True,
-            "used_at": datetime.now()
+            "used_at": datetime.now(timezone.utc)
         }}
     )
 
 def is_valid_token(token: str) -> bool:
     entry = db["tokens"].find_one({"token": token, "used": False})
     return entry is not None
+
+def get_all_progress_events():
+    try:
+        events = list(db["progress_log"].find().sort("timestamp", -1))
+        for event in events:
+            event["_id"] = str(event["_id"])  # optional
+            if isinstance(event["timestamp"], datetime):
+                event["timestamp"] = event["timestamp"].isoformat()
+        return events
+    except Exception as e:
+        print("Mongo fetch error:", e)
+        return []
+
+def log_progress_event(event_name, session_id=None):
+    log_entry = {
+        "event_name": event_name,
+        "timestamp": datetime.now(timezone.utc),
+    }
+    if session_id:
+        log_entry["session_id"] = session_id
+
+    return db["progress_log"].insert_one(log_entry)

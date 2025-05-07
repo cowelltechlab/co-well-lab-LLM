@@ -23,6 +23,7 @@ from services.mongodb_service import get_session
 from services.mongodb_service import set_fields
 from services.mongodb_service import is_valid_token
 from services.mongodb_service import mark_token_used
+from services.mongodb_service import log_progress_event
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
@@ -42,6 +43,8 @@ def initialize():
     DEBUG_MONGO_WRITE = False
 
     try:
+        log_progress_event("initialize_request")
+
         data = request.get_json()
         resume = data.get("resume_text")
         job_desc = data.get("job_desc")
@@ -207,6 +210,8 @@ def initialize():
 
         document_id = create_session(session_data)
 
+        log_progress_event("initialize_success", session_id=document_id)
+
         if DEBUG_MONGO_WRITE:
             print("MongoDB document successfully created.")
             print("Document ID:", document_id)
@@ -215,6 +220,7 @@ def initialize():
         ### RESPONSE TO FRONTEND
 
         session_data["document_id"] = str(document_id)
+        session_data["completed"] = False
 
         return jsonify(session_data), 200
 
@@ -226,9 +232,11 @@ def initialize():
 @token_required
 def final_cover_letter():
     try:
+
         payload = request.get_json()
         document_id = payload.get("document_id")
         section_feedback = payload.get("section_feedback")
+        log_progress_event("update_request", session_id=document_id)
 
         if not document_id or not section_feedback:
             return jsonify({"error": "Missing document_id or section_feedback"}), 400
@@ -260,6 +268,9 @@ def final_cover_letter():
         )
 
         set_fields(document_id, {"final_cover_letter": final_letter})
+
+        log_progress_event("update_success", session_id=document_id)
+
         print(f"Updated session with final cover letter: {document_id}")
 
         return jsonify({"final_cover_letter": final_letter}), 200
@@ -275,6 +286,8 @@ def submit_final_data():
         data = request.get_json()
         doc_id = data.get("document_id")
 
+        log_progress_event("final_update_request", session_id=doc_id)
+
         if not doc_id or not ObjectId.is_valid(doc_id):
             return jsonify({"error": "Invalid or missing document_id"}), 400
 
@@ -287,6 +300,9 @@ def submit_final_data():
             return jsonify({"error": "No document updated"}), 404
         
         print(f"Updated session with final data: {doc_id}")
+
+        set_fields(doc_id, {"completed": True})
+        log_progress_event("final_update_success", session_id=doc_id)
 
         return jsonify({"status": "success"}), 200
 
@@ -310,5 +326,9 @@ def validate_token():
 
     return jsonify({"status": "authorized"}), 200
 
+@letter_lab_bp.route("/logout", methods=["POST"])
+def logout_participant():
+    session.pop("token", None)
+    return jsonify({"status": "logged_out"}), 200
 
 

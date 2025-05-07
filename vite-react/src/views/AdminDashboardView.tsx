@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { useAdminContext } from "@/context/useAdminContext";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
+
+import { ProgressLogPanel } from "@/components/ProgressLogPanel";
 
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 
@@ -41,7 +43,8 @@ function HealthStatusCard() {
 // Main admin dashboard layout
 export function AdminDashboardView() {
   const [newToken, setNewToken] = useState<string | null>(null);
-  const { isAdmin } = useAdminContext();
+  const { isAdmin, setIsAdmin } = useAdminContext();
+  const navigate = useNavigate();
 
   if (!isAdmin) {
     return <Navigate to="/admin/login" replace />;
@@ -49,7 +52,22 @@ export function AdminDashboardView() {
   return (
     <div className="min-h-screen w-[80%] p-6 bg-gray-50 flex justify-center">
       <div className="">
-        <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              await fetch(`${apiBase}/api/admin/logout`, {
+                method: "POST",
+                credentials: "include",
+              });
+              setIsAdmin(false);
+              navigate("/admin/login");
+            }}
+          >
+            Logout
+          </Button>
+        </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-[80vw] h-[80vh]">
           {/* 1. System Health */}
@@ -89,8 +107,7 @@ export function AdminDashboardView() {
 
           {/* 3. Progress Log */}
           <div className="border rounded p-6 shadow bg-white h-full">
-            <h2 className="text-lg font-semibold mb-4">Progress Log</h2>
-            <p className="text-gray-500 italic">Coming soon...</p>
+            <ProgressLogPanel />
           </div>
 
           {/* 4. Download Sessions */}

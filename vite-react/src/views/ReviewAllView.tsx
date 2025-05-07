@@ -20,6 +20,12 @@ export function ReviewAllView() {
     }
   }, [letterLabData, navigate]);
 
+  useEffect(() => {
+    if (!letterLabData?.hasAccess) {
+      navigate("/enter");
+    }
+  }, [letterLabData, navigate]);
+
   if (!letterLabData) return null;
 
   const beliefs: {

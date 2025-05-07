@@ -6,10 +6,14 @@ import string
 from flask import make_response
 from flask import Blueprint, request, jsonify
 from flask_login import login_user, logout_user, login_required
+
 from models.admin_user import AdminUser
+
 from services.mongodb_service import get_all_sessions
 from services.mongodb_service import create_token
 from services.mongodb_service import collection
+from services.mongodb_service import get_all_progress_events
+
 from services.openai_service import llmchat
 from services.openai_service import check_openai_health
 
@@ -115,3 +119,13 @@ def create_token_endpoint():
     create_token(token)
     return jsonify({"status": "created", "token": token})
 
+@admin_bp.route("/progress-log", methods=["GET"])
+@login_required
+def get_progress_log():
+    try:
+        events = get_all_progress_events()
+        completed_count = collection.count_documents({"completed": True})
+        return jsonify({"events": events, "completed": completed_count}), 200
+    except Exception as e:
+        print("Error fetching progress log:", e)
+        return jsonify({"error": "Failed to fetch progress log"}), 500
