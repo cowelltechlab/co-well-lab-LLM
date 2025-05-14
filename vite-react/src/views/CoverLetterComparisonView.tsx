@@ -184,7 +184,11 @@ export function CoverLetterComparisonView() {
                       <ChatPanel draftKey="draft1" />
                     </div>
                     {/* Optional footer (e.g., input or buttons) */}
-                    <div className="pt-4 flex items-center justify-between">
+                    <div className="pt-4">
+                      Overall, how well do you feel this cover letter represents
+                      you and your experiences?
+                    </div>
+                    <div className="pt-1 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         {[1, 2, 3, 4, 5, 6, 7].map((star) => {
                           const isSelected =
@@ -233,7 +237,11 @@ export function CoverLetterComparisonView() {
                       <ChatPanel draftKey="draft2" />
                     </div>
                     {/* Optional footer (e.g., input or buttons) */}
-                    <div className="pt-4 flex items-center justify-between">
+                    <div className="pt-4">
+                      Overall, how well do you feel this cover letter represents
+                      you and your experiences?
+                    </div>
+                    <div className="pt-1 flex items-center justify-between">
                       <div className="flex items-center gap-1">
                         {[1, 2, 3, 4, 5, 6, 7].map((star) => {
                           const isSelected =
