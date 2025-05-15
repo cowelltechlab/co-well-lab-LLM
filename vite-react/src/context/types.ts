@@ -36,6 +36,16 @@ export interface CoverLetterResponse {
     draft1?: Message[];
     draft2?: Message[];
   };
+  textFeedback?: {
+    draft1?: {
+      likes: string;
+      dislikes: string;
+    };
+    draft2?: {
+      likes: string;
+      dislikes: string;
+    };
+  };
   chatRating?: {
     draft1?: number;
     draft2?: number;

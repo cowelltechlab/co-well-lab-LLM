@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import ChatPanel from "@/components/ChatPanel";
+import TextFeedbackPanel from "@/components/TextFeedbackPanel";
 import { Star } from "lucide-react";
 
 export function CoverLetterComparisonView() {
@@ -57,9 +57,10 @@ export function CoverLetterComparisonView() {
         const payload = {
           document_id: letterLabData.document_id,
           chatMessages: letterLabData.chatMessages ?? {},
+          textFeedback: letterLabData.textFeedback ?? {},
           chatRating: letterLabData.chatRating ?? {},
           selectedFinalDraft,
-          draftMapping: letterLabData.draftMapping ?? {}, // ✅ Add this
+          draftMapping: letterLabData.draftMapping ?? {},
           resume: letterLabData.resume,
           job_desc: letterLabData.job_desc,
         };
@@ -178,12 +179,12 @@ export function CoverLetterComparisonView() {
                     {getDraftText("draft1")}
                   </div>
 
-                  {/* Right panel: placeholder for chat feedback */}
+                  {/* Right panel: text feedback */}
                   <div className="flex-1 border rounded p-4 flex flex-col overflow-hidden">
                     <div className="flex-1 overflow-hidden">
-                      <ChatPanel draftKey="draft1" />
+                      <TextFeedbackPanel draftKey="draft1" />
                     </div>
-                    {/* Optional footer (e.g., input or buttons) */}
+                    {/* Rating section */}
                     <div className="pt-4">
                       Overall, how well do you feel this cover letter represents
                       you and your experiences?
@@ -215,7 +216,7 @@ export function CoverLetterComparisonView() {
                         }}
                         disabled={getRating("draft1") === null}
                       >
-                        Done Chatting
+                        Continue
                       </Button>
                     </div>
                   </div>
@@ -231,12 +232,12 @@ export function CoverLetterComparisonView() {
                     {getDraftText("draft2")}
                   </div>
 
-                  {/* Right panel: placeholder for chat feedback */}
+                  {/* Right panel: text feedback */}
                   <div className="flex-1 border rounded p-4 flex flex-col overflow-hidden">
                     <div className="flex-1 overflow-hidden">
-                      <ChatPanel draftKey="draft2" />
+                      <TextFeedbackPanel draftKey="draft2" />
                     </div>
-                    {/* Optional footer (e.g., input or buttons) */}
+                    {/* Rating section */}
                     <div className="pt-4">
                       Overall, how well do you feel this cover letter represents
                       you and your experiences?
@@ -268,7 +269,7 @@ export function CoverLetterComparisonView() {
                         }}
                         disabled={getRating("draft2") === null}
                       >
-                        Done Chatting
+                        Continue
                       </Button>
                     </div>
                   </div>
