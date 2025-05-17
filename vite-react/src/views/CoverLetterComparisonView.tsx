@@ -6,7 +6,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import TextFeedbackPanel from "@/components/TextFeedbackPanel";
-import { Star } from "lucide-react";
+import { LikertScale } from "@/components/LikertScale";
 
 export function CoverLetterComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
@@ -210,41 +210,31 @@ export function CoverLetterComparisonView() {
                   </div>
 
                   {/* Right panel: text feedback */}
-                  <div className="flex-1 border rounded p-4 flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-hidden">
+                  <div className="flex-1 border rounded p-4 flex flex-col">
+                    <div className="flex-1 overflow-y-auto">
                       <TextFeedbackPanel draftKey="draft1" />
-                    </div>
-                    {/* Rating section */}
-                    <div className="pt-4">
-                      Overall, how well do you feel this cover letter represents
-                      you and your experiences?
-                    </div>
-                    <div className="pt-1 flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5, 6, 7].map((star) => {
-                          const isSelected =
-                            getRating("draft1") !== null &&
-                            getRating("draft1")! >= star;
-                          return (
-                            <Star
-                              key={star}
-                              onClick={() => setRating("draft1", star)}
-                              fill={isSelected ? "currentColor" : "none"}
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              className={`w-6 h-6 cursor-pointer ${
-                                isSelected ? "text-yellow-400" : "text-gray-300"
-                              } hover:text-yellow-500`}
-                            />
-                          );
-                        })}
+                      {/* Rating section */}
+                      <div className="pt-2 font-semibold">
+                        To what extent does this draft sound like you?
                       </div>
+                      <div className="pt-1">
+                        <LikertScale
+                          value={getRating("draft1")}
+                          onChange={(rating) => setRating("draft1", rating)}
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-4 flex justify-center">
                       <Button
                         onClick={() => {
                           setDraft1Complete(true);
                           setActiveTab("draft2");
                         }}
-                        disabled={getRating("draft1") === null}
+                        disabled={
+                          getRating("draft1") === null ||
+                          !letterLabData?.textFeedback?.draft1?.likes?.trim() ||
+                          !letterLabData?.textFeedback?.draft1?.dislikes?.trim()
+                        }
                       >
                         Continue
                       </Button>
@@ -263,41 +253,31 @@ export function CoverLetterComparisonView() {
                   </div>
 
                   {/* Right panel: text feedback */}
-                  <div className="flex-1 border rounded p-4 flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-hidden">
+                  <div className="flex-1 border rounded p-4 flex flex-col">
+                    <div className="flex-1 overflow-y-auto">
                       <TextFeedbackPanel draftKey="draft2" />
-                    </div>
-                    {/* Rating section */}
-                    <div className="pt-4">
-                      Overall, how well do you feel this cover letter represents
-                      you and your experiences?
-                    </div>
-                    <div className="pt-1 flex items-center justify-between">
-                      <div className="flex items-center gap-1">
-                        {[1, 2, 3, 4, 5, 6, 7].map((star) => {
-                          const isSelected =
-                            getRating("draft2") !== null &&
-                            getRating("draft2")! >= star;
-                          return (
-                            <Star
-                              key={star}
-                              onClick={() => setRating("draft2", star)}
-                              fill={isSelected ? "currentColor" : "none"}
-                              stroke="currentColor"
-                              strokeWidth={2}
-                              className={`w-6 h-6 cursor-pointer ${
-                                isSelected ? "text-yellow-400" : "text-gray-300"
-                              } hover:text-yellow-500`}
-                            />
-                          );
-                        })}
+                      {/* Rating section */}
+                      <div className="pt-2 font-semibold">
+                        To what extent does this draft sound like you?
                       </div>
+                      <div className="pt-1">
+                        <LikertScale
+                          value={getRating("draft2")}
+                          onChange={(rating) => setRating("draft2", rating)}
+                        />
+                      </div>
+                    </div>
+                    <div className="pt-4 flex justify-center">
                       <Button
                         onClick={() => {
                           setDraft2Complete(true);
                           setActiveTab("submit");
                         }}
-                        disabled={getRating("draft2") === null}
+                        disabled={
+                          getRating("draft2") === null ||
+                          !letterLabData?.textFeedback?.draft2?.likes?.trim() ||
+                          !letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                        }
                       >
                         Continue
                       </Button>

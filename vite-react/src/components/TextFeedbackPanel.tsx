@@ -43,13 +43,13 @@ export default function TextFeedbackPanel({ draftKey }: TextFeedbackPanelProps) 
   }, [updateContext]);
   
   return (
-    <div className="flex flex-col h-full space-y-4">
+    <div className="space-y-4">
       <div className="flex flex-col space-y-2">
         <Label className="font-medium">What do you like about this draft?</Label>
         <Textarea
           value={likeFeedback}
           onChange={(e) => setLikeFeedback(e.target.value)}
-          className="min-h-[100px]"
+          className="min-h-[100px] resize-none"
           placeholder="Enter what you like about this draft..."
         />
       </div>
@@ -59,7 +59,7 @@ export default function TextFeedbackPanel({ draftKey }: TextFeedbackPanelProps) 
         <Textarea
           value={dislikeFeedback}
           onChange={(e) => setDislikeFeedback(e.target.value)}
-          className="min-h-[100px]"
+          className="min-h-[100px] resize-none"
           placeholder="Enter what you don't like about this draft..."
         />
       </div>
