@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAppContext } from "@/context/useAppContext";
 import { Textarea } from "./ui/textarea";
 import { Label } from "./ui/label";
@@ -20,7 +20,7 @@ export default function TextFeedbackPanel({ draftKey }: TextFeedbackPanelProps) 
   );
   
   // Update context when feedback changes
-  const updateContext = () => {
+  const updateContext = useCallback(() => {
     if (!letterLabData) return;
     
     setLetterLabData({
@@ -33,12 +33,12 @@ export default function TextFeedbackPanel({ draftKey }: TextFeedbackPanelProps) 
         }
       }
     });
-  };
+  }, [letterLabData, setLetterLabData, draftKey, likeFeedback, dislikeFeedback]);
   
   // Update context on input change
   useEffect(() => {
     updateContext();
-  }, [likeFeedback, dislikeFeedback]);
+  }, [updateContext]);
   
   return (
     <div className="flex flex-col h-full space-y-4">
