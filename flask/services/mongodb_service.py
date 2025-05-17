@@ -62,6 +62,10 @@ def get_all_sessions():
         flattened_sessions = []
 
         for s in sessions:
+            # Extract timestamp from ObjectId in ISO 8601 format
+            creation_timestamp = s["_id"].generation_time
+            s["timestamp"] = creation_timestamp.isoformat()
+            
             s["document_id"] = str(s["_id"])
             del s["_id"]
             flat = flatten_dict(s)
