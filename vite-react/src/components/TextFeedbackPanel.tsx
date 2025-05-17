@@ -21,19 +21,21 @@ export default function TextFeedbackPanel({ draftKey }: TextFeedbackPanelProps) 
   
   // Update context when feedback changes
   const updateContext = useCallback(() => {
-    if (!letterLabData) return;
-    
-    setLetterLabData({
-      ...letterLabData,
-      textFeedback: {
-        ...(letterLabData?.textFeedback || {}),
-        [draftKey]: {
-          likes: likeFeedback,
-          dislikes: dislikeFeedback
+    setLetterLabData((prevData) => {
+      if (!prevData) return prevData;
+      
+      return {
+        ...prevData,
+        textFeedback: {
+          ...(prevData?.textFeedback || {}),
+          [draftKey]: {
+            likes: likeFeedback,
+            dislikes: dislikeFeedback
+          }
         }
-      }
+      };
     });
-  }, [letterLabData, setLetterLabData, draftKey, likeFeedback, dislikeFeedback]);
+  }, [setLetterLabData, draftKey, likeFeedback, dislikeFeedback]);
   
   // Update context on input change
   useEffect(() => {
