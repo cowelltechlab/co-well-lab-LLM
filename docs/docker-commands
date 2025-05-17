@@ -7,3 +7,7 @@ MongoDB
 docker exec -it mongodb mongosh -u root -p examplepassword --authenticationDatabase admin
 use cover_letter_app
 db.sessions.findOne({ _id: ObjectId("") })
+show collections
+db.sessions.deleteMany({})
+db.tokens.deleteMany({})
+db.progress_log.deleteMany({})

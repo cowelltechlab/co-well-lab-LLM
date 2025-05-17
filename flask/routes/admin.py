@@ -52,10 +52,14 @@ def export_sessions_csv():
     all_keys = set()
     for s in sessions:
         all_keys.update(s.keys())
-    fieldnames = sorted(all_keys)
+    
+    # Step 2: Define column order with timestamp and document_id first
+    primary_columns = ["timestamp", "document_id"]
+    # Filter out primary columns from other keys and sort the rest
+    other_columns = sorted([k for k in all_keys if k not in primary_columns])
+    fieldnames = primary_columns + other_columns
 
-
-    # Step 2: Write the CSV
+    # Step 3: Write the CSV
     si = io.StringIO()
     writer = csv.DictWriter(si, fieldnames=fieldnames, extrasaction="ignore")
     writer.writeheader()
