@@ -11,9 +11,6 @@ import { Star } from "lucide-react";
 export function CoverLetterComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
   const [activeTab, setActiveTab] = useState("intro");
-  const [selectedFinalDraft, setSelectedFinalDraft] = useState<
-    "draft1" | "draft2" | null
-  >(null);
   const [draft1Complete, setDraft1Complete] = useState(false);
   const [draft2Complete, setDraft2Complete] = useState(false);
 
@@ -52,14 +49,13 @@ export function CoverLetterComparisonView() {
   useEffect(() => {
     if (activeTab === "submit") {
       const submitFeedback = async () => {
-        if (!letterLabData || !selectedFinalDraft) return;
+        if (!letterLabData) return;
 
         const payload = {
           document_id: letterLabData.document_id,
           chatMessages: letterLabData.chatMessages ?? {},
           textFeedback: letterLabData.textFeedback ?? {},
           chatRating: letterLabData.chatRating ?? {},
-          selectedFinalDraft,
           draftMapping: letterLabData.draftMapping ?? {},
           resume: letterLabData.resume,
           job_desc: letterLabData.job_desc,
@@ -84,7 +80,7 @@ export function CoverLetterComparisonView() {
 
       submitFeedback();
     }
-  }, [activeTab, letterLabData, selectedFinalDraft]);
+  }, [activeTab, letterLabData]);
 
   const getRating = (draftKey: "draft1" | "draft2"): number | null => {
     return letterLabData?.chatRating?.[draftKey] ?? null;
@@ -265,7 +261,7 @@ export function CoverLetterComparisonView() {
                       <Button
                         onClick={() => {
                           setDraft2Complete(true);
-                          setActiveTab("final");
+                          setActiveTab("submit");
                         }}
                         disabled={getRating("draft2") === null}
                       >
@@ -277,55 +273,8 @@ export function CoverLetterComparisonView() {
               </TabsContent>
             )}
 
-            {activeTab === "final" && (
-              <TabsContent value="final" className="h-full w-full">
-                <div className="flex h-full gap-6">
-                  {/* Draft 1 Panel */}
-                  <div
-                    className={`flex-1 border rounded p-4 flex flex-col overflow-hidden transition-colors ${
-                      selectedFinalDraft === "draft1"
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <div className="flex-1 overflow-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
-                      {getDraftText("draft1")}
-                    </div>
-                    <div className="pt-4 text-center">
-                      <Button
-                        onClick={() => setSelectedFinalDraft("draft1")}
-                        variant="default"
-                      >
-                        Choose Draft 1
-                      </Button>
-                    </div>
-                  </div>
 
-                  {/* Draft 2 Panel */}
-                  <div
-                    className={`flex-1 border rounded p-4 flex flex-col overflow-hidden transition-colors ${
-                      selectedFinalDraft === "draft2"
-                        ? "border-blue-600 bg-blue-50"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <div className="flex-1 overflow-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
-                      {getDraftText("draft2")}
-                    </div>
-                    <div className="pt-4 text-center">
-                      <Button
-                        onClick={() => setSelectedFinalDraft("draft2")}
-                        variant="default"
-                      >
-                        Choose Draft 2
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </TabsContent>
-            )}
-
-            {activeTab && (
+            {activeTab === "submit" && (
               <TabsContent
                 value="submit"
                 className="h-full w-full flex items-center justify-center"
@@ -366,28 +315,21 @@ export function CoverLetterComparisonView() {
               Introduction
             </TabsTrigger>
             <TabsTrigger className="py-4 px-8" value="draft1">
-              1. Draft 1
+              Draft 1
             </TabsTrigger>
             <TabsTrigger className="py-4 px-8" value="draft2">
-              2. Draft 2
-            </TabsTrigger>
-            <TabsTrigger
-              value="final"
-              className="py-4 px-8"
-              disabled={!(draft1Complete && draft2Complete)}
-            >
-              4. Final Preference
+              Draft 2
             </TabsTrigger>
             <TabsTrigger
               className={`py-4 px-8 transition-colors ${
-                selectedFinalDraft
+                draft1Complete && draft2Complete
                   ? "bg-green-600 text-white hover:bg-green-700"
                   : "opacity-50 cursor-not-allowed pointer-events-none"
               }`}
               value="submit"
-              disabled={!selectedFinalDraft}
+              disabled={!(draft1Complete && draft2Complete)}
             >
-              5. Submit
+              Submit
             </TabsTrigger>
           </TabsList>
         </Tabs>
