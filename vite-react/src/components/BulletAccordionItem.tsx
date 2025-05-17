@@ -4,7 +4,7 @@ import {
   AccordionTrigger,
   AccordionContent,
 } from "@radix-ui/react-accordion";
-import { Star } from "lucide-react";
+import { LikertScale } from "@/components/LikertScale";
 
 interface BulletAccordionItemProps {
   bulletKey: string;
@@ -32,7 +32,7 @@ export function BulletAccordionItem({
     setLocalRating(feedback.rating);
   }, [feedback.rating]);
 
-  const handleStarClick = (rating: number) => {
+  const handleRatingChange = (rating: number) => {
     setLocalRating(rating);
     onFeedbackChange({
       rating,
@@ -61,26 +61,14 @@ export function BulletAccordionItem({
         <div className="text-sm whitespace-pre-line mb-3">{rationaleText}</div>
 
         <p className="mb-2 text-base font-semibold">
-          How well does this rationale align with your understanding of yourself
-          and your experience?
+          To what extent does this description sound like you?
         </p>
 
-        <div className="flex items-center gap-1 mb-2">
-          {[1, 2, 3, 4, 5, 6, 7].map((star) => {
-            const isSelected = localRating !== null && localRating >= star;
-            return (
-              <Star
-                key={star}
-                onClick={() => handleStarClick(star)}
-                fill={isSelected ? "currentColor" : "none"}
-                stroke="currentColor"
-                strokeWidth={2}
-                className={`w-6 h-6 cursor-pointer ${
-                  isSelected ? "text-yellow-400" : "text-gray-300"
-                } hover:text-yellow-500`}
-              />
-            );
-          })}
+        <div className="mb-4">
+          <LikertScale
+            value={localRating}
+            onChange={handleRatingChange}
+          />
         </div>
 
         {localRating !== null && (
