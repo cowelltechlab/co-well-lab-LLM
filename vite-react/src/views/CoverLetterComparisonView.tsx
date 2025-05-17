@@ -51,12 +51,46 @@ export function CoverLetterComparisonView() {
       const submitFeedback = async () => {
         if (!letterLabData) return;
 
+        // Move calculateFinalPreference inside the effect to avoid dependency issues
+        const calculateFinalPreference = () => {
+          if (!letterLabData?.chatRating || !draftMap) return null;
+
+          const draft1Rating = letterLabData.chatRating.draft1;
+          const draft2Rating = letterLabData.chatRating.draft2;
+
+          if (draft1Rating === undefined || draft2Rating === undefined || draft1Rating === null || draft2Rating === null) return null;
+
+          // Determine which draft corresponds to initial/final
+          const initialRating =
+            draftMap.draft1 === "initial" ? draft1Rating : draft2Rating;
+          const finalRating =
+            draftMap.draft1 === "final" ? draft1Rating : draft2Rating;
+
+          if (initialRating > finalRating) {
+            return "control";
+          } else if (finalRating > initialRating) {
+            return "aligned";
+          } else {
+            return "tie";
+          }
+        };
+
+        const finalPreference = calculateFinalPreference();
+
+        // Log the calculation for debugging
+        // console.log("Final preference calculation:", {
+        //   draftMapping: letterLabData.draftMapping,
+        //   draftRatings: letterLabData.chatRating,
+        //   finalPreference
+        // });
+
         const payload = {
           document_id: letterLabData.document_id,
           chatMessages: letterLabData.chatMessages ?? {},
           textFeedback: letterLabData.textFeedback ?? {},
-          chatRating: letterLabData.chatRating ?? {},
+          draftRating: letterLabData.chatRating ?? {},
           draftMapping: letterLabData.draftMapping ?? {},
+          finalPreference,
           resume: letterLabData.resume,
           job_desc: letterLabData.job_desc,
         };
@@ -80,7 +114,7 @@ export function CoverLetterComparisonView() {
 
       submitFeedback();
     }
-  }, [activeTab, letterLabData]);
+  }, [activeTab, letterLabData, draftMap]);
 
   const getRating = (draftKey: "draft1" | "draft2"): number | null => {
     return letterLabData?.chatRating?.[draftKey] ?? null;
@@ -272,7 +306,6 @@ export function CoverLetterComparisonView() {
                 </div>
               </TabsContent>
             )}
-
 
             {activeTab === "submit" && (
               <TabsContent

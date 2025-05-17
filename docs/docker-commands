@@ -6,4 +6,4 @@ docker-compose -f docker-compose.prod.yml up --build
 MongoDB
 docker exec -it mongodb mongosh -u root -p examplepassword --authenticationDatabase admin
 use cover_letter_app
-db.sessions.findOne({ _id: ObjectId("68124c25bc254e2cd81b275d") })
+db.sessions.findOne({ _id: ObjectId("") })
