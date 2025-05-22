@@ -203,6 +203,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
         );
       })}
       <Button
+        variant="outline"
         className={`mt-8 w-full ${allSectionsComplete() ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
         onClick={handleFeedbackSubmission}
         disabled={!allSectionsComplete()}

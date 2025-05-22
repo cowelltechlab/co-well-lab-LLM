@@ -83,7 +83,7 @@ export function WelcomeInputView() {
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-4">
           <Button
-            variant="default"
+            variant="outline"
             className={resumeText ? "border-2 border-green-500 hover:border-green-600" : "border-2 border-orange-500 hover:border-orange-600"}
             onClick={() => setShowResumePopup(true)}
             disabled={isGeneratingCoverLetter}
@@ -92,7 +92,7 @@ export function WelcomeInputView() {
             {resumeText && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
-            variant="default"
+            variant="outline"
             className={jobDescription ? "border-2 border-green-500 hover:border-green-600" : "border-2 border-orange-500 hover:border-orange-600"}
             onClick={() => setShowJobPopup(true)}
             disabled={isGeneratingCoverLetter}
@@ -101,8 +101,8 @@ export function WelcomeInputView() {
             {jobDescription && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
-            variant="default"
-            className={`bg-blue-600 text-white hover:bg-blue-700 ${resumeText && jobDescription ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
+            variant="outline"
+            className={resumeText && jobDescription ? 'border-2 border-orange-500 hover:border-orange-600' : ''}
             onClick={handleGenerate}
             disabled={isGeneratingCoverLetter || !resumeText || !jobDescription}
           >

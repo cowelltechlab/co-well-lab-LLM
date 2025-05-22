@@ -84,6 +84,7 @@ export function ReviewSectionView() {
     bpKey: string,
     update: { rating: number; qualitative: string }
   ) => {
+    // Update local state
     setSectionFeedback((prev) => ({
       ...prev,
       [bpKey]: {
@@ -91,6 +92,23 @@ export function ReviewSectionView() {
         qualitative: update.qualitative,
       },
     }));
+
+    // Update context immediately to trigger localStorage save through AppProvider
+    if (letterLabData && sectionName) {
+      const updatedSection = {
+        ...letterLabData[sectionName],
+        [bpKey]: {
+          ...letterLabData[sectionName]?.[bpKey],
+          rating: update.rating,
+          qualitative: update.qualitative,
+        },
+      };
+
+      setLetterLabData({
+        ...letterLabData,
+        [sectionName]: updatedSection,
+      });
+    }
   };
 
   const allComplete = Object.keys(bulletPoints ?? {}).every(
