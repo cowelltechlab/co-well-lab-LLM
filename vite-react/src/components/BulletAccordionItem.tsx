@@ -15,6 +15,7 @@ interface BulletAccordionItemProps {
     qualitative: string;
   };
   onFeedbackChange: (update: { rating: number; qualitative: string }) => void;
+  isOpen: boolean;
 }
 
 export function BulletAccordionItem({
@@ -23,6 +24,7 @@ export function BulletAccordionItem({
   rationaleText,
   feedback,
   onFeedbackChange,
+  isOpen,
 }: BulletAccordionItemProps) {
   const [localRating, setLocalRating] = useState<number | null>(
     feedback.rating
@@ -51,7 +53,13 @@ export function BulletAccordionItem({
   return (
     <AccordionItem
       value={bulletKey}
-      className="border rounded p-4 bg-gray-50 shadow-sm"
+      className={`border-2 rounded p-4 bg-gray-50 shadow-sm ${
+        isOpen 
+          ? 'border-gray-300' 
+          : (localRating !== null && feedback.qualitative.trim().length > 0)
+            ? 'border-green-500 hover:border-green-600'
+            : 'border-orange-500 hover:border-orange-600'
+      }`}
     >
       <AccordionTrigger className="font-medium text-left">
         <li>{bulletText}</li>
@@ -68,6 +76,8 @@ export function BulletAccordionItem({
           <LikertScale
             value={localRating}
             onChange={handleRatingChange}
+            showBorder={isOpen}
+            isComplete={localRating !== null}
           />
         </div>
 
@@ -76,7 +86,11 @@ export function BulletAccordionItem({
             value={feedback.qualitative}
             onChange={(e) => handleTextChange(e.target.value)}
             placeholder="Any additional comments?"
-            className="w-full p-3 border border-gray-300 rounded shadow-inner bg-gray-50 text-sm"
+            className={`w-full p-3 border-2 rounded shadow-inner bg-gray-50 text-sm ${
+              feedback.qualitative.trim().length > 0 
+                ? 'border-green-500 focus:border-green-600' 
+                : 'border-orange-500 focus:border-orange-600'
+            }`}
             rows={4}
           />
         )}

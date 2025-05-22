@@ -44,6 +44,7 @@ export function ReviewSectionView() {
       qualitative: string;
     };
   }>({});
+  const [openItems, setOpenItems] = useState<string[]>([]);
 
   useEffect(() => {
     if (!letterLabData || !sectionName) return;
@@ -123,11 +124,18 @@ export function ReviewSectionView() {
   return (
     <Card className="w-full max-w-4xl p-6 bg-white shadow-lg space-y-6">
       <h2 className="text-xl font-bold">Let’s Review Your {title} Section</h2>
-      <p className="whitespace-pre-line text-gray-700">{intro}</p>
+      <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
+        <p className="whitespace-pre-line text-gray-700">{intro}</p>
+      </div>
 
       <h3 className="text-lg font-semibold mt-6"> {title} </h3>
 
-      <Accordion type="multiple" className="space-y-4">
+      <Accordion 
+        type="multiple" 
+        className="space-y-4"
+        value={openItems}
+        onValueChange={setOpenItems}
+      >
         {Object.entries(bulletPoints ?? {}).map(([bpKey, bp]) => (
           <BulletAccordionItem
             key={bpKey}
@@ -138,10 +146,16 @@ export function ReviewSectionView() {
               sectionFeedback[bpKey] ?? { thumbs: null, qualitative: "" }
             }
             onFeedbackChange={(update) => updateFeedback(bpKey, update)}
+            isOpen={openItems.includes(bpKey)}
           />
         ))}
       </Accordion>
-      <Button onClick={handleComplete} disabled={!allComplete} className="mt-8">
+      <Button 
+        variant="outline"
+        onClick={handleComplete} 
+        disabled={!allComplete} 
+        className={`mt-8 ${allComplete ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
+      >
         {allComplete && <CheckCircle className="w-5 h-5 text-green-600" />}
         Complete Section Review
       </Button>

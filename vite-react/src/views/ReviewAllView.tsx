@@ -184,7 +184,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               />
               <Button
                 variant="outline"
-                className="shrink-0 border-orange-500 hover:border-orange-600"
+                className={`shrink-0 ${isSectionComplete(key) ? 'border-2 border-green-500 hover:border-green-600' : 'border-2 border-orange-500 hover:border-orange-600'}`}
                 onClick={() => navigate(`/review-section/${key}`)}
               >
                 {isSectionComplete(key) && (
