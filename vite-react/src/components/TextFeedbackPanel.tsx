@@ -44,22 +44,30 @@ export default function TextFeedbackPanel({ draftKey }: TextFeedbackPanelProps) 
   
   return (
     <div className="space-y-4">
-      <div className="flex flex-col space-y-2">
+      <div className={`flex flex-col space-y-2 p-3 rounded-lg border-2 ${
+        likeFeedback.trim().length > 0 
+          ? "border-green-500" 
+          : "border-orange-500"
+      }`}>
         <Label className="font-medium">What do you like about this draft?</Label>
         <Textarea
           value={likeFeedback}
           onChange={(e) => setLikeFeedback(e.target.value)}
-          className="min-h-[100px] resize-none"
+          className="min-h-[100px] resize-none border-0 p-0 focus:ring-0"
           placeholder="Enter what you like about this draft..."
         />
       </div>
       
-      <div className="flex flex-col space-y-2">
+      <div className={`flex flex-col space-y-2 p-3 rounded-lg border-2 ${
+        dislikeFeedback.trim().length > 0 
+          ? "border-green-500" 
+          : "border-orange-500"
+      }`}>
         <Label className="font-medium">What do you not like about this draft?</Label>
         <Textarea
           value={dislikeFeedback}
           onChange={(e) => setDislikeFeedback(e.target.value)}
-          className="min-h-[100px] resize-none"
+          className="min-h-[100px] resize-none border-0 p-0 focus:ring-0"
           placeholder="Enter what you don't like about this draft..."
         />
       </div>

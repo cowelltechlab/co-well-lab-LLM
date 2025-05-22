@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import TextFeedbackPanel from "@/components/TextFeedbackPanel";
 import { LikertScale } from "@/components/LikertScale";
+import { CheckCircle } from "lucide-react";
 
 export function CoverLetterComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
@@ -155,7 +156,7 @@ export function CoverLetterComparisonView() {
                 className="h-full w-full flex items-center justify-center"
               >
                 <div className="max-w-2xl w-full px-6 space-y-6 text-gray-700 leading-relaxed text-left">
-                  <div className="space-y-4">
+                  <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200 space-y-4">
                     <p>
                       Welcome! 🎉 You’ve already done the hard part by getting
                       started — now let’s refine your cover letter so it truly
@@ -192,7 +193,8 @@ export function CoverLetterComparisonView() {
                   <div className="pt-4 text-center">
                     <Button
                       onClick={() => setActiveTab("draft1")}
-                      variant="default"
+                      variant="outline"
+                      className="border-2 border-orange-500 hover:border-orange-600"
                     >
                       Proceed
                     </Button>
@@ -214,18 +216,34 @@ export function CoverLetterComparisonView() {
                     <div className="flex-1 overflow-y-auto">
                       <TextFeedbackPanel draftKey="draft1" />
                       {/* Rating section */}
-                      <div className="pt-2 font-semibold">
-                        To what extent does this draft sound like you?
-                      </div>
-                      <div className="pt-1">
-                        <LikertScale
-                          value={getRating("draft1")}
-                          onChange={(rating) => setRating("draft1", rating)}
-                        />
+                      <div className={`mt-4 p-3 rounded-lg border-2 ${
+                        getRating("draft1") !== null 
+                          ? "border-green-500" 
+                          : "border-orange-500"
+                      }`}>
+                        <div className="font-semibold">
+                          To what extent does this draft sound like you?
+                        </div>
+                        <div className="pt-1">
+                          <LikertScale
+                            value={getRating("draft1")}
+                            onChange={(rating) => setRating("draft1", rating)}
+                            showBorder={false}
+                            isComplete={getRating("draft1") !== null}
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="pt-4 flex justify-center">
                       <Button
+                        variant="outline"
+                        className={
+                          getRating("draft1") !== null &&
+                          letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                          letterLabData?.textFeedback?.draft1?.dislikes?.trim()
+                            ? "border-2 border-orange-500 hover:border-orange-600"
+                            : ""
+                        }
                         onClick={() => {
                           setDraft1Complete(true);
                           setActiveTab("draft2");
@@ -257,18 +275,34 @@ export function CoverLetterComparisonView() {
                     <div className="flex-1 overflow-y-auto">
                       <TextFeedbackPanel draftKey="draft2" />
                       {/* Rating section */}
-                      <div className="pt-2 font-semibold">
-                        To what extent does this draft sound like you?
-                      </div>
-                      <div className="pt-1">
-                        <LikertScale
-                          value={getRating("draft2")}
-                          onChange={(rating) => setRating("draft2", rating)}
-                        />
+                      <div className={`mt-4 p-3 rounded-lg border-2 ${
+                        getRating("draft2") !== null 
+                          ? "border-green-500" 
+                          : "border-orange-500"
+                      }`}>
+                        <div className="font-semibold">
+                          To what extent does this draft sound like you?
+                        </div>
+                        <div className="pt-1">
+                          <LikertScale
+                            value={getRating("draft2")}
+                            onChange={(rating) => setRating("draft2", rating)}
+                            showBorder={false}
+                            isComplete={getRating("draft2") !== null}
+                          />
+                        </div>
                       </div>
                     </div>
                     <div className="pt-4 flex justify-center">
                       <Button
+                        variant="outline"
+                        className={
+                          getRating("draft2") !== null &&
+                          letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                          letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                            ? "border-2 border-orange-500 hover:border-orange-600"
+                            : ""
+                        }
                         onClick={() => {
                           setDraft2Complete(true);
                           setActiveTab("submit");
@@ -312,8 +346,8 @@ export function CoverLetterComparisonView() {
                       localStorage.removeItem("letterLabData");
                       window.location.href = "/enter";
                     }}
-                    variant="destructive"
-                    className="mt-4"
+                    variant="outline"
+                    className="mt-4 border-2 border-red-500 hover:border-red-600 text-red-600 hover:text-red-700"
                   >
                     Log Out
                   </Button>
@@ -324,24 +358,67 @@ export function CoverLetterComparisonView() {
 
           {/* Tab list at the bottom */}
           <TabsList className="flex justify-evenly border-t py-10 px-6">
-            <TabsTrigger className="py-4 px-8" value="intro">
+            <TabsTrigger 
+              className={`py-4 px-8 border-2 ${
+                activeTab === "intro" 
+                  ? "border-green-500" 
+                  : activeTab !== "intro"
+                    ? "border-green-500"
+                    : "border-orange-500 hover:border-orange-600"
+              }`} 
+              value="intro"
+            >
+              {activeTab !== "intro" && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
               Introduction
             </TabsTrigger>
-            <TabsTrigger className="py-4 px-8" value="draft1">
+            <TabsTrigger 
+              className={`py-4 px-8 border-2 ${
+                (getRating("draft1") !== null &&
+                 letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                 letterLabData?.textFeedback?.draft1?.dislikes?.trim())
+                  ? "border-green-500" 
+                  : "border-orange-500 hover:border-orange-600"
+              }`} 
+              value="draft1"
+            >
+              {(getRating("draft1") !== null &&
+                letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                letterLabData?.textFeedback?.draft1?.dislikes?.trim()) && 
+                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
               Draft 1
             </TabsTrigger>
-            <TabsTrigger className="py-4 px-8" value="draft2">
+            <TabsTrigger 
+              className={`py-4 px-8 border-2 ${
+                (getRating("draft2") !== null &&
+                 letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                 letterLabData?.textFeedback?.draft2?.dislikes?.trim())
+                  ? "border-green-500" 
+                  : (getRating("draft1") !== null &&
+                     letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                     letterLabData?.textFeedback?.draft1?.dislikes?.trim())
+                    ? "border-orange-500 hover:border-orange-600"
+                    : "border-gray-300"
+              }`} 
+              value="draft2"
+            >
+              {(getRating("draft2") !== null &&
+                letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                letterLabData?.textFeedback?.draft2?.dislikes?.trim()) && 
+                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
               Draft 2
             </TabsTrigger>
             <TabsTrigger
-              className={`py-4 px-8 transition-colors ${
-                draft1Complete && draft2Complete
-                  ? "bg-green-600 text-white hover:bg-green-700"
-                  : "opacity-50 cursor-not-allowed pointer-events-none"
+              className={`py-4 px-8 border-2 transition-colors ${
+                activeTab === "submit"
+                  ? "border-green-500"
+                  : draft1Complete && draft2Complete
+                    ? "border-orange-500 hover:border-orange-600"
+                    : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
               }`}
               value="submit"
               disabled={!(draft1Complete && draft2Complete)}
             >
+              {activeTab === "submit" && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
               Submit
             </TabsTrigger>
           </TabsList>
