@@ -154,19 +154,30 @@ export function ReviewSectionView() {
         value={openItems}
         onValueChange={setOpenItems}
       >
-        {Object.entries(bulletPoints ?? {}).map(([bpKey, bp]) => (
-          <BulletAccordionItem
-            key={bpKey}
-            bulletKey={bpKey}
-            bulletText={bp.text}
-            rationaleText={bp.rationale}
-            feedback={
-              sectionFeedback[bpKey] ?? { thumbs: null, qualitative: "" }
-            }
-            onFeedbackChange={(update) => updateFeedback(bpKey, update)}
-            isOpen={openItems.includes(bpKey)}
-          />
-        ))}
+        {Object.entries(bulletPoints ?? {}).map(([bpKey, bp], index) => {
+          // Find the first incomplete bullet
+          const bulletKeys = Object.keys(bulletPoints ?? {});
+          const firstIncompleteIndex = bulletKeys.findIndex(key => 
+            !sectionFeedback[key]?.rating || 
+            !sectionFeedback[key]?.qualitative?.trim()
+          );
+          const isNextAction = index === firstIncompleteIndex;
+          
+          return (
+            <BulletAccordionItem
+              key={bpKey}
+              bulletKey={bpKey}
+              bulletText={bp.text}
+              rationaleText={bp.rationale}
+              feedback={
+                sectionFeedback[bpKey] ?? { thumbs: null, qualitative: "" }
+              }
+              onFeedbackChange={(update) => updateFeedback(bpKey, update)}
+              isOpen={openItems.includes(bpKey)}
+              isNextAction={isNextAction}
+            />
+          );
+        })}
       </Accordion>
       <Button 
         variant="outline"

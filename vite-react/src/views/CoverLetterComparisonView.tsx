@@ -219,7 +219,10 @@ export function CoverLetterComparisonView() {
                       <div className={`mt-4 p-3 rounded-lg border-2 ${
                         getRating("draft1") !== null 
                           ? "border-green-500" 
-                          : "border-orange-500"
+                          : letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                            letterLabData?.textFeedback?.draft1?.dislikes?.trim()
+                            ? "border-orange-500"
+                            : "border-gray-300"
                       }`}>
                         <div className="font-semibold">
                           To what extent does this draft sound like you?
@@ -278,7 +281,10 @@ export function CoverLetterComparisonView() {
                       <div className={`mt-4 p-3 rounded-lg border-2 ${
                         getRating("draft2") !== null 
                           ? "border-green-500" 
-                          : "border-orange-500"
+                          : letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                            letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                            ? "border-orange-500"
+                            : "border-gray-300"
                       }`}>
                         <div className="font-semibold">
                           To what extent does this draft sound like you?
@@ -377,7 +383,9 @@ export function CoverLetterComparisonView() {
                  letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                  letterLabData?.textFeedback?.draft1?.dislikes?.trim())
                   ? "border-green-500" 
-                  : "border-orange-500 hover:border-orange-600"
+                  : activeTab !== "intro"
+                    ? "border-orange-500 hover:border-orange-600"
+                    : ""
               }`} 
               value="draft1"
             >

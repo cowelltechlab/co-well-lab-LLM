@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { TextInputDialog } from "@/components/TextInputDialog";
 
 export function WelcomeInputView() {
@@ -84,21 +84,29 @@ export function WelcomeInputView() {
         <div className="flex flex-col gap-4">
           <Button
             variant="outline"
-            className={resumeText ? "border-2 border-green-500 hover:border-green-600" : "border-2 border-orange-500 hover:border-orange-600"}
+            className={resumeText 
+              ? "border-2 border-green-500 hover:border-green-600" 
+              : !resumeText && !jobDescription 
+                ? "border-2 border-orange-500 hover:border-orange-600"
+                : ""}
             onClick={() => setShowResumePopup(true)}
             disabled={isGeneratingCoverLetter}
           >
+            {resumeText && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
             Paste Your Resume
-            {resumeText && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
             variant="outline"
-            className={jobDescription ? "border-2 border-green-500 hover:border-green-600" : "border-2 border-orange-500 hover:border-orange-600"}
+            className={jobDescription 
+              ? "border-2 border-green-500 hover:border-green-600" 
+              : resumeText && !jobDescription 
+                ? "border-2 border-orange-500 hover:border-orange-600"
+                : ""}
             onClick={() => setShowJobPopup(true)}
             disabled={isGeneratingCoverLetter}
           >
+            {jobDescription && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
             Paste Job Description
-            {jobDescription && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
             variant="outline"

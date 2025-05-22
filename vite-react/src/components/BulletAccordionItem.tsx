@@ -16,6 +16,7 @@ interface BulletAccordionItemProps {
   };
   onFeedbackChange: (update: { rating: number; qualitative: string }) => void;
   isOpen: boolean;
+  isNextAction: boolean;
 }
 
 export function BulletAccordionItem({
@@ -25,6 +26,7 @@ export function BulletAccordionItem({
   feedback,
   onFeedbackChange,
   isOpen,
+  isNextAction,
 }: BulletAccordionItemProps) {
   const [localRating, setLocalRating] = useState<number | null>(
     feedback.rating
@@ -54,11 +56,13 @@ export function BulletAccordionItem({
     <AccordionItem
       value={bulletKey}
       className={`border-2 rounded p-4 bg-gray-50 shadow-sm ${
-        isOpen 
-          ? 'border-gray-300' 
-          : (localRating !== null && feedback.qualitative.trim().length > 0)
-            ? 'border-green-500 hover:border-green-600'
-            : 'border-orange-500 hover:border-orange-600'
+        (localRating !== null && feedback.qualitative.trim().length > 0)
+          ? 'border-green-500 hover:border-green-600'
+          : isOpen 
+            ? 'border-gray-300' 
+            : isNextAction
+              ? 'border-orange-500 hover:border-orange-600'
+              : ''
       }`}
     >
       <AccordionTrigger className="font-medium text-left">
@@ -76,7 +80,7 @@ export function BulletAccordionItem({
           <LikertScale
             value={localRating}
             onChange={handleRatingChange}
-            showBorder={isOpen}
+            showBorder={isOpen && (localRating !== null || (isNextAction && feedback.qualitative.trim().length === 0))}
             isComplete={localRating !== null}
           />
         </div>
@@ -89,7 +93,9 @@ export function BulletAccordionItem({
             className={`w-full p-3 border-2 rounded shadow-inner bg-gray-50 text-sm ${
               feedback.qualitative.trim().length > 0 
                 ? 'border-green-500 focus:border-green-600' 
-                : 'border-orange-500 focus:border-orange-600'
+                : isOpen && isNextAction && localRating !== null
+                  ? 'border-orange-500 focus:border-orange-600'
+                  : 'border-gray-300 focus:border-gray-400'
             }`}
             rows={4}
           />

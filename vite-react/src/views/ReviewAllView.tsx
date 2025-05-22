@@ -172,8 +172,12 @@ Encouragement, positive feedback, and managing your emotional state under pressu
         </p>
       </div>
 
-      {beliefs.map(({ key, title }) => {
+      {beliefs.map(({ key, title }, index) => {
         const bullets = getBulletTexts(letterLabData, key);
+        
+        // Find the first incomplete section
+        const firstIncompleteIndex = beliefs.findIndex(belief => !isSectionComplete(belief.key));
+        const isNextAction = index === firstIncompleteIndex;
 
         return (
           <div key={key} className="relative border-t pt-6 mt-6 space-y-4">
@@ -184,7 +188,13 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               />
               <Button
                 variant="outline"
-                className={`shrink-0 ${isSectionComplete(key) ? 'border-2 border-green-500 hover:border-green-600' : 'border-2 border-orange-500 hover:border-orange-600'}`}
+                className={`shrink-0 ${
+                  isSectionComplete(key) 
+                    ? 'border-2 border-green-500 hover:border-green-600' 
+                    : isNextAction 
+                      ? 'border-2 border-orange-500 hover:border-orange-600'
+                      : ''
+                }`}
                 onClick={() => navigate(`/review-section/${key}`)}
               >
                 {isSectionComplete(key) && (

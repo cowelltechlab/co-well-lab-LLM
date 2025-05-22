@@ -28,9 +28,11 @@ export function LikertScale({
 
   return (
     <div className={`w-full space-y-3 p-4 rounded-lg ${
-      showBorder ? 
-        (isComplete ? 'border-2 border-green-500' : 'border-2 border-orange-500') : 
-        ''
+      showBorder ? 'border-2' : ''
+    } ${
+      showBorder && isComplete ? 'border-green-500' : 
+      showBorder && !isComplete ? 'border-orange-500' : 
+      ''
     }`}>
       <RadioGroup
         value={value?.toString() || ""}
