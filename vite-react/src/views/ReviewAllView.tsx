@@ -166,9 +166,11 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       <h2 className="text-2xl font-bold mb-4">
         Your Personalized Cover Letter Review
       </h2>
-      <p className="text-gray-700 whitespace-pre-line">
-        {letterLabData.review_all_view_intro}
-      </p>
+      <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
+        <p className="text-gray-700 whitespace-pre-line">
+          {letterLabData.review_all_view_intro}
+        </p>
+      </div>
 
       {beliefs.map(({ key, title }) => {
         const bullets = getBulletTexts(letterLabData, key);
@@ -182,7 +184,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               />
               <Button
                 variant="outline"
-                className="shrink-0"
+                className="shrink-0 border-orange-500 hover:border-orange-600"
                 onClick={() => navigate(`/review-section/${key}`)}
               >
                 {isSectionComplete(key) && (
@@ -201,7 +203,7 @@ Encouragement, positive feedback, and managing your emotional state under pressu
         );
       })}
       <Button
-        className="mt-8 w-full"
+        className={`mt-8 w-full ${allSectionsComplete() ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
         onClick={handleFeedbackSubmission}
         disabled={!allSectionsComplete()}
       >
