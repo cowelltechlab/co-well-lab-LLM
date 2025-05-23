@@ -50,12 +50,22 @@ export interface CoverLetterResponse {
     draft1?: number;
     draft2?: number;
   };
+  contentRepresentationRating?: {
+    draft1?: number;
+    draft2?: number;
+  };
+  styleRepresentationRating?: {
+    draft1?: number;
+    draft2?: number;
+  };
   draftMapping?: {
     draft1?: "initial" | "final";
     draft2?: "initial" | "final";
   };
   token?: string;
   hasAccess?: boolean;
+  completed?: boolean;
+  finalPreference?: "control" | "aligned" | "tie" | null;
 }
 
 export interface AppState {

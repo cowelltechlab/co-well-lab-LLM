@@ -292,16 +292,15 @@ Bullet Points:
 
 def generate_final_cover_letter(resume, job_desc, all_bullets, feedback):
     prompt = f"""
-You are an expert career coach and writer using Albert Bandura's Self-Efficacy Theory (BSET) to craft personalized cover letters. BSET consists of three beliefs:
-- Enactive Mastery: confidence gained through direct experience
-- Vicarious Experience: confidence gained through observing others
-- Verbal Persuasion: confidence gained through encouragement or affirmation
+You are an expert career coach and writer. While you use principles from self-efficacy theory to guide your approach, you will craft a cover letter that focuses entirely on the candidate's experiences and qualifications.
+
+IMPORTANT: Do NOT mention Bandura's Self-Efficacy Theory, BSET, or any theoretical frameworks in the cover letter. The letter should be a professional document focused solely on the candidate's qualifications for the position.
 
 Use the user's resume, job description, and structured reflection (bullet points + feedback) to generate a compelling, final cover letter. This letter should reflect the user's strengths, insights, and confidence, and should align closely with the job description.
 
 Structure:
 - Introduction
-- Key paragraphs that integrate relevant achievements and confidence insights
+- Key paragraphs that integrate relevant achievements and demonstrate confidence through specific examples
 - Strong, optimistic conclusion
 
 Use a confident but sincere tone. Do not include headers or sign-offs.

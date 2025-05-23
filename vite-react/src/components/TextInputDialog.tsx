@@ -48,10 +48,21 @@ export function TextInputDialog({
           placeholder={`Paste your ${title.toLowerCase()} here...`}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          className="min-h-32"
+          className={`min-h-32 border-2 ${
+            inputValue.trim().length > 0 
+              ? "border-green-500 focus:border-green-600" 
+              : "border-orange-500 focus:border-orange-600"
+          }`}
         />
 
-        <Button onClick={handleSave}>Save</Button>
+        <Button 
+          variant="outline"
+          onClick={handleSave}
+          disabled={inputValue.trim().length === 0}
+          className={inputValue.trim().length > 0 ? "border-2 border-orange-500 hover:border-orange-600" : ""}
+        >
+          Save
+        </Button>
       </DialogContent>
     </Dialog>
   );

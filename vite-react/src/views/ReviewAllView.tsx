@@ -3,7 +3,7 @@ import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Loader2 } from "lucide-react";
+import { CheckCircle, Loader2, ExternalLink } from "lucide-react";
 
 import { BeliefHeaderWithTooltip } from "@/components/BeliefHeaderWithTooltip";
 
@@ -166,12 +166,18 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       <h2 className="text-2xl font-bold mb-4">
         Your Personalized Cover Letter Review
       </h2>
-      <p className="text-gray-700 whitespace-pre-line">
-        {letterLabData.review_all_view_intro}
-      </p>
+      <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
+        <p className="text-gray-700 whitespace-pre-line">
+          {letterLabData.review_all_view_intro}
+        </p>
+      </div>
 
-      {beliefs.map(({ key, title }) => {
+      {beliefs.map(({ key, title }, index) => {
         const bullets = getBulletTexts(letterLabData, key);
+        
+        // Find the first incomplete section
+        const firstIncompleteIndex = beliefs.findIndex(belief => !isSectionComplete(belief.key));
+        const isNextAction = index === firstIncompleteIndex;
 
         return (
           <div key={key} className="relative border-t pt-6 mt-6 space-y-4">
@@ -182,11 +188,19 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               />
               <Button
                 variant="outline"
-                className="shrink-0"
+                className={`shrink-0 ${
+                  isSectionComplete(key) 
+                    ? 'border-2 border-green-500 hover:border-green-600' 
+                    : isNextAction 
+                      ? 'border-2 border-orange-500 hover:border-orange-600'
+                      : ''
+                }`}
                 onClick={() => navigate(`/review-section/${key}`)}
               >
-                {isSectionComplete(key) && (
+                {isSectionComplete(key) ? (
                   <CheckCircle className="w-5 h-5 text-green-600" />
+                ) : (
+                  <ExternalLink className="w-4 h-4" />
                 )}
                 Review Section
               </Button>
@@ -201,9 +215,10 @@ Encouragement, positive feedback, and managing your emotional state under pressu
         );
       })}
       <Button
-        className="mt-8 w-full"
+        variant="outline"
+        className={`mt-8 w-full ${allSectionsComplete() && !isFinalizing ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
         onClick={handleFeedbackSubmission}
-        disabled={!allSectionsComplete()}
+        disabled={!allSectionsComplete() || isFinalizing}
       >
         {isFinalizing ? (
           <>

@@ -8,6 +8,8 @@ interface LikertScaleProps {
   leftLabel?: string;
   rightLabel?: string;
   middleLabel?: string;
+  showBorder?: boolean;
+  isComplete?: boolean;
 }
 
 export function LikertScale({
@@ -17,13 +19,25 @@ export function LikertScale({
   leftLabel = "This does not sound like me",
   rightLabel = "This sounds like me",
   middleLabel = "Neutral",
+  showBorder = true,
+  isComplete = false,
 }: LikertScaleProps) {
   const handleChange = (newValue: string) => {
     onChange(parseInt(newValue));
   };
 
   return (
-    <div className="w-full space-y-3">
+    <div
+      className={`w-full space-y-3 p-4 rounded-lg ${
+        showBorder ? "border-2" : ""
+      } ${
+        showBorder && isComplete
+          ? "border-green-500"
+          : showBorder && !isComplete
+          ? "border-orange-500"
+          : ""
+      }`}
+    >
       <RadioGroup
         value={value?.toString() || ""}
         onValueChange={handleChange}

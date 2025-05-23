@@ -13,6 +13,8 @@ from services.mongodb_service import get_all_sessions
 from services.mongodb_service import create_token
 from services.mongodb_service import collection
 from services.mongodb_service import get_all_progress_events
+from services.mongodb_service import get_all_tokens
+from services.mongodb_service import invalidate_token
 
 from services.openai_service import llmchat
 from services.openai_service import check_openai_health
@@ -133,3 +135,31 @@ def get_progress_log():
     except Exception as e:
         print("Error fetching progress log:", e)
         return jsonify({"error": "Failed to fetch progress log"}), 500
+
+@admin_bp.route("/tokens", methods=["GET"])
+@login_required
+def get_tokens():
+    try:
+        tokens = get_all_tokens()
+        return jsonify({"tokens": tokens}), 200
+    except Exception as e:
+        print("Error fetching tokens:", e)
+        return jsonify({"error": "Failed to fetch tokens"}), 500
+
+@admin_bp.route("/tokens/invalidate", methods=["POST"])
+@login_required
+def invalidate_token_endpoint():
+    try:
+        data = request.get_json()
+        token = data.get("token")
+        if not token:
+            return jsonify({"error": "Token required"}), 400
+        
+        success = invalidate_token(token)
+        if success:
+            return jsonify({"status": "invalidated"}), 200
+        else:
+            return jsonify({"error": "Failed to invalidate token"}), 500
+    except Exception as e:
+        print("Error invalidating token:", e)
+        return jsonify({"error": "Failed to invalidate token"}), 500

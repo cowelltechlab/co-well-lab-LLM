@@ -44,6 +44,7 @@ export function ReviewSectionView() {
       qualitative: string;
     };
   }>({});
+  const [openItems, setOpenItems] = useState<string[]>([]);
 
   useEffect(() => {
     if (!letterLabData || !sectionName) return;
@@ -83,6 +84,7 @@ export function ReviewSectionView() {
     bpKey: string,
     update: { rating: number; qualitative: string }
   ) => {
+    // Update local state
     setSectionFeedback((prev) => ({
       ...prev,
       [bpKey]: {
@@ -90,6 +92,23 @@ export function ReviewSectionView() {
         qualitative: update.qualitative,
       },
     }));
+
+    // Update context immediately to trigger localStorage save through AppProvider
+    if (letterLabData && sectionName) {
+      const updatedSection = {
+        ...letterLabData[sectionName],
+        [bpKey]: {
+          ...letterLabData[sectionName]?.[bpKey],
+          rating: update.rating,
+          qualitative: update.qualitative,
+        },
+      };
+
+      setLetterLabData({
+        ...letterLabData,
+        [sectionName]: updatedSection,
+      });
+    }
   };
 
   const allComplete = Object.keys(bulletPoints ?? {}).every(
@@ -123,25 +142,49 @@ export function ReviewSectionView() {
   return (
     <Card className="w-full max-w-4xl p-6 bg-white shadow-lg space-y-6">
       <h2 className="text-xl font-bold">Let’s Review Your {title} Section</h2>
-      <p className="whitespace-pre-line text-gray-700">{intro}</p>
+      <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
+        <p className="whitespace-pre-line text-gray-700">{intro}</p>
+      </div>
 
       <h3 className="text-lg font-semibold mt-6"> {title} </h3>
 
-      <Accordion type="multiple" className="space-y-4">
-        {Object.entries(bulletPoints ?? {}).map(([bpKey, bp]) => (
-          <BulletAccordionItem
-            key={bpKey}
-            bulletKey={bpKey}
-            bulletText={bp.text}
-            rationaleText={bp.rationale}
-            feedback={
-              sectionFeedback[bpKey] ?? { thumbs: null, qualitative: "" }
-            }
-            onFeedbackChange={(update) => updateFeedback(bpKey, update)}
-          />
-        ))}
+      <Accordion 
+        type="multiple" 
+        className="space-y-4"
+        value={openItems}
+        onValueChange={setOpenItems}
+      >
+        {Object.entries(bulletPoints ?? {}).map(([bpKey, bp], index) => {
+          // Find the first incomplete bullet
+          const bulletKeys = Object.keys(bulletPoints ?? {});
+          const firstIncompleteIndex = bulletKeys.findIndex(key => 
+            !sectionFeedback[key]?.rating || 
+            !sectionFeedback[key]?.qualitative?.trim()
+          );
+          const isNextAction = index === firstIncompleteIndex;
+          
+          return (
+            <BulletAccordionItem
+              key={bpKey}
+              bulletKey={bpKey}
+              bulletText={bp.text}
+              rationaleText={bp.rationale}
+              feedback={
+                sectionFeedback[bpKey] ?? { thumbs: null, qualitative: "" }
+              }
+              onFeedbackChange={(update) => updateFeedback(bpKey, update)}
+              isOpen={openItems.includes(bpKey)}
+              isNextAction={isNextAction}
+            />
+          );
+        })}
       </Accordion>
-      <Button onClick={handleComplete} disabled={!allComplete} className="mt-8">
+      <Button 
+        variant="outline"
+        onClick={handleComplete} 
+        disabled={!allComplete} 
+        className={`mt-8 ${allComplete ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
+      >
         {allComplete && <CheckCircle className="w-5 h-5 text-green-600" />}
         Complete Section Review
       </Button>

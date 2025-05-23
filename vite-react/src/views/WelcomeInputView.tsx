@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 import { TextInputDialog } from "@/components/TextInputDialog";
 
 export function WelcomeInputView() {
@@ -45,7 +45,7 @@ export function WelcomeInputView() {
         </CardTitle>
       </CardHeader>
 
-      <CardContent className="space-y-4 text-left text-gray-700 leading-relaxed">
+      <CardContent className="bg-blue-100/70 p-4 rounded-lg border border-blue-200 space-y-4 text-left text-gray-700 leading-relaxed">
         <p>
           Hi there! 👋 Welcome to <strong>LetterLab</strong>, your personalized
           Cover Letter Builder — a space designed to help you create a cover
@@ -83,24 +83,46 @@ export function WelcomeInputView() {
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-4">
           <Button
-            variant="default"
+            variant="outline"
+            className={
+              resumeText
+                ? "border-2 border-green-500 hover:border-green-600"
+                : !resumeText && !jobDescription
+                ? "border-2 border-orange-500 hover:border-orange-600"
+                : ""
+            }
             onClick={() => setShowResumePopup(true)}
             disabled={isGeneratingCoverLetter}
           >
+            {resumeText && (
+              <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            )}
             Paste Your Resume
-            {resumeText && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
-            variant="default"
+            variant="outline"
+            className={
+              jobDescription
+                ? "border-2 border-green-500 hover:border-green-600"
+                : resumeText && !jobDescription
+                ? "border-2 border-orange-500 hover:border-orange-600"
+                : ""
+            }
             onClick={() => setShowJobPopup(true)}
             disabled={isGeneratingCoverLetter}
           >
+            {jobDescription && (
+              <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            )}
             Paste Job Description
-            {jobDescription && <span className="ml-2 text-green-500">✓</span>}
           </Button>
           <Button
-            variant="default"
-            className="bg-blue-600 text-white hover:bg-blue-700"
+            variant="outline"
+            className={
+              resumeText && jobDescription
+                ? "border-2 border-orange-500 hover:border-orange-600"
+                : ""
+            }
             onClick={handleGenerate}
             disabled={isGeneratingCoverLetter || !resumeText || !jobDescription}
           >
@@ -110,7 +132,7 @@ export function WelcomeInputView() {
                 Generating...
               </>
             ) : (
-              "Generate Cover Letter"
+              "Generate Cover Letter Outline"
             )}
           </Button>
 
