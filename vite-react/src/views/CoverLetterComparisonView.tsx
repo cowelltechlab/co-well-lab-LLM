@@ -490,8 +490,7 @@ export function CoverLetterComparisonView() {
                   <div className="flex flex-col items-center space-y-4">
                     <Button
                       onClick={() => {
-                        // TODO: Replace with actual survey URL
-                        window.open("https://example.com/survey", "_blank");
+                        window.open("https://gatech.co1.qualtrics.com/jfe/form/SV_42yH2yLMgouPMeq", "_blank");
 
                         // Set up listener for when user returns to this tab
                         const handleFocus = () => {
