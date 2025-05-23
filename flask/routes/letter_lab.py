@@ -291,8 +291,44 @@ def submit_final_data():
         if not doc_id or not ObjectId.is_valid(doc_id):
             return jsonify({"error": "Invalid or missing document_id"}), 400
 
-        # Remove doc_id before updating fields
-        update_fields = {k: v for k, v in data.items() if k != "document_id"}
+        # Extract the fields we want to save
+        content_ratings = data.get("contentRepresentationRating", {})
+        style_ratings = data.get("styleRepresentationRating", {})
+        text_feedback = data.get("textFeedback", {})
+        draft_mapping = data.get("draftMapping", {})
+        
+        # Calculate finalPreference based on contentRepresentationRating
+        draft1_content = content_ratings.get("draft1")
+        draft2_content = content_ratings.get("draft2")
+        
+        final_preference = None
+        if draft1_content is not None and draft2_content is not None:
+            # Determine which draft corresponds to initial/final
+            initial_rating = draft1_content if draft_mapping.get("draft1") == "initial" else draft2_content
+            final_rating = draft1_content if draft_mapping.get("draft1") == "final" else draft2_content
+            
+            if initial_rating > final_rating:
+                final_preference = "control"
+            elif final_rating > initial_rating:
+                final_preference = "aligned"
+            else:
+                final_preference = "tie"
+        
+        # Prepare fields to update (excluding chatMessages and draftRating)
+        update_fields = {
+            "contentRepresentationRating": content_ratings,
+            "styleRepresentationRating": style_ratings,
+            "textFeedback": text_feedback,
+            "draftMapping": draft_mapping,
+            "finalPreference": final_preference,
+            "completed": True
+        }
+        
+        # Only include non-None fields from original data
+        if data.get("resume"):
+            update_fields["resume"] = data["resume"]
+        if data.get("job_desc"):
+            update_fields["job_desc"] = data["job_desc"]
 
         result = set_fields(doc_id, update_fields)
 
@@ -300,11 +336,13 @@ def submit_final_data():
             return jsonify({"error": "No document updated"}), 404
         
         print(f"Updated session with final data: {doc_id}")
-
-        set_fields(doc_id, {"completed": True})
         log_progress_event("final_update_success", session_id=doc_id)
 
-        return jsonify({"status": "success"}), 200
+        return jsonify({
+            "status": "success",
+            "completed": True,
+            "finalPreference": final_preference
+        }), 200
 
     except Exception as e:
         print("❌ Error submitting final data:", e)
