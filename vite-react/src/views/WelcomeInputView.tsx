@@ -84,33 +84,45 @@ export function WelcomeInputView() {
         <div className="flex flex-col gap-4">
           <Button
             variant="outline"
-            className={resumeText 
-              ? "border-2 border-green-500 hover:border-green-600" 
-              : !resumeText && !jobDescription 
+            className={
+              resumeText
+                ? "border-2 border-green-500 hover:border-green-600"
+                : !resumeText && !jobDescription
                 ? "border-2 border-orange-500 hover:border-orange-600"
-                : ""}
+                : ""
+            }
             onClick={() => setShowResumePopup(true)}
             disabled={isGeneratingCoverLetter}
           >
-            {resumeText && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
+            {resumeText && (
+              <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            )}
             Paste Your Resume
           </Button>
           <Button
             variant="outline"
-            className={jobDescription 
-              ? "border-2 border-green-500 hover:border-green-600" 
-              : resumeText && !jobDescription 
+            className={
+              jobDescription
+                ? "border-2 border-green-500 hover:border-green-600"
+                : resumeText && !jobDescription
                 ? "border-2 border-orange-500 hover:border-orange-600"
-                : ""}
+                : ""
+            }
             onClick={() => setShowJobPopup(true)}
             disabled={isGeneratingCoverLetter}
           >
-            {jobDescription && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
+            {jobDescription && (
+              <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+            )}
             Paste Job Description
           </Button>
           <Button
             variant="outline"
-            className={resumeText && jobDescription ? 'border-2 border-orange-500 hover:border-orange-600' : ''}
+            className={
+              resumeText && jobDescription
+                ? "border-2 border-orange-500 hover:border-orange-600"
+                : ""
+            }
             onClick={handleGenerate}
             disabled={isGeneratingCoverLetter || !resumeText || !jobDescription}
           >
@@ -120,7 +132,7 @@ export function WelcomeInputView() {
                 Generating...
               </>
             ) : (
-              "Generate Cover Letter"
+              "Generate Cover Letter Outline"
             )}
           </Button>
 
