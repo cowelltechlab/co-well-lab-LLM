@@ -13,6 +13,7 @@ export function CoverLetterComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
   const [activeTab, setActiveTab] = useState("intro");
   const [hasSubmitted, setHasSubmitted] = useState(false);
+  const [hasTakenSurvey, setHasTakenSurvey] = useState(false);
 
   const navigate = useNavigate();
 
@@ -45,7 +46,6 @@ export function CoverLetterComparisonView() {
       draftMapping: map,
     });
   }, [letterLabData, setLetterLabData, draftMap]);
-
 
   const getRating = (draftKey: "draft1" | "draft2"): number | null => {
     return letterLabData?.chatRating?.[draftKey] ?? null;
@@ -146,14 +146,16 @@ export function CoverLetterComparisonView() {
                     <div className="flex-1 overflow-y-auto">
                       <TextFeedbackPanel draftKey="draft1" />
                       {/* Rating section */}
-                      <div className={`mt-4 p-3 rounded-lg border-2 ${
-                        getRating("draft1") !== null 
-                          ? "border-green-500" 
-                          : letterLabData?.textFeedback?.draft1?.likes?.trim() &&
-                            letterLabData?.textFeedback?.draft1?.dislikes?.trim()
+                      <div
+                        className={`mt-4 p-3 rounded-lg border-2 ${
+                          getRating("draft1") !== null
+                            ? "border-green-500"
+                            : letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                              letterLabData?.textFeedback?.draft1?.dislikes?.trim()
                             ? "border-orange-500"
                             : "border-gray-300"
-                      }`}>
+                        }`}
+                      >
                         <div className="font-semibold">
                           To what extent does this draft sound like you?
                         </div>
@@ -207,14 +209,16 @@ export function CoverLetterComparisonView() {
                     <div className="flex-1 overflow-y-auto">
                       <TextFeedbackPanel draftKey="draft2" />
                       {/* Rating section */}
-                      <div className={`mt-4 p-3 rounded-lg border-2 ${
-                        getRating("draft2") !== null 
-                          ? "border-green-500" 
-                          : letterLabData?.textFeedback?.draft2?.likes?.trim() &&
-                            letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                      <div
+                        className={`mt-4 p-3 rounded-lg border-2 ${
+                          getRating("draft2") !== null
+                            ? "border-green-500"
+                            : letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                              letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                             ? "border-orange-500"
                             : "border-gray-300"
-                      }`}>
+                        }`}
+                      >
                         <div className="font-semibold">
                           To what extent does this draft sound like you?
                         </div>
@@ -265,92 +269,189 @@ export function CoverLetterComparisonView() {
                     🎉 Thank you for using our tool!
                   </h2>
                   <p className="text-gray-600">
-                    Your feedback helps us improve our cover letter generation process. 
-                    Please take a moment to complete our survey to share your experience.
+                    Your feedback helps us improve our cover letter generation
+                    process. Please take a moment to complete our survey to
+                    share your experience.
                   </p>
                   <div className="flex flex-col items-center space-y-4">
                     <Button
-                    onClick={async () => {
-                      if (!letterLabData) return;
+                      onClick={async () => {
+                        if (!letterLabData) return;
 
-                      // Calculate final preference
-                      const calculateFinalPreference = () => {
-                        if (!letterLabData?.chatRating || !draftMap) return null;
+                        // Calculate final preference
+                        const calculateFinalPreference = () => {
+                          if (!letterLabData?.chatRating || !draftMap)
+                            return null;
 
-                        const draft1Rating = letterLabData.chatRating.draft1;
-                        const draft2Rating = letterLabData.chatRating.draft2;
+                          const draft1Rating = letterLabData.chatRating.draft1;
+                          const draft2Rating = letterLabData.chatRating.draft2;
 
-                        if (draft1Rating === undefined || draft2Rating === undefined || draft1Rating === null || draft2Rating === null) return null;
+                          if (
+                            draft1Rating === undefined ||
+                            draft2Rating === undefined ||
+                            draft1Rating === null ||
+                            draft2Rating === null
+                          )
+                            return null;
 
-                        // Determine which draft corresponds to initial/final
-                        const initialRating =
-                          draftMap.draft1 === "initial" ? draft1Rating : draft2Rating;
-                        const finalRating =
-                          draftMap.draft1 === "final" ? draft1Rating : draft2Rating;
+                          // Determine which draft corresponds to initial/final
+                          const initialRating =
+                            draftMap.draft1 === "initial"
+                              ? draft1Rating
+                              : draft2Rating;
+                          const finalRating =
+                            draftMap.draft1 === "final"
+                              ? draft1Rating
+                              : draft2Rating;
 
-                        if (initialRating > finalRating) {
-                          return "control";
-                        } else if (finalRating > initialRating) {
-                          return "aligned";
-                        } else {
-                          return "tie";
-                        }
-                      };
-
-                      const finalPreference = calculateFinalPreference();
-
-                      const payload = {
-                        document_id: letterLabData.document_id,
-                        chatMessages: letterLabData.chatMessages ?? {},
-                        textFeedback: letterLabData.textFeedback ?? {},
-                        draftRating: letterLabData.chatRating ?? {},
-                        draftMapping: letterLabData.draftMapping ?? {},
-                        finalPreference,
-                        resume: letterLabData.resume,
-                        job_desc: letterLabData.job_desc,
-                      };
-
-                      try {
-                        const res = await fetch(
-                          `${import.meta.env.VITE_API_BASE_URL}/lab/submit-final-data`,
-                          {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify(payload),
+                          if (initialRating > finalRating) {
+                            return "control";
+                          } else if (finalRating > initialRating) {
+                            return "aligned";
+                          } else {
+                            return "tie";
                           }
-                        );
+                        };
 
-                        if (!res.ok) throw new Error("Server error");
-                        console.log("✅ Feedback submitted successfully");
-                        setHasSubmitted(true);
-                        // TODO: Navigate to survey or show success message
-                      } catch (err) {
-                        console.error("❌ Feedback submission failed:", err);
-                      }
-                    }}
-                    variant="outline"
-                    className={`border-2 ${
-                      hasSubmitted 
-                        ? "border-green-500 hover:border-green-600" 
-                        : "border-orange-500 hover:border-orange-600"
-                    }`}
-                    disabled={hasSubmitted}
-                  >
-                    {hasSubmitted && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
-                    Submit
-                  </Button>
-                  {hasSubmitted && (
-                    <Button
-                      onClick={() => {
-                        // TODO: Add navigation or action for Continue
-                        console.log("Continue clicked");
+                        const finalPreference = calculateFinalPreference();
+
+                        const payload = {
+                          document_id: letterLabData.document_id,
+                          chatMessages: letterLabData.chatMessages ?? {},
+                          textFeedback: letterLabData.textFeedback ?? {},
+                          draftRating: letterLabData.chatRating ?? {},
+                          draftMapping: letterLabData.draftMapping ?? {},
+                          finalPreference,
+                          resume: letterLabData.resume,
+                          job_desc: letterLabData.job_desc,
+                        };
+
+                        try {
+                          const res = await fetch(
+                            `${
+                              import.meta.env.VITE_API_BASE_URL
+                            }/lab/submit-final-data`,
+                            {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify(payload),
+                            }
+                          );
+
+                          if (!res.ok) throw new Error("Server error");
+                          console.log("✅ Feedback submitted successfully");
+                          setHasSubmitted(true);
+                          // TODO: Navigate to survey or show success message
+                        } catch (err) {
+                          console.error("❌ Feedback submission failed:", err);
+                        }
                       }}
                       variant="outline"
-                      className="border-2 border-orange-500 hover:border-orange-600"
+                      className={`border-2 ${
+                        hasSubmitted
+                          ? "border-green-500 hover:border-green-600"
+                          : "border-orange-500 hover:border-orange-600"
+                      }`}
+                      disabled={hasSubmitted}
                     >
-                      Continue
+                      {hasSubmitted && (
+                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                      )}
+                      Submit
                     </Button>
-                  )}
+                    {hasSubmitted && (
+                      <Button
+                        onClick={() => {
+                          setActiveTab("survey");
+                        }}
+                        variant="outline"
+                        className="border-2 border-orange-500 hover:border-orange-600"
+                      >
+                        Continue
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            )}
+
+            {activeTab === "survey" && (
+              <TabsContent
+                value="survey"
+                className="h-full w-full flex items-center justify-center"
+              >
+                <div className="text-center space-y-6 max-w-lg">
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    📝 Help Us Improve
+                  </h2>
+                  <p className="text-gray-600">
+                    Please take a moment to answer a few questions about your
+                    experience using our cover letter generation tool. Your
+                    feedback is invaluable in helping us improve our service.
+                  </p>
+                  <div className="flex flex-col items-center space-y-4">
+                    <Button
+                      onClick={() => {
+                        // TODO: Replace with actual survey URL
+                        window.open("https://example.com/survey", "_blank");
+
+                        // Set up listener for when user returns to this tab
+                        const handleFocus = () => {
+                          setHasTakenSurvey(true);
+                          window.removeEventListener("focus", handleFocus);
+                        };
+
+                        // Add a small delay before adding the listener to avoid immediate trigger
+                        setTimeout(() => {
+                          window.addEventListener("focus", handleFocus);
+                        }, 1000);
+                      }}
+                      variant="outline"
+                      className={`border-2 ${
+                        hasTakenSurvey
+                          ? "border-green-500 hover:border-green-600"
+                          : "border-orange-500 hover:border-orange-600"
+                      }`}
+                      disabled={hasTakenSurvey}
+                    >
+                      {hasTakenSurvey && (
+                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                      )}
+                      Take Survey
+                    </Button>
+                    {hasTakenSurvey && (
+                      <Button
+                        onClick={() => {
+                          setActiveTab("final");
+                        }}
+                        variant="outline"
+                        className="border-2 border-orange-500 hover:border-orange-600"
+                      >
+                        Continue
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </TabsContent>
+            )}
+
+            {activeTab === "final" && (
+              <TabsContent value="final" className="h-full w-full">
+                <div className="flex h-full gap-6">
+                  {/* Left panel: Control draft */}
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="text-lg font-semibold mb-2">Control</h3>
+                    <div className="flex-1 border rounded p-4 overflow-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                      {letterLabData?.initial_cover_letter || "Control draft not available"}
+                    </div>
+                  </div>
+
+                  {/* Right panel: Aligned draft */}
+                  <div className="flex-1 flex flex-col">
+                    <h3 className="text-lg font-semibold mb-2">Aligned</h3>
+                    <div className="flex-1 border rounded p-4 overflow-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                      {letterLabData?.final_cover_letter || "Aligned draft not available"}
+                    </div>
                   </div>
                 </div>
               </TabsContent>
@@ -359,82 +460,126 @@ export function CoverLetterComparisonView() {
 
           {/* Tab list at the bottom */}
           <TabsList className="flex justify-evenly border-t py-10 px-6">
-            <TabsTrigger 
-              className={`py-4 px-8 border-2 ${
-                activeTab === "intro" 
-                  ? "border-green-500" 
+            <TabsTrigger
+              className={`py-2 px-5 border-2 ${
+                activeTab === "intro"
+                  ? "border-green-500"
                   : activeTab !== "intro"
-                    ? "border-green-500"
-                    : "border-orange-500 hover:border-orange-600"
-              }`} 
+                  ? "border-green-500"
+                  : "border-orange-500 hover:border-orange-600"
+              }`}
               value="intro"
             >
-              {activeTab !== "intro" && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
-              Introduction
+              {activeTab !== "intro" && (
+                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+              )}
+              Intro
             </TabsTrigger>
-            <TabsTrigger 
-              className={`py-4 px-8 border-2 ${
-                (getRating("draft1") !== null &&
-                 letterLabData?.textFeedback?.draft1?.likes?.trim() &&
-                 letterLabData?.textFeedback?.draft1?.dislikes?.trim())
-                  ? "border-green-500" 
+            <TabsTrigger
+              className={`py-2 px-5 border-2 ${
+                getRating("draft1") !== null &&
+                letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                letterLabData?.textFeedback?.draft1?.dislikes?.trim()
+                  ? "border-green-500"
                   : activeTab !== "intro"
-                    ? "border-orange-500 hover:border-orange-600"
-                    : ""
-              }`} 
+                  ? "border-orange-500 hover:border-orange-600"
+                  : ""
+              }`}
               value="draft1"
             >
-              {(getRating("draft1") !== null &&
+              {getRating("draft1") !== null &&
                 letterLabData?.textFeedback?.draft1?.likes?.trim() &&
-                letterLabData?.textFeedback?.draft1?.dislikes?.trim()) && 
-                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
+                letterLabData?.textFeedback?.draft1?.dislikes?.trim() && (
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                )}
               Draft 1
             </TabsTrigger>
-            <TabsTrigger 
-              className={`py-4 px-8 border-2 ${
-                (getRating("draft2") !== null &&
-                 letterLabData?.textFeedback?.draft2?.likes?.trim() &&
-                 letterLabData?.textFeedback?.draft2?.dislikes?.trim())
-                  ? "border-green-500" 
-                  : (getRating("draft1") !== null &&
-                     letterLabData?.textFeedback?.draft1?.likes?.trim() &&
-                     letterLabData?.textFeedback?.draft1?.dislikes?.trim())
-                    ? "border-orange-500 hover:border-orange-600"
-                    : "border-gray-300"
-              }`} 
+            <TabsTrigger
+              className={`py-2 px-5 border-2 ${
+                getRating("draft2") !== null &&
+                letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                  ? "border-green-500"
+                  : getRating("draft1") !== null &&
+                    letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                    letterLabData?.textFeedback?.draft1?.dislikes?.trim()
+                  ? "border-orange-500 hover:border-orange-600"
+                  : "border-gray-300"
+              }`}
               value="draft2"
             >
-              {(getRating("draft2") !== null &&
+              {getRating("draft2") !== null &&
                 letterLabData?.textFeedback?.draft2?.likes?.trim() &&
-                letterLabData?.textFeedback?.draft2?.dislikes?.trim()) && 
-                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
+                letterLabData?.textFeedback?.draft2?.dislikes?.trim() && (
+                  <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                )}
               Draft 2
             </TabsTrigger>
             <TabsTrigger
-              className={`py-4 px-8 border-2 transition-colors ${
+              className={`py-2 px-5 border-2 transition-colors ${
                 hasSubmitted
                   ? "border-green-500"
                   : activeTab === "submit"
-                    ? "border-orange-500 hover:border-orange-600"
-                    : (getRating("draft1") !== null &&
-                       letterLabData?.textFeedback?.draft1?.likes?.trim() &&
-                       letterLabData?.textFeedback?.draft1?.dislikes?.trim() &&
-                       getRating("draft2") !== null &&
-                       letterLabData?.textFeedback?.draft2?.likes?.trim() &&
-                       letterLabData?.textFeedback?.draft2?.dislikes?.trim())
-                      ? "border-orange-500 hover:border-orange-600"
-                      : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
+                  ? "border-orange-500 hover:border-orange-600"
+                  : getRating("draft1") !== null &&
+                    letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                    letterLabData?.textFeedback?.draft1?.dislikes?.trim() &&
+                    getRating("draft2") !== null &&
+                    letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                    letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                  ? "border-orange-500 hover:border-orange-600"
+                  : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
               }`}
               value="submit"
-              disabled={!(getRating("draft1") !== null &&
-                         letterLabData?.textFeedback?.draft1?.likes?.trim() &&
-                         letterLabData?.textFeedback?.draft1?.dislikes?.trim() &&
-                         getRating("draft2") !== null &&
-                         letterLabData?.textFeedback?.draft2?.likes?.trim() &&
-                         letterLabData?.textFeedback?.draft2?.dislikes?.trim())}
+              disabled={
+                !(
+                  getRating("draft1") !== null &&
+                  letterLabData?.textFeedback?.draft1?.likes?.trim() &&
+                  letterLabData?.textFeedback?.draft1?.dislikes?.trim() &&
+                  getRating("draft2") !== null &&
+                  letterLabData?.textFeedback?.draft2?.likes?.trim() &&
+                  letterLabData?.textFeedback?.draft2?.dislikes?.trim()
+                )
+              }
             >
-              {hasSubmitted && <CheckCircle className="w-5 h-5 text-green-600 mr-2" />}
+              {hasSubmitted && (
+                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+              )}
               Submit
+            </TabsTrigger>
+            <TabsTrigger
+              className={`py-2 px-5 border-2 transition-colors ${
+                hasTakenSurvey
+                  ? "border-green-500"
+                  : activeTab === "survey"
+                  ? "border-orange-500 hover:border-orange-600"
+                  : hasSubmitted
+                  ? "border-orange-500 hover:border-orange-600"
+                  : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
+              }`}
+              value="survey"
+              disabled={!hasSubmitted}
+            >
+              {hasTakenSurvey && (
+                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+              )}
+              Survey
+            </TabsTrigger>
+            <TabsTrigger
+              className={`py-2 px-5 border-2 transition-colors ${
+                activeTab === "final"
+                  ? "border-green-500"
+                  : hasTakenSurvey
+                  ? "border-orange-500 hover:border-orange-600"
+                  : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
+              }`}
+              value="final"
+              disabled={!hasTakenSurvey}
+            >
+              {activeTab === "final" && (
+                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+              )}
+              Final
             </TabsTrigger>
           </TabsList>
         </Tabs>
