@@ -40,11 +40,56 @@ function HealthStatusCard() {
   );
 }
 
+interface Token {
+  _id: string;
+  token: string;
+  used: boolean;
+  created_at: string;
+  used_at?: string;
+  session_id?: string;
+}
+
 // Main admin dashboard layout
 export function AdminDashboardView() {
   const [newToken, setNewToken] = useState<string | null>(null);
+  const [tokens, setTokens] = useState<Token[]>([]);
   const { isAdmin, setIsAdmin } = useAdminContext();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchTokens();
+  }, []);
+
+  const fetchTokens = async () => {
+    try {
+      const res = await fetch(`${apiBase}/api/admin/tokens`, {
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTokens(data.tokens);
+      }
+    } catch (error) {
+      console.error("Error fetching tokens:", error);
+    }
+  };
+
+  const handleInvalidateToken = async (token: string) => {
+    try {
+      const res = await fetch(`${apiBase}/api/admin/tokens/invalidate`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+      if (res.ok) {
+        // Refresh token list
+        fetchTokens();
+      }
+    } catch (error) {
+      console.error("Error invalidating token:", error);
+    }
+  };
 
   if (!isAdmin) {
     return <Navigate to="/admin/login" replace />;
@@ -76,7 +121,7 @@ export function AdminDashboardView() {
           </div>
 
           {/* 2. Participant Tokens */}
-          <div className="border rounded p-6 shadow bg-white h-full flex flex-col justify-between">
+          <div className="border rounded p-6 shadow bg-white h-full flex flex-col">
             <div>
               <h2 className="text-lg font-semibold mb-4">Participant Tokens</h2>
               <Button
@@ -90,19 +135,52 @@ export function AdminDashboardView() {
                   );
                   const data = await res.json();
                   setNewToken(data.token);
+                  fetchTokens(); // Refresh list
                 }}
+                className="mb-4"
               >
                 Generate Token
               </Button>
             </div>
+            
             {newToken && (
-              <div className="mt-4 text-center">
-                <p className="text-sm text-gray-600">Latest Token:</p>
+              <div className="mb-4 text-center bg-green-50 p-3 rounded">
+                <p className="text-sm text-gray-600">New Token Created:</p>
                 <div className="text-xl font-mono bg-gray-100 px-4 py-2 rounded mt-1">
                   {newToken}
                 </div>
               </div>
             )}
+            
+            {/* Token List */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="space-y-2">
+                {tokens.map((token) => (
+                  <div
+                    key={token._id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                  >
+                    <div className="flex-1">
+                      <div className="font-mono text-sm">{token.token}</div>
+                      <div className="text-xs text-gray-500">
+                        {token.used ? (
+                          <>Used • Session: {token.session_id}</>
+                        ) : (
+                          "Unused"
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      onClick={() => handleInvalidateToken(token.token)}
+                    >
+                      Invalidate
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* 3. Progress Log */}

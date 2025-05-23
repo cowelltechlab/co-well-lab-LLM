@@ -211,6 +211,10 @@ def initialize():
         document_id = create_session(session_data)
 
         log_progress_event("initialize_success", session_id=document_id)
+        
+        # Link the token to this session
+        if "token" in session:
+            mark_token_used(session["token"], session_id=str(document_id))
 
         if DEBUG_MONGO_WRITE:
             print("MongoDB document successfully created.")
@@ -358,9 +362,6 @@ def validate_token():
 
     # Store in session so @token_required works
     session["token"] = token
-
-    # Optional: mark it as used here if you're enforcing one-time usage
-    mark_token_used(token)
 
     return jsonify({"status": "authorized"}), 200
 

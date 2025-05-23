@@ -87,17 +87,28 @@ def create_token(token_str):
 def validate_token(token_str):
     return db["tokens"].find_one({"token": token_str, "used": False})
 
-def mark_token_used(token):
+def mark_token_used(token, session_id=None):
+    update_fields = {
+        "used": True,
+        "used_at": datetime.now(timezone.utc)
+    }
+    if session_id:
+        update_fields["session_id"] = session_id
+    
     db["tokens"].update_one(
         {"token": token},
-        {"$set": {
-            "used": True,
-            "used_at": datetime.now(timezone.utc)
-        }}
+        {"$set": update_fields}
     )
 
 def is_valid_token(token: str) -> bool:
-    entry = db["tokens"].find_one({"token": token, "used": False})
+    entry = db["tokens"].find_one({
+        "token": token, 
+        "used": False,
+        "$or": [
+            {"invalidated": {"$exists": False}},
+            {"invalidated": False}
+        ]
+    })
     return entry is not None
 
 def get_all_progress_events():
@@ -121,3 +132,32 @@ def log_progress_event(event_name, session_id=None):
         log_entry["session_id"] = session_id
 
     return db["progress_log"].insert_one(log_entry)
+
+def get_all_tokens():
+    try:
+        # Only get tokens that haven't been invalidated
+        tokens = list(db["tokens"].find({"invalidated": {"$ne": True}}).sort("created_at", -1))
+        for token in tokens:
+            token["_id"] = str(token["_id"])
+            if isinstance(token.get("created_at"), datetime):
+                token["created_at"] = token["created_at"].isoformat()
+            if isinstance(token.get("used_at"), datetime):
+                token["used_at"] = token["used_at"].isoformat()
+        return tokens
+    except Exception as e:
+        print("Mongo fetch error:", e)
+        return []
+
+def invalidate_token(token_str):
+    try:
+        result = db["tokens"].update_one(
+            {"token": token_str},
+            {"$set": {
+                "invalidated": True,
+                "invalidated_at": datetime.now(timezone.utc)
+            }}
+        )
+        return result.modified_count > 0
+    except Exception as e:
+        print("Mongo update error:", e)
+        return False
