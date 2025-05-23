@@ -95,7 +95,7 @@ export function AdminDashboardView() {
     return <Navigate to="/admin/login" replace />;
   }
   return (
-    <div className="min-h-screen w-[80%] p-6 bg-gray-50 flex justify-center">
+    <div className="min-h-screen w-full p-6 bg-gray-50 flex justify-center">
       <div className="">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
@@ -142,7 +142,7 @@ export function AdminDashboardView() {
                 Generate Token
               </Button>
             </div>
-            
+
             {newToken && (
               <div className="mb-4 text-center bg-green-50 p-3 rounded">
                 <p className="text-sm text-gray-600">New Token Created:</p>
@@ -151,7 +151,7 @@ export function AdminDashboardView() {
                 </div>
               </div>
             )}
-            
+
             {/* Token List */}
             <div className="flex-1 overflow-y-auto">
               <div className="space-y-2">
