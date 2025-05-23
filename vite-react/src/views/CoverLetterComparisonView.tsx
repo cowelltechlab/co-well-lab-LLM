@@ -172,18 +172,21 @@ export function CoverLetterComparisonView() {
                         }`}
                       >
                         <div className="font-semibold">
-                          How well does the content of this letter represent you and your experiences?
+                          How well does the content of this letter represent you
+                          and your experiences?
                         </div>
                         <div className="pt-1">
                           <LikertScale
                             value={getContentRating("draft1")}
-                            onChange={(rating) => setContentRating("draft1", rating)}
+                            onChange={(rating) =>
+                              setContentRating("draft1", rating)
+                            }
                             showBorder={false}
                             isComplete={getContentRating("draft1") !== null}
                           />
                         </div>
                       </div>
-                      
+
                       {/* Second Rating Question */}
                       <div
                         className={`mt-4 p-3 rounded-lg border-2 ${
@@ -195,12 +198,15 @@ export function CoverLetterComparisonView() {
                         }`}
                       >
                         <div className="font-semibold">
-                          How well does this cover letter represent your writing tone & style?
+                          How well does this cover letter represent your writing
+                          tone & style?
                         </div>
                         <div className="pt-1">
                           <LikertScale
                             value={getStyleRating("draft1")}
-                            onChange={(rating) => setStyleRating("draft1", rating)}
+                            onChange={(rating) =>
+                              setStyleRating("draft1", rating)
+                            }
                             showBorder={false}
                             isComplete={getStyleRating("draft1") !== null}
                           />
@@ -260,18 +266,21 @@ export function CoverLetterComparisonView() {
                         }`}
                       >
                         <div className="font-semibold">
-                          How well does the content of this letter represent you and your experiences?
+                          How well does the content of this letter represent you
+                          and your experiences?
                         </div>
                         <div className="pt-1">
                           <LikertScale
                             value={getContentRating("draft2")}
-                            onChange={(rating) => setContentRating("draft2", rating)}
+                            onChange={(rating) =>
+                              setContentRating("draft2", rating)
+                            }
                             showBorder={false}
                             isComplete={getContentRating("draft2") !== null}
                           />
                         </div>
                       </div>
-                      
+
                       {/* Second Rating Question */}
                       <div
                         className={`mt-4 p-3 rounded-lg border-2 ${
@@ -283,12 +292,15 @@ export function CoverLetterComparisonView() {
                         }`}
                       >
                         <div className="font-semibold">
-                          How well does this cover letter represent your writing tone & style?
+                          How well does this cover letter represent your writing
+                          tone & style?
                         </div>
                         <div className="pt-1">
                           <LikertScale
                             value={getStyleRating("draft2")}
-                            onChange={(rating) => setStyleRating("draft2", rating)}
+                            onChange={(rating) =>
+                              setStyleRating("draft2", rating)
+                            }
                             showBorder={false}
                             isComplete={getStyleRating("draft2") !== null}
                           />
@@ -385,8 +397,10 @@ export function CoverLetterComparisonView() {
                           chatMessages: letterLabData.chatMessages ?? {},
                           textFeedback: letterLabData.textFeedback ?? {},
                           draftRating: letterLabData.chatRating ?? {},
-                          contentRepresentationRating: letterLabData.contentRepresentationRating ?? {},
-                          styleRepresentationRating: letterLabData.styleRepresentationRating ?? {},
+                          contentRepresentationRating:
+                            letterLabData.contentRepresentationRating ?? {},
+                          styleRepresentationRating:
+                            letterLabData.styleRepresentationRating ?? {},
                           draftMapping: letterLabData.draftMapping ?? {},
                           finalPreference,
                           resume: letterLabData.resume,
@@ -406,19 +420,25 @@ export function CoverLetterComparisonView() {
                           );
 
                           if (!res.ok) throw new Error("Server error");
-                          
+
                           const responseData = await res.json();
-                          console.log("✅ Feedback submitted successfully", responseData);
-                          
+                          console.log(
+                            "✅ Feedback submitted successfully",
+                            responseData
+                          );
+
                           // Update context with completed status and finalPreference
-                          if (responseData.completed !== undefined || responseData.finalPreference !== undefined) {
+                          if (
+                            responseData.completed !== undefined ||
+                            responseData.finalPreference !== undefined
+                          ) {
                             setLetterLabData({
                               ...letterLabData,
                               completed: responseData.completed,
                               finalPreference: responseData.finalPreference,
                             });
                           }
-                          
+
                           setHasSubmitted(true);
                         } catch (err) {
                           console.error("❌ Feedback submission failed:", err);
@@ -514,36 +534,54 @@ export function CoverLetterComparisonView() {
             )}
 
             {activeTab === "final" && (
-              <TabsContent value="final" className="h-full w-full flex flex-col overflow-hidden">
+              <TabsContent
+                value="final"
+                className="h-full w-full flex flex-col overflow-hidden"
+              >
                 {/* Preference statement */}
-                {letterLabData?.finalPreference && letterLabData.finalPreference !== "tie" && (
-                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex-shrink-0">
-                    <p className="text-lg text-gray-800">
-                      {letterLabData.finalPreference === "control" 
-                        ? "You preferred the Control Cover Letter which was generated without any feedback from you."
-                        : "You preferred the Aligned Cover Letter which was generated using your feedback."}
-                    </p>
-                  </div>
-                )}
-                
+                {letterLabData?.finalPreference &&
+                  letterLabData.finalPreference !== "tie" && (
+                    <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex-shrink-0">
+                      <p className="text-lg text-gray-800">
+                        {letterLabData.finalPreference === "control"
+                          ? "You preferred the Control Cover Letter"
+                          : "You preferred the Aligned Cover Letter"}
+                      </p>
+                    </div>
+                  )}
+
                 <div className="flex-1 flex gap-6 min-h-0">
                   {/* Left panel: Control draft */}
                   <div className="flex-1 flex flex-col min-h-0">
-                    <h3 className="text-lg font-semibold mb-2 flex-shrink-0">Control</h3>
-                    <div className={`flex-1 border rounded p-4 overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed min-h-0 ${
-                      letterLabData?.finalPreference === "control" ? "border-green-500 border-2" : ""
-                    }`}>
-                      {letterLabData?.initial_cover_letter || "Control draft not available"}
+                    <h3 className="text-lg font-semibold mb-2 flex-shrink-0">
+                      Control
+                    </h3>
+                    <div
+                      className={`flex-1 border rounded p-4 overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed min-h-0 ${
+                        letterLabData?.finalPreference === "control"
+                          ? "border-green-500 border-2"
+                          : ""
+                      }`}
+                    >
+                      {letterLabData?.initial_cover_letter ||
+                        "Control draft not available"}
                     </div>
                   </div>
 
                   {/* Right panel: Aligned draft */}
                   <div className="flex-1 flex flex-col min-h-0">
-                    <h3 className="text-lg font-semibold mb-2 flex-shrink-0">Aligned</h3>
-                    <div className={`flex-1 border rounded p-4 overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed min-h-0 ${
-                      letterLabData?.finalPreference === "aligned" ? "border-green-500 border-2" : ""
-                    }`}>
-                      {letterLabData?.final_cover_letter || "Aligned draft not available"}
+                    <h3 className="text-lg font-semibold mb-2 flex-shrink-0">
+                      Aligned
+                    </h3>
+                    <div
+                      className={`flex-1 border rounded p-4 overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed min-h-0 ${
+                        letterLabData?.finalPreference === "aligned"
+                          ? "border-green-500 border-2"
+                          : ""
+                      }`}
+                    >
+                      {letterLabData?.final_cover_letter ||
+                        "Aligned draft not available"}
                     </div>
                   </div>
                 </div>
