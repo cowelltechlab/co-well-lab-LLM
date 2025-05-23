@@ -47,16 +47,31 @@ export function CoverLetterComparisonView() {
     });
   }, [letterLabData, setLetterLabData, draftMap]);
 
-  const getRating = (draftKey: "draft1" | "draft2"): number | null => {
-    return letterLabData?.chatRating?.[draftKey] ?? null;
+  const getContentRating = (draftKey: "draft1" | "draft2"): number | null => {
+    return letterLabData?.contentRepresentationRating?.[draftKey] ?? null;
   };
 
-  const setRating = (draftKey: "draft1" | "draft2", value: number) => {
+  const setContentRating = (draftKey: "draft1" | "draft2", value: number) => {
     if (!letterLabData) return;
     setLetterLabData({
       ...letterLabData,
-      chatRating: {
-        ...letterLabData.chatRating,
+      contentRepresentationRating: {
+        ...letterLabData.contentRepresentationRating,
+        [draftKey]: value,
+      },
+    });
+  };
+
+  const getStyleRating = (draftKey: "draft1" | "draft2"): number | null => {
+    return letterLabData?.styleRepresentationRating?.[draftKey] ?? null;
+  };
+
+  const setStyleRating = (draftKey: "draft1" | "draft2", value: number) => {
+    if (!letterLabData) return;
+    setLetterLabData({
+      ...letterLabData,
+      styleRepresentationRating: {
+        ...letterLabData.styleRepresentationRating,
         [draftKey]: value,
       },
     });
@@ -148,7 +163,7 @@ export function CoverLetterComparisonView() {
                       {/* Rating section */}
                       <div
                         className={`mt-4 p-3 rounded-lg border-2 ${
-                          getRating("draft1") !== null
+                          getContentRating("draft1") !== null
                             ? "border-green-500"
                             : letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                               letterLabData?.textFeedback?.draft1?.dislikes?.trim()
@@ -157,14 +172,37 @@ export function CoverLetterComparisonView() {
                         }`}
                       >
                         <div className="font-semibold">
-                          To what extent does this draft sound like you?
+                          How well does the content of this letter represent you and your experiences?
                         </div>
                         <div className="pt-1">
                           <LikertScale
-                            value={getRating("draft1")}
-                            onChange={(rating) => setRating("draft1", rating)}
+                            value={getContentRating("draft1")}
+                            onChange={(rating) => setContentRating("draft1", rating)}
                             showBorder={false}
-                            isComplete={getRating("draft1") !== null}
+                            isComplete={getContentRating("draft1") !== null}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Second Rating Question */}
+                      <div
+                        className={`mt-4 p-3 rounded-lg border-2 ${
+                          getStyleRating("draft1") !== null
+                            ? "border-green-500"
+                            : getContentRating("draft1") !== null
+                            ? "border-orange-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <div className="font-semibold">
+                          How well does this cover letter represent your writing tone & style?
+                        </div>
+                        <div className="pt-1">
+                          <LikertScale
+                            value={getStyleRating("draft1")}
+                            onChange={(rating) => setStyleRating("draft1", rating)}
+                            showBorder={false}
+                            isComplete={getStyleRating("draft1") !== null}
                           />
                         </div>
                       </div>
@@ -173,7 +211,8 @@ export function CoverLetterComparisonView() {
                       <Button
                         variant="outline"
                         className={
-                          getRating("draft1") !== null &&
+                          getContentRating("draft1") !== null &&
+                          getStyleRating("draft1") !== null &&
                           letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                           letterLabData?.textFeedback?.draft1?.dislikes?.trim()
                             ? "border-2 border-orange-500 hover:border-orange-600"
@@ -183,7 +222,8 @@ export function CoverLetterComparisonView() {
                           setActiveTab("draft2");
                         }}
                         disabled={
-                          getRating("draft1") === null ||
+                          getContentRating("draft1") === null ||
+                          getStyleRating("draft1") === null ||
                           !letterLabData?.textFeedback?.draft1?.likes?.trim() ||
                           !letterLabData?.textFeedback?.draft1?.dislikes?.trim()
                         }
@@ -211,7 +251,7 @@ export function CoverLetterComparisonView() {
                       {/* Rating section */}
                       <div
                         className={`mt-4 p-3 rounded-lg border-2 ${
-                          getRating("draft2") !== null
+                          getContentRating("draft2") !== null
                             ? "border-green-500"
                             : letterLabData?.textFeedback?.draft2?.likes?.trim() &&
                               letterLabData?.textFeedback?.draft2?.dislikes?.trim()
@@ -220,14 +260,37 @@ export function CoverLetterComparisonView() {
                         }`}
                       >
                         <div className="font-semibold">
-                          To what extent does this draft sound like you?
+                          How well does the content of this letter represent you and your experiences?
                         </div>
                         <div className="pt-1">
                           <LikertScale
-                            value={getRating("draft2")}
-                            onChange={(rating) => setRating("draft2", rating)}
+                            value={getContentRating("draft2")}
+                            onChange={(rating) => setContentRating("draft2", rating)}
                             showBorder={false}
-                            isComplete={getRating("draft2") !== null}
+                            isComplete={getContentRating("draft2") !== null}
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Second Rating Question */}
+                      <div
+                        className={`mt-4 p-3 rounded-lg border-2 ${
+                          getStyleRating("draft2") !== null
+                            ? "border-green-500"
+                            : getContentRating("draft2") !== null
+                            ? "border-orange-500"
+                            : "border-gray-300"
+                        }`}
+                      >
+                        <div className="font-semibold">
+                          How well does this cover letter represent your writing tone & style?
+                        </div>
+                        <div className="pt-1">
+                          <LikertScale
+                            value={getStyleRating("draft2")}
+                            onChange={(rating) => setStyleRating("draft2", rating)}
+                            showBorder={false}
+                            isComplete={getStyleRating("draft2") !== null}
                           />
                         </div>
                       </div>
@@ -236,7 +299,8 @@ export function CoverLetterComparisonView() {
                       <Button
                         variant="outline"
                         className={
-                          getRating("draft2") !== null &&
+                          getContentRating("draft2") !== null &&
+                          getStyleRating("draft2") !== null &&
                           letterLabData?.textFeedback?.draft2?.likes?.trim() &&
                           letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                             ? "border-2 border-orange-500 hover:border-orange-600"
@@ -246,7 +310,8 @@ export function CoverLetterComparisonView() {
                           setActiveTab("submit");
                         }}
                         disabled={
-                          getRating("draft2") === null ||
+                          getContentRating("draft2") === null ||
+                          getStyleRating("draft2") === null ||
                           !letterLabData?.textFeedback?.draft2?.likes?.trim() ||
                           !letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                         }
@@ -320,6 +385,8 @@ export function CoverLetterComparisonView() {
                           chatMessages: letterLabData.chatMessages ?? {},
                           textFeedback: letterLabData.textFeedback ?? {},
                           draftRating: letterLabData.chatRating ?? {},
+                          contentRepresentationRating: letterLabData.contentRepresentationRating ?? {},
+                          styleRepresentationRating: letterLabData.styleRepresentationRating ?? {},
                           draftMapping: letterLabData.draftMapping ?? {},
                           finalPreference,
                           resume: letterLabData.resume,
@@ -477,7 +544,8 @@ export function CoverLetterComparisonView() {
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 ${
-                getRating("draft1") !== null &&
+                getContentRating("draft1") !== null &&
+                getStyleRating("draft1") !== null &&
                 letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                 letterLabData?.textFeedback?.draft1?.dislikes?.trim()
                   ? "border-green-500"
@@ -487,7 +555,8 @@ export function CoverLetterComparisonView() {
               }`}
               value="draft1"
             >
-              {getRating("draft1") !== null &&
+              {getContentRating("draft1") !== null &&
+                getStyleRating("draft1") !== null &&
                 letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                 letterLabData?.textFeedback?.draft1?.dislikes?.trim() && (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
@@ -496,11 +565,13 @@ export function CoverLetterComparisonView() {
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 ${
-                getRating("draft2") !== null &&
+                getContentRating("draft2") !== null &&
+                getStyleRating("draft2") !== null &&
                 letterLabData?.textFeedback?.draft2?.likes?.trim() &&
                 letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                   ? "border-green-500"
-                  : getRating("draft1") !== null &&
+                  : getContentRating("draft1") !== null &&
+                    getStyleRating("draft1") !== null &&
                     letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                     letterLabData?.textFeedback?.draft1?.dislikes?.trim()
                   ? "border-orange-500 hover:border-orange-600"
@@ -508,7 +579,8 @@ export function CoverLetterComparisonView() {
               }`}
               value="draft2"
             >
-              {getRating("draft2") !== null &&
+              {getContentRating("draft2") !== null &&
+                getStyleRating("draft2") !== null &&
                 letterLabData?.textFeedback?.draft2?.likes?.trim() &&
                 letterLabData?.textFeedback?.draft2?.dislikes?.trim() && (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
@@ -521,10 +593,12 @@ export function CoverLetterComparisonView() {
                   ? "border-green-500"
                   : activeTab === "submit"
                   ? "border-orange-500 hover:border-orange-600"
-                  : getRating("draft1") !== null &&
+                  : getContentRating("draft1") !== null &&
+                    getStyleRating("draft1") !== null &&
                     letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                     letterLabData?.textFeedback?.draft1?.dislikes?.trim() &&
-                    getRating("draft2") !== null &&
+                    getContentRating("draft2") !== null &&
+                    getStyleRating("draft2") !== null &&
                     letterLabData?.textFeedback?.draft2?.likes?.trim() &&
                     letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                   ? "border-orange-500 hover:border-orange-600"
@@ -533,10 +607,12 @@ export function CoverLetterComparisonView() {
               value="submit"
               disabled={
                 !(
-                  getRating("draft1") !== null &&
+                  getContentRating("draft1") !== null &&
+                  getStyleRating("draft1") !== null &&
                   letterLabData?.textFeedback?.draft1?.likes?.trim() &&
                   letterLabData?.textFeedback?.draft1?.dislikes?.trim() &&
-                  getRating("draft2") !== null &&
+                  getContentRating("draft2") !== null &&
+                  getStyleRating("draft2") !== null &&
                   letterLabData?.textFeedback?.draft2?.likes?.trim() &&
                   letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                 )
