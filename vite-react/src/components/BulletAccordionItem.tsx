@@ -70,10 +70,13 @@ export function BulletAccordionItem({
       </AccordionTrigger>
 
       <AccordionContent className="pt-3 text-sm text-gray-700">
-        <div className="text-sm whitespace-pre-line mb-3">{rationaleText}</div>
+        <div className="text-sm mb-3">
+          <span className="font-semibold">Rationale:</span>
+          <div className="whitespace-pre-line mt-1">{rationaleText}</div>
+        </div>
 
         <p className="mb-2 text-base font-semibold">
-          To what extent does this description sound like you?
+          To what extent does this <span className="underline">bullet point</span> sound like you?
         </p>
 
         <div className="mb-4">
@@ -89,7 +92,13 @@ export function BulletAccordionItem({
           <textarea
             value={feedback.qualitative}
             onChange={(e) => handleTextChange(e.target.value)}
-            placeholder="Any additional comments?"
+            placeholder={
+              localRating >= 1 && localRating <= 3
+                ? "Uh oh, let's fix this. What about this reasoning do you not agree with? How would you re-write this bullet point?"
+                : localRating >= 5 && localRating <= 7
+                ? "Great! Do you have any feedback for additional comments about this bullet point?"
+                : "Any additional comments?"
+            }
             className={`w-full p-3 border-2 rounded shadow-inner bg-gray-50 text-sm ${
               feedback.qualitative.trim().length > 0 
                 ? 'border-green-500 focus:border-green-600' 
