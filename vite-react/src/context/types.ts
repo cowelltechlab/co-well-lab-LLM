@@ -64,6 +64,8 @@ export interface CoverLetterResponse {
   };
   token?: string;
   hasAccess?: boolean;
+  completed?: boolean;
+  finalPreference?: "control" | "aligned" | "tie" | null;
 }
 
 export interface AppState {

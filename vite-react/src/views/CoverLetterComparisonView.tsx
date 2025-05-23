@@ -406,9 +406,20 @@ export function CoverLetterComparisonView() {
                           );
 
                           if (!res.ok) throw new Error("Server error");
-                          console.log("✅ Feedback submitted successfully");
+                          
+                          const responseData = await res.json();
+                          console.log("✅ Feedback submitted successfully", responseData);
+                          
+                          // Update context with completed status and finalPreference
+                          if (responseData.completed !== undefined || responseData.finalPreference !== undefined) {
+                            setLetterLabData({
+                              ...letterLabData,
+                              completed: responseData.completed,
+                              finalPreference: responseData.finalPreference,
+                            });
+                          }
+                          
                           setHasSubmitted(true);
-                          // TODO: Navigate to survey or show success message
                         } catch (err) {
                           console.error("❌ Feedback submission failed:", err);
                         }
@@ -503,20 +514,35 @@ export function CoverLetterComparisonView() {
             )}
 
             {activeTab === "final" && (
-              <TabsContent value="final" className="h-full w-full">
-                <div className="flex h-full gap-6">
+              <TabsContent value="final" className="h-full w-full flex flex-col overflow-hidden">
+                {/* Preference statement */}
+                {letterLabData?.finalPreference && letterLabData.finalPreference !== "tie" && (
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex-shrink-0">
+                    <p className="text-lg text-gray-800">
+                      {letterLabData.finalPreference === "control" 
+                        ? "You preferred the Control Cover Letter which was generated without any feedback from you."
+                        : "You preferred the Aligned Cover Letter which was generated using your feedback."}
+                    </p>
+                  </div>
+                )}
+                
+                <div className="flex-1 flex gap-6 min-h-0">
                   {/* Left panel: Control draft */}
-                  <div className="flex-1 flex flex-col">
-                    <h3 className="text-lg font-semibold mb-2">Control</h3>
-                    <div className="flex-1 border rounded p-4 overflow-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <h3 className="text-lg font-semibold mb-2 flex-shrink-0">Control</h3>
+                    <div className={`flex-1 border rounded p-4 overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed min-h-0 ${
+                      letterLabData?.finalPreference === "control" ? "border-green-500 border-2" : ""
+                    }`}>
                       {letterLabData?.initial_cover_letter || "Control draft not available"}
                     </div>
                   </div>
 
                   {/* Right panel: Aligned draft */}
-                  <div className="flex-1 flex flex-col">
-                    <h3 className="text-lg font-semibold mb-2">Aligned</h3>
-                    <div className="flex-1 border rounded p-4 overflow-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed">
+                  <div className="flex-1 flex flex-col min-h-0">
+                    <h3 className="text-lg font-semibold mb-2 flex-shrink-0">Aligned</h3>
+                    <div className={`flex-1 border rounded p-4 overflow-y-auto whitespace-pre-wrap text-sm text-gray-800 leading-relaxed min-h-0 ${
+                      letterLabData?.finalPreference === "aligned" ? "border-green-500 border-2" : ""
+                    }`}>
                       {letterLabData?.final_cover_letter || "Aligned draft not available"}
                     </div>
                   </div>
