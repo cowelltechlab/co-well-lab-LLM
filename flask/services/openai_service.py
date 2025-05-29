@@ -42,12 +42,23 @@ Job Description:
 # Task 2
 def generate_role_name(job_desc):
     prompt = f"""
-Please use the provided job description and return only a 1-3 word role name (e.g., "Software Engineer", "Senior Product Manager"), nothing more. No opening or closing greetings, just the role name. If there is any problem extracting the role name, you may default to "role_name" for the role name.
+Extract the job title from the job description below and return ONLY the role name.
+
+Examples of good responses:
+- Software Engineer
+- Senior Product Manager
+- Data Analyst
+- Marketing Coordinator
+- AI Trainer
+
+Rules:
+1. Return only the job title (1-4 words maximum)
+2. Do NOT include company name, location, or department
+3. Do NOT include any explanation or additional text
+4. If no clear job title is found, return "Specialist"
 
 Job description:
 {job_desc}
-
-Only return the job title/role name. Do not include any explanation.
 """
 
     try:

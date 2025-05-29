@@ -27,7 +27,7 @@ from services.mongodb_service import log_progress_event
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
-from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output
+from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output, is_valid_role_name
 from utils.data_structuring import zip_bullets_and_rationales
 from utils.auth_decorators import token_required
 
@@ -67,10 +67,10 @@ def initialize():
             print(initial_cover_letter)
             sys.stdout.flush()
 
-        # REVIEW-ALL-VIEW INTRO
+        # ROLE NAME GENERATION
         role_name = retry_generation(
             generate_role_name,
-            validator_fn=is_valid_string_output,
+            validator_fn=is_valid_role_name,
             args=(job_desc,),
             debug_label="Role Name"
         )
