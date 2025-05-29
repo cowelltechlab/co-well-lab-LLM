@@ -12,7 +12,6 @@ import { CheckCircle } from "lucide-react";
 export function CoverLetterComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
   const [activeTab, setActiveTab] = useState("intro");
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [hasTakenSurvey, setHasTakenSurvey] = useState(false);
 
   const navigate = useNavigate();
@@ -309,8 +308,108 @@ export function CoverLetterComparisonView() {
                             ? "border-2 border-orange-500 hover:border-orange-600"
                             : ""
                         }
-                        onClick={() => {
-                          setActiveTab("submit");
+                        onClick={async () => {
+                          // Submit data before moving to survey
+                          if (!letterLabData) return;
+
+                          // Calculate final preference based on content ratings
+                          const calculateFinalPreference = () => {
+                            if (
+                              !letterLabData?.contentRepresentationRating ||
+                              !draftMap
+                            )
+                              return null;
+
+                            const draft1Rating =
+                              letterLabData.contentRepresentationRating.draft1;
+                            const draft2Rating =
+                              letterLabData.contentRepresentationRating.draft2;
+
+                            if (
+                              draft1Rating === undefined ||
+                              draft2Rating === undefined ||
+                              draft1Rating === null ||
+                              draft2Rating === null
+                            )
+                              return null;
+
+                            // Determine which draft corresponds to initial/final
+                            const initialRating =
+                              draftMap.draft1 === "initial"
+                                ? draft1Rating
+                                : draft2Rating;
+                            const finalRating =
+                              draftMap.draft1 === "final"
+                                ? draft1Rating
+                                : draft2Rating;
+
+                            if (initialRating > finalRating) {
+                              return "control";
+                            } else if (finalRating > initialRating) {
+                              return "aligned";
+                            } else {
+                              return "tie";
+                            }
+                          };
+
+                          const finalPreference = calculateFinalPreference();
+
+                          const payload = {
+                            document_id: letterLabData.document_id,
+                            chatMessages: letterLabData.chatMessages ?? {},
+                            textFeedback: letterLabData.textFeedback ?? {},
+                            draftRating: letterLabData.chatRating ?? {},
+                            contentRepresentationRating:
+                              letterLabData.contentRepresentationRating ?? {},
+                            styleRepresentationRating:
+                              letterLabData.styleRepresentationRating ?? {},
+                            draftMapping: letterLabData.draftMapping ?? {},
+                            finalPreference,
+                            resume: letterLabData.resume,
+                            job_desc: letterLabData.job_desc,
+                          };
+
+                          try {
+                            const res = await fetch(
+                              `${
+                                import.meta.env.VITE_API_BASE_URL
+                              }/lab/submit-final-data`,
+                              {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(payload),
+                              }
+                            );
+
+                            if (!res.ok) throw new Error("Server error");
+
+                            const responseData = await res.json();
+                            console.log(
+                              "✅ Feedback submitted successfully",
+                              responseData
+                            );
+
+                            // Update context with completed status and finalPreference
+                            if (
+                              responseData.completed !== undefined ||
+                              responseData.finalPreference !== undefined
+                            ) {
+                              setLetterLabData({
+                                ...letterLabData,
+                                completed: responseData.completed,
+                                finalPreference: responseData.finalPreference,
+                              });
+                            }
+
+                            setActiveTab("survey");
+                          } catch (err) {
+                            console.error(
+                              "❌ Feedback submission failed:",
+                              err
+                            );
+                            // Still navigate to survey even if submission fails
+                            setActiveTab("survey");
+                          }
                         }}
                         disabled={
                           getContentRating("draft2") === null ||
@@ -327,143 +426,6 @@ export function CoverLetterComparisonView() {
               </TabsContent>
             )}
 
-            {activeTab === "submit" && (
-              <TabsContent
-                value="submit"
-                className="h-full w-full flex items-center justify-center"
-              >
-                <div className="text-center space-y-6 max-w-lg">
-                  <h2 className="text-2xl font-semibold text-gray-800">
-                    🎉 Thank you for using our tool!
-                  </h2>
-                  <p className="text-gray-600">
-                    Your feedback helps us improve our cover letter generation
-                    process. Please take a moment to complete our survey to
-                    share your experience.
-                  </p>
-                  <div className="flex flex-col items-center space-y-4">
-                    <Button
-                      onClick={async () => {
-                        if (!letterLabData) return;
-
-                        // Calculate final preference
-                        const calculateFinalPreference = () => {
-                          if (!letterLabData?.chatRating || !draftMap)
-                            return null;
-
-                          const draft1Rating = letterLabData.chatRating.draft1;
-                          const draft2Rating = letterLabData.chatRating.draft2;
-
-                          if (
-                            draft1Rating === undefined ||
-                            draft2Rating === undefined ||
-                            draft1Rating === null ||
-                            draft2Rating === null
-                          )
-                            return null;
-
-                          // Determine which draft corresponds to initial/final
-                          const initialRating =
-                            draftMap.draft1 === "initial"
-                              ? draft1Rating
-                              : draft2Rating;
-                          const finalRating =
-                            draftMap.draft1 === "final"
-                              ? draft1Rating
-                              : draft2Rating;
-
-                          if (initialRating > finalRating) {
-                            return "control";
-                          } else if (finalRating > initialRating) {
-                            return "aligned";
-                          } else {
-                            return "tie";
-                          }
-                        };
-
-                        const finalPreference = calculateFinalPreference();
-
-                        const payload = {
-                          document_id: letterLabData.document_id,
-                          chatMessages: letterLabData.chatMessages ?? {},
-                          textFeedback: letterLabData.textFeedback ?? {},
-                          draftRating: letterLabData.chatRating ?? {},
-                          contentRepresentationRating:
-                            letterLabData.contentRepresentationRating ?? {},
-                          styleRepresentationRating:
-                            letterLabData.styleRepresentationRating ?? {},
-                          draftMapping: letterLabData.draftMapping ?? {},
-                          finalPreference,
-                          resume: letterLabData.resume,
-                          job_desc: letterLabData.job_desc,
-                        };
-
-                        try {
-                          const res = await fetch(
-                            `${
-                              import.meta.env.VITE_API_BASE_URL
-                            }/lab/submit-final-data`,
-                            {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify(payload),
-                            }
-                          );
-
-                          if (!res.ok) throw new Error("Server error");
-
-                          const responseData = await res.json();
-                          console.log(
-                            "✅ Feedback submitted successfully",
-                            responseData
-                          );
-
-                          // Update context with completed status and finalPreference
-                          if (
-                            responseData.completed !== undefined ||
-                            responseData.finalPreference !== undefined
-                          ) {
-                            setLetterLabData({
-                              ...letterLabData,
-                              completed: responseData.completed,
-                              finalPreference: responseData.finalPreference,
-                            });
-                          }
-
-                          setHasSubmitted(true);
-                        } catch (err) {
-                          console.error("❌ Feedback submission failed:", err);
-                        }
-                      }}
-                      variant="outline"
-                      className={`border-2 ${
-                        hasSubmitted
-                          ? "border-green-500 hover:border-green-600"
-                          : "border-orange-500 hover:border-orange-600"
-                      }`}
-                      disabled={hasSubmitted}
-                    >
-                      {hasSubmitted && (
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                      )}
-                      Submit
-                    </Button>
-                    {hasSubmitted && (
-                      <Button
-                        onClick={() => {
-                          setActiveTab("survey");
-                        }}
-                        variant="outline"
-                        className="border-2 border-orange-500 hover:border-orange-600"
-                      >
-                        Continue
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-            )}
-
             {activeTab === "survey" && (
               <TabsContent
                 value="survey"
@@ -471,12 +433,15 @@ export function CoverLetterComparisonView() {
               >
                 <div className="text-center space-y-6 max-w-lg">
                   <h2 className="text-2xl font-semibold text-gray-800">
-                    📝 Help Us Improve
+                    🎉 Thanks for your feedback!
                   </h2>
                   <p className="text-gray-600">
-                    Please take a moment to answer a few questions about your
-                    experience using our cover letter generation tool. Your
-                    feedback is invaluable in helping us improve our service.
+                    Your input helps us understand how LetterLab is working —
+                    and how we can make it even better for future users.
+                  </p>
+                  <p className="text-gray-600">
+                    📝 You’re now being directed to a short survey where you can
+                    share your experience and thoughts about the tool.
                   </p>
                   <div className="flex flex-col items-center space-y-4">
                     <Button
@@ -646,9 +611,9 @@ export function CoverLetterComparisonView() {
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 transition-colors ${
-                hasSubmitted
+                hasTakenSurvey
                   ? "border-green-500"
-                  : activeTab === "submit"
+                  : activeTab === "survey"
                   ? "border-orange-500 hover:border-orange-600"
                   : getContentRating("draft1") !== null &&
                     getStyleRating("draft1") !== null &&
@@ -661,7 +626,7 @@ export function CoverLetterComparisonView() {
                   ? "border-orange-500 hover:border-orange-600"
                   : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
               }`}
-              value="submit"
+              value="survey"
               disabled={
                 !(
                   getContentRating("draft1") !== null &&
@@ -674,24 +639,6 @@ export function CoverLetterComparisonView() {
                   letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                 )
               }
-            >
-              {hasSubmitted && (
-                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-              )}
-              Submit
-            </TabsTrigger>
-            <TabsTrigger
-              className={`py-2 px-5 border-2 transition-colors ${
-                hasTakenSurvey
-                  ? "border-green-500"
-                  : activeTab === "survey"
-                  ? "border-orange-500 hover:border-orange-600"
-                  : hasSubmitted
-                  ? "border-orange-500 hover:border-orange-600"
-                  : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
-              }`}
-              value="survey"
-              disabled={!hasSubmitted}
             >
               {hasTakenSurvey && (
                 <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
