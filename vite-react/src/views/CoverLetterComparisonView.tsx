@@ -583,7 +583,7 @@ export function CoverLetterComparisonView() {
                 letterLabData?.textFeedback?.draft1?.dislikes?.trim() && (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                 )}
-              Draft 1
+              Version 1
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 ${
@@ -607,7 +607,7 @@ export function CoverLetterComparisonView() {
                 letterLabData?.textFeedback?.draft2?.dislikes?.trim() && (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                 )}
-              Draft 2
+              Version 2
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 transition-colors ${
