@@ -7,7 +7,7 @@ from flask import session
 
 # GENERATION SERVICE FUNCTIONS
 from services.openai_service import generate_initial_cover_letter
-from services.openai_service import generate_review_all_view_intro
+from services.openai_service import generate_role_name
 from services.openai_service import generate_enactive_mastery_bullet_points
 from services.openai_service import generate_vicarious_experience_bullet_points
 from services.openai_service import generate_verbal_persuasion_bullet_points
@@ -68,19 +68,19 @@ def initialize():
             sys.stdout.flush()
 
         # REVIEW-ALL-VIEW INTRO
-        review_all_view_intro = retry_generation(
-            generate_review_all_view_intro,
+        role_name = retry_generation(
+            generate_role_name,
             validator_fn=is_valid_string_output,
             args=(job_desc,),
-            debug_label="Review-All-View Intro"
+            debug_label="Role Name"
         )
 
-        if not review_all_view_intro:
-            return jsonify({"error": "Failed to generate review-all-view intro"}), 500
+        if not role_name:
+            return jsonify({"error": "Failed to generate role_name"}), 500
 
 
         if DEBUG_GENERATION:
-            print(review_all_view_intro)
+            print(role_name)
             sys.stdout.flush()
 
         ### BULLET POINTS
@@ -195,7 +195,7 @@ def initialize():
             "resume": resume,
             "job_desc": job_desc,
             "initial_cover_letter": initial_cover_letter,
-            "review_all_view_intro": review_all_view_intro,
+            "role_name": role_name,
             "BSETB_enactive_mastery": zipped_enactive,
             "BSETB_vicarious_experience": zipped_vicarious,
             "BSETB_verbal_persuasion": zipped_verbal

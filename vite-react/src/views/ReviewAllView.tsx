@@ -168,15 +168,17 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       </h2>
       <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
         <p className="text-gray-700 whitespace-pre-line">
-          {letterLabData.review_all_view_intro}
+          {letterLabData.role_name}
         </p>
       </div>
 
       {beliefs.map(({ key, title }, index) => {
         const bullets = getBulletTexts(letterLabData, key);
-        
+
         // Find the first incomplete section
-        const firstIncompleteIndex = beliefs.findIndex(belief => !isSectionComplete(belief.key));
+        const firstIncompleteIndex = beliefs.findIndex(
+          (belief) => !isSectionComplete(belief.key)
+        );
         const isNextAction = index === firstIncompleteIndex;
 
         return (
@@ -189,11 +191,11 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               <Button
                 variant="outline"
                 className={`shrink-0 ${
-                  isSectionComplete(key) 
-                    ? 'border-2 border-green-500 hover:border-green-600' 
-                    : isNextAction 
-                      ? 'border-2 border-orange-500 hover:border-orange-600'
-                      : ''
+                  isSectionComplete(key)
+                    ? "border-2 border-green-500 hover:border-green-600"
+                    : isNextAction
+                    ? "border-2 border-orange-500 hover:border-orange-600"
+                    : ""
                 }`}
                 onClick={() => navigate(`/review-section/${key}`)}
               >
@@ -216,7 +218,11 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       })}
       <Button
         variant="outline"
-        className={`mt-8 w-full ${allSectionsComplete() && !isFinalizing ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
+        className={`mt-8 w-full ${
+          allSectionsComplete() && !isFinalizing
+            ? "border-2 border-orange-500 hover:border-orange-600"
+            : ""
+        }`}
         onClick={handleFeedbackSubmission}
         disabled={!allSectionsComplete() || isFinalizing}
       >

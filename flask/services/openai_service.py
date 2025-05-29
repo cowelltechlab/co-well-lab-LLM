@@ -40,31 +40,22 @@ Job Description:
         return "Error generating initial cover letter."
 
 # Task 2
-def generate_review_all_view_intro(job_desc):
+def generate_role_name(job_desc):
     prompt = f"""
-You are helping build a friendly and helpful AI career assistant.
-
-Extract the job title and organization name from the job description below. Then, use them to write a short, welcoming intro message like the following:
-
-Example format:
-"Here’s a personalized cover letter outline we’ve created for you, tailored specifically for the [job title] role at [organization].
-
-As you read through each section, you’ll see the thinking behind the wording and structure — why certain skills are emphasized, how the language reflects the job description, and where your strengths shine through.
-
-Take some time to review each section. If something doesn’t feel quite right, let us know! You can agree with our choices or suggest changes — we’re here to build this with you, not just for you."
+Please use the provided job description and return only a 1-3 word role name (e.g., "Software Engineer", "Senior Product Manager"), nothing more. No opening or closing greetings, just the role name. If there is any problem extracting the role name, you may default to "role" for the role name.
 
 Job description:
 {job_desc}
 
-Only return the final formatted message. Do not include any explanation.
+Only return the job title/role name. Do not include any explanation.
 """
 
     try:
         response = llmchat.invoke(prompt)
         return response.content.strip()
     except Exception as e:
-        print("Error generating review-all-view intro:", e)
-        return "Error generating intro text."
+        print("Error generating role name:", e)
+        return "Error generating role name."
 
 
 # Task 3
