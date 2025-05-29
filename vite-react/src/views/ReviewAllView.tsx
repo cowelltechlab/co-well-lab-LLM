@@ -168,7 +168,24 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       </h2>
       <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
         <p className="text-gray-700 whitespace-pre-line">
-          {letterLabData.role_name}
+          Below are <strong>3 sections</strong> with different ways of
+          expressing your experience for the{" "}
+          <strong>{letterLabData.role_name}</strong> role.
+        </p>
+        <p className="mt-2">
+          👉 Click “Review Section” to deep dive into the statements and review
+          them. For each one, you’ll:
+        </p>
+        <ul className="list-disc list-inside space-y-1 mt-2 ml-4">
+          <li>✅ Rate how well it fits you</li>
+          <li>
+            💬 Leave <strong>clear, specific feedback</strong> on what you like
+            or want changed
+          </li>
+        </ul>
+        <p className="mt-2">
+          Your input will help LetterLab craft a cover letter that truly
+          reflects your voice, strengths, and goals.
         </p>
       </div>
 

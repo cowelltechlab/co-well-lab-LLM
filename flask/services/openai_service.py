@@ -42,7 +42,7 @@ Job Description:
 # Task 2
 def generate_role_name(job_desc):
     prompt = f"""
-Please use the provided job description and return only a 1-3 word role name (e.g., "Software Engineer", "Senior Product Manager"), nothing more. No opening or closing greetings, just the role name. If there is any problem extracting the role name, you may default to "role" for the role name.
+Please use the provided job description and return only a 1-3 word role name (e.g., "Software Engineer", "Senior Product Manager"), nothing more. No opening or closing greetings, just the role name. If there is any problem extracting the role name, you may default to "role_name" for the role name.
 
 Job description:
 {job_desc}
