@@ -25,7 +25,7 @@ export interface CoverLetterResponse {
   resume?: string;
   job_desc?: string;
   initial_cover_letter?: string;
-  review_all_view_intro?: string;
+  role_name?: string;
   BSETB_enactive_mastery?: BulletPointGroup;
   BSETB_vicarious_experience?: BulletPointGroup;
   BSETB_verbal_persuasion?: BulletPointGroup;

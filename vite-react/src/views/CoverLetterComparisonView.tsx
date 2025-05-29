@@ -12,7 +12,6 @@ import { CheckCircle } from "lucide-react";
 export function CoverLetterComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
   const [activeTab, setActiveTab] = useState("intro");
-  const [hasSubmitted, setHasSubmitted] = useState(false);
   const [hasTakenSurvey, setHasTakenSurvey] = useState(false);
 
   const navigate = useNavigate();
@@ -103,36 +102,27 @@ export function CoverLetterComparisonView() {
                 <div className="max-w-2xl w-full px-6 space-y-6 text-gray-700 leading-relaxed text-left">
                   <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200 space-y-4">
                     <p>
-                      Welcome! 🎉 You’ve already done the hard part by getting
-                      started — now let’s refine your cover letter so it truly
-                      represents you.
+                      🎉 Thanks for helping LetterLab understand you and your
+                      experiences better!
                     </p>
                     <p>
-                      In this next step, we’ll ask you to read and respond to
-                      two drafts of your cover letter.
+                      In this next step, we’ll show you 2 versions of your cover
+                      letter.
                     </p>
                     <ul className="list-disc ml-6 space-y-1">
                       <li>
-                        📝 Each draft is built from your resume and the job
-                        description, but with different stylistic choices.
+                        📝 Each version is built from your resume and the job
+                        description, but with different stylistic choices
                       </li>
                       <li>
-                        👍👎 As you review, mark what you like and what you’d
-                        change.
+                        💬 As you review, leave feedback on what you like and
+                        what felt missed the mark
                       </li>
                       <li>
-                        💬 You’ll also explain your preferences so we can
-                        improve the next version.
-                      </li>
-                      <li>
-                        ⭐ At the end, you’ll pick the draft you prefer — and
-                        we’ll use that feedback to generate your final letter.
+                        ⭐ Finally, rate the draft for how well it represents
+                        you
                       </li>
                     </ul>
-                    <p>
-                      Your feedback helps shape a letter that’s not only
-                      professional, but also a true reflection of your voice.
-                    </p>
                   </div>
 
                   <div className="pt-4 text-center">
@@ -318,8 +308,108 @@ export function CoverLetterComparisonView() {
                             ? "border-2 border-orange-500 hover:border-orange-600"
                             : ""
                         }
-                        onClick={() => {
-                          setActiveTab("submit");
+                        onClick={async () => {
+                          // Submit data before moving to survey
+                          if (!letterLabData) return;
+
+                          // Calculate final preference based on content ratings
+                          const calculateFinalPreference = () => {
+                            if (
+                              !letterLabData?.contentRepresentationRating ||
+                              !draftMap
+                            )
+                              return null;
+
+                            const draft1Rating =
+                              letterLabData.contentRepresentationRating.draft1;
+                            const draft2Rating =
+                              letterLabData.contentRepresentationRating.draft2;
+
+                            if (
+                              draft1Rating === undefined ||
+                              draft2Rating === undefined ||
+                              draft1Rating === null ||
+                              draft2Rating === null
+                            )
+                              return null;
+
+                            // Determine which draft corresponds to initial/final
+                            const initialRating =
+                              draftMap.draft1 === "initial"
+                                ? draft1Rating
+                                : draft2Rating;
+                            const finalRating =
+                              draftMap.draft1 === "final"
+                                ? draft1Rating
+                                : draft2Rating;
+
+                            if (initialRating > finalRating) {
+                              return "control";
+                            } else if (finalRating > initialRating) {
+                              return "aligned";
+                            } else {
+                              return "tie";
+                            }
+                          };
+
+                          const finalPreference = calculateFinalPreference();
+
+                          const payload = {
+                            document_id: letterLabData.document_id,
+                            chatMessages: letterLabData.chatMessages ?? {},
+                            textFeedback: letterLabData.textFeedback ?? {},
+                            draftRating: letterLabData.chatRating ?? {},
+                            contentRepresentationRating:
+                              letterLabData.contentRepresentationRating ?? {},
+                            styleRepresentationRating:
+                              letterLabData.styleRepresentationRating ?? {},
+                            draftMapping: letterLabData.draftMapping ?? {},
+                            finalPreference,
+                            resume: letterLabData.resume,
+                            job_desc: letterLabData.job_desc,
+                          };
+
+                          try {
+                            const res = await fetch(
+                              `${
+                                import.meta.env.VITE_API_BASE_URL
+                              }/lab/submit-final-data`,
+                              {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(payload),
+                              }
+                            );
+
+                            if (!res.ok) throw new Error("Server error");
+
+                            const responseData = await res.json();
+                            console.log(
+                              "✅ Feedback submitted successfully",
+                              responseData
+                            );
+
+                            // Update context with completed status and finalPreference
+                            if (
+                              responseData.completed !== undefined ||
+                              responseData.finalPreference !== undefined
+                            ) {
+                              setLetterLabData({
+                                ...letterLabData,
+                                completed: responseData.completed,
+                                finalPreference: responseData.finalPreference,
+                              });
+                            }
+
+                            setActiveTab("survey");
+                          } catch (err) {
+                            console.error(
+                              "❌ Feedback submission failed:",
+                              err
+                            );
+                            // Still navigate to survey even if submission fails
+                            setActiveTab("survey");
+                          }
                         }}
                         disabled={
                           getContentRating("draft2") === null ||
@@ -336,143 +426,6 @@ export function CoverLetterComparisonView() {
               </TabsContent>
             )}
 
-            {activeTab === "submit" && (
-              <TabsContent
-                value="submit"
-                className="h-full w-full flex items-center justify-center"
-              >
-                <div className="text-center space-y-6 max-w-lg">
-                  <h2 className="text-2xl font-semibold text-gray-800">
-                    🎉 Thank you for using our tool!
-                  </h2>
-                  <p className="text-gray-600">
-                    Your feedback helps us improve our cover letter generation
-                    process. Please take a moment to complete our survey to
-                    share your experience.
-                  </p>
-                  <div className="flex flex-col items-center space-y-4">
-                    <Button
-                      onClick={async () => {
-                        if (!letterLabData) return;
-
-                        // Calculate final preference
-                        const calculateFinalPreference = () => {
-                          if (!letterLabData?.chatRating || !draftMap)
-                            return null;
-
-                          const draft1Rating = letterLabData.chatRating.draft1;
-                          const draft2Rating = letterLabData.chatRating.draft2;
-
-                          if (
-                            draft1Rating === undefined ||
-                            draft2Rating === undefined ||
-                            draft1Rating === null ||
-                            draft2Rating === null
-                          )
-                            return null;
-
-                          // Determine which draft corresponds to initial/final
-                          const initialRating =
-                            draftMap.draft1 === "initial"
-                              ? draft1Rating
-                              : draft2Rating;
-                          const finalRating =
-                            draftMap.draft1 === "final"
-                              ? draft1Rating
-                              : draft2Rating;
-
-                          if (initialRating > finalRating) {
-                            return "control";
-                          } else if (finalRating > initialRating) {
-                            return "aligned";
-                          } else {
-                            return "tie";
-                          }
-                        };
-
-                        const finalPreference = calculateFinalPreference();
-
-                        const payload = {
-                          document_id: letterLabData.document_id,
-                          chatMessages: letterLabData.chatMessages ?? {},
-                          textFeedback: letterLabData.textFeedback ?? {},
-                          draftRating: letterLabData.chatRating ?? {},
-                          contentRepresentationRating:
-                            letterLabData.contentRepresentationRating ?? {},
-                          styleRepresentationRating:
-                            letterLabData.styleRepresentationRating ?? {},
-                          draftMapping: letterLabData.draftMapping ?? {},
-                          finalPreference,
-                          resume: letterLabData.resume,
-                          job_desc: letterLabData.job_desc,
-                        };
-
-                        try {
-                          const res = await fetch(
-                            `${
-                              import.meta.env.VITE_API_BASE_URL
-                            }/lab/submit-final-data`,
-                            {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json" },
-                              body: JSON.stringify(payload),
-                            }
-                          );
-
-                          if (!res.ok) throw new Error("Server error");
-
-                          const responseData = await res.json();
-                          console.log(
-                            "✅ Feedback submitted successfully",
-                            responseData
-                          );
-
-                          // Update context with completed status and finalPreference
-                          if (
-                            responseData.completed !== undefined ||
-                            responseData.finalPreference !== undefined
-                          ) {
-                            setLetterLabData({
-                              ...letterLabData,
-                              completed: responseData.completed,
-                              finalPreference: responseData.finalPreference,
-                            });
-                          }
-
-                          setHasSubmitted(true);
-                        } catch (err) {
-                          console.error("❌ Feedback submission failed:", err);
-                        }
-                      }}
-                      variant="outline"
-                      className={`border-2 ${
-                        hasSubmitted
-                          ? "border-green-500 hover:border-green-600"
-                          : "border-orange-500 hover:border-orange-600"
-                      }`}
-                      disabled={hasSubmitted}
-                    >
-                      {hasSubmitted && (
-                        <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-                      )}
-                      Submit
-                    </Button>
-                    {hasSubmitted && (
-                      <Button
-                        onClick={() => {
-                          setActiveTab("survey");
-                        }}
-                        variant="outline"
-                        className="border-2 border-orange-500 hover:border-orange-600"
-                      >
-                        Continue
-                      </Button>
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-            )}
-
             {activeTab === "survey" && (
               <TabsContent
                 value="survey"
@@ -480,17 +433,23 @@ export function CoverLetterComparisonView() {
               >
                 <div className="text-center space-y-6 max-w-lg">
                   <h2 className="text-2xl font-semibold text-gray-800">
-                    📝 Help Us Improve
+                    🎉 Thanks for your feedback!
                   </h2>
                   <p className="text-gray-600">
-                    Please take a moment to answer a few questions about your
-                    experience using our cover letter generation tool. Your
-                    feedback is invaluable in helping us improve our service.
+                    Your input helps us understand how LetterLab is working —
+                    and how we can make it even better for future users.
+                  </p>
+                  <p className="text-gray-600">
+                    📝 You’re now being directed to a short survey where you can
+                    share your experience and thoughts about the tool.
                   </p>
                   <div className="flex flex-col items-center space-y-4">
                     <Button
                       onClick={() => {
-                        window.open("https://gatech.co1.qualtrics.com/jfe/form/SV_42yH2yLMgouPMeq", "_blank");
+                        window.open(
+                          "https://gatech.co1.qualtrics.com/jfe/form/SV_42yH2yLMgouPMeq",
+                          "_blank"
+                        );
 
                         // Set up listener for when user returns to this tab
                         const handleFocus = () => {
@@ -624,7 +583,7 @@ export function CoverLetterComparisonView() {
                 letterLabData?.textFeedback?.draft1?.dislikes?.trim() && (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                 )}
-              Draft 1
+              Version 1
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 ${
@@ -648,13 +607,13 @@ export function CoverLetterComparisonView() {
                 letterLabData?.textFeedback?.draft2?.dislikes?.trim() && (
                   <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
                 )}
-              Draft 2
+              Version 2
             </TabsTrigger>
             <TabsTrigger
               className={`py-2 px-5 border-2 transition-colors ${
-                hasSubmitted
+                hasTakenSurvey
                   ? "border-green-500"
-                  : activeTab === "submit"
+                  : activeTab === "survey"
                   ? "border-orange-500 hover:border-orange-600"
                   : getContentRating("draft1") !== null &&
                     getStyleRating("draft1") !== null &&
@@ -667,7 +626,7 @@ export function CoverLetterComparisonView() {
                   ? "border-orange-500 hover:border-orange-600"
                   : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
               }`}
-              value="submit"
+              value="survey"
               disabled={
                 !(
                   getContentRating("draft1") !== null &&
@@ -680,24 +639,6 @@ export function CoverLetterComparisonView() {
                   letterLabData?.textFeedback?.draft2?.dislikes?.trim()
                 )
               }
-            >
-              {hasSubmitted && (
-                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
-              )}
-              Submit
-            </TabsTrigger>
-            <TabsTrigger
-              className={`py-2 px-5 border-2 transition-colors ${
-                hasTakenSurvey
-                  ? "border-green-500"
-                  : activeTab === "survey"
-                  ? "border-orange-500 hover:border-orange-600"
-                  : hasSubmitted
-                  ? "border-orange-500 hover:border-orange-600"
-                  : "border-gray-300 opacity-50 cursor-not-allowed pointer-events-none"
-              }`}
-              value="survey"
-              disabled={!hasSubmitted}
             >
               {hasTakenSurvey && (
                 <CheckCircle className="w-5 h-5 text-green-600 mr-2" />

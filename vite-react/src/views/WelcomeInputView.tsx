@@ -47,36 +47,36 @@ export function WelcomeInputView() {
 
       <CardContent className="bg-blue-100/70 p-4 rounded-lg border border-blue-200 space-y-4 text-left text-gray-700 leading-relaxed">
         <p>
-          Hi there! 👋 Welcome to <strong>LetterLab</strong>, your personalized
-          Cover Letter Builder — a space designed to help you create a cover
-          letter that’s not only professional, but also a true reflection of
-          your skills, goals, and personality.
+          <strong>👋 Welcome to LetterLab!</strong>
         </p>
         <p>
-          We believe the best cover letters don’t come from templates or generic
-          buzzwords — they come from <em>you</em>. A great cover letter clearly
-          shows how your strengths and experiences connect to the specific job
-          you’re applying for. That’s why we’ll be using your resume as a
-          starting point to highlight your qualifications in a way that directly
-          aligns with the job description. Think of it as translating your
-          resume into a story that fits the role.
+          📄 Letterlab will use your <strong>resume</strong> and the{" "}
+          <strong>job description you provide</strong> to highlight your
+          strengths and show why you're a great fit — no generic templates here.
         </p>
         <p>
-          But we’re not stopping there. We’ll also be using{" "}
-          <strong>Bandura’s Self-Efficacy Theory</strong> to guide how we build
-          this content — together. This means focusing on what you believe you
-          can do, what you’ve already succeeded at, and where you’re most
-          confident. We’ll reflect on your past achievements (
-          <em>mastery experiences</em>), consider how others’ successes inspire
-          you (<em>vicarious experiences</em>), and even use affirming,
-          encouraging language (<em>verbal persuasion</em>) to help you express
-          yourself with confidence.
+          🧠 First, you’ll review a few statements about your experience and how
+          it relates to the job you want. You’ll rate each one and let us know
+          what feels right (or doesn’t).
         </p>
         <p>
-          Together, we’ll make sure your cover letter feels like{" "}
-          <strong>you</strong> — clear, capable, and ready for the opportunity
-          ahead. Add your resume and the job you’d like to apply for below and
-          let’s get started!
+          ✍️ Then, LetterLab will create{" "}
+          <strong>two cover letter versions</strong> based on your feedback. For
+          each, you’ll:
+          <br />
+          👍 Tell us what you like
+          <br />
+          👎 Note what’s not quite right
+          <br />⭐ Give it a satisfaction rating
+        </p>
+        <p>
+          📋 Afterward, there’s a short survey about your experience using
+          LetterLab. Feel free to skip anything you don’t want to answer — and
+          you can stop at any time.
+        </p>
+        <p>
+          ⬇️ Upload your <strong>resume</strong> and the{" "}
+          <strong>job you’re applying for</strong> to get started!
         </p>
       </CardContent>
 

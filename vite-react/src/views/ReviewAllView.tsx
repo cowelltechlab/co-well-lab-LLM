@@ -168,15 +168,34 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       </h2>
       <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
         <p className="text-gray-700 whitespace-pre-line">
-          {letterLabData.review_all_view_intro}
+          Below are <strong>3 sections</strong> with different ways of
+          expressing your experience for the{" "}
+          <strong>{letterLabData.role_name}</strong> role.
+        </p>
+        <p className="mt-2">
+          👉 Click “Review Section” to deep dive into the statements and review
+          them. For each one, you’ll:
+        </p>
+        <ul className="list-disc list-inside space-y-1 mt-2 ml-4">
+          <li>✅ Rate how well it fits you</li>
+          <li>
+            💬 Leave <strong>clear, specific feedback</strong> on what you like
+            or want changed
+          </li>
+        </ul>
+        <p className="mt-2">
+          Your input will help LetterLab craft a cover letter that truly
+          reflects your voice, strengths, and goals.
         </p>
       </div>
 
       {beliefs.map(({ key, title }, index) => {
         const bullets = getBulletTexts(letterLabData, key);
-        
+
         // Find the first incomplete section
-        const firstIncompleteIndex = beliefs.findIndex(belief => !isSectionComplete(belief.key));
+        const firstIncompleteIndex = beliefs.findIndex(
+          (belief) => !isSectionComplete(belief.key)
+        );
         const isNextAction = index === firstIncompleteIndex;
 
         return (
@@ -189,11 +208,11 @@ Encouragement, positive feedback, and managing your emotional state under pressu
               <Button
                 variant="outline"
                 className={`shrink-0 ${
-                  isSectionComplete(key) 
-                    ? 'border-2 border-green-500 hover:border-green-600' 
-                    : isNextAction 
-                      ? 'border-2 border-orange-500 hover:border-orange-600'
-                      : ''
+                  isSectionComplete(key)
+                    ? "border-2 border-green-500 hover:border-green-600"
+                    : isNextAction
+                    ? "border-2 border-orange-500 hover:border-orange-600"
+                    : ""
                 }`}
                 onClick={() => navigate(`/review-section/${key}`)}
               >
@@ -216,7 +235,11 @@ Encouragement, positive feedback, and managing your emotional state under pressu
       })}
       <Button
         variant="outline"
-        className={`mt-8 w-full ${allSectionsComplete() && !isFinalizing ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
+        className={`mt-8 w-full ${
+          allSectionsComplete() && !isFinalizing
+            ? "border-2 border-orange-500 hover:border-orange-600"
+            : ""
+        }`}
         onClick={handleFeedbackSubmission}
         disabled={!allSectionsComplete() || isFinalizing}
       >
