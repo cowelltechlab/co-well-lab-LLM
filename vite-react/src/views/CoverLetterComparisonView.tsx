@@ -103,36 +103,27 @@ export function CoverLetterComparisonView() {
                 <div className="max-w-2xl w-full px-6 space-y-6 text-gray-700 leading-relaxed text-left">
                   <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200 space-y-4">
                     <p>
-                      Welcome! 🎉 You’ve already done the hard part by getting
-                      started — now let’s refine your cover letter so it truly
-                      represents you.
+                      🎉 Thanks for helping LetterLab understand you and your
+                      experiences better!
                     </p>
                     <p>
-                      In this next step, we’ll ask you to read and respond to
-                      two drafts of your cover letter.
+                      In this next step, we’ll show you 2 versions of your cover
+                      letter.
                     </p>
                     <ul className="list-disc ml-6 space-y-1">
                       <li>
-                        📝 Each draft is built from your resume and the job
-                        description, but with different stylistic choices.
+                        📝 Each version is built from your resume and the job
+                        description, but with different stylistic choices
                       </li>
                       <li>
-                        👍👎 As you review, mark what you like and what you’d
-                        change.
+                        💬 As you review, leave feedback on what you like and
+                        what felt missed the mark
                       </li>
                       <li>
-                        💬 You’ll also explain your preferences so we can
-                        improve the next version.
-                      </li>
-                      <li>
-                        ⭐ At the end, you’ll pick the draft you prefer — and
-                        we’ll use that feedback to generate your final letter.
+                        ⭐ Finally, rate the draft for how well it represents
+                        you
                       </li>
                     </ul>
-                    <p>
-                      Your feedback helps shape a letter that’s not only
-                      professional, but also a true reflection of your voice.
-                    </p>
                   </div>
 
                   <div className="pt-4 text-center">
@@ -490,7 +481,10 @@ export function CoverLetterComparisonView() {
                   <div className="flex flex-col items-center space-y-4">
                     <Button
                       onClick={() => {
-                        window.open("https://gatech.co1.qualtrics.com/jfe/form/SV_42yH2yLMgouPMeq", "_blank");
+                        window.open(
+                          "https://gatech.co1.qualtrics.com/jfe/form/SV_42yH2yLMgouPMeq",
+                          "_blank"
+                        );
 
                         // Set up listener for when user returns to this tab
                         const handleFocus = () => {
