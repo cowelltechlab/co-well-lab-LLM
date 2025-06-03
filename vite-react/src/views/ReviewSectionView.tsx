@@ -21,15 +21,15 @@ const beliefSectionMeta: Record<
 > = {
   BSETB_enactive_mastery: {
     title: "Enactive Mastery Experience",
-    intro: `This section highlights the moments in your career where you’ve succeeded at something meaningful — where you’ve shown, through action, that you’re competent and capable...`,
+    intro: `These bullets highlight instances in your career when you’ve done something important and done it well. In other words: when your actions proved that you’re skilled and capable.`,
   },
   BSETB_vicarious_experience: {
     title: "Vicarious Experience / Social Modeling",
-    intro: `This section focuses on how you’ve drawn confidence by observing or learning from others — especially those similar to you...`,
+    intro: `These bullets highlight how watching, interacting with, or learning from others — especially people like you — has helped you build confidence and competence.`,
   },
   BSETB_verbal_persuasion: {
     title: "Verbal Persuasion / Physiological & Affective States",
-    intro: `This section explores encouragement, affirmations, and your ability to manage emotion under pressure — how those factors boost your sense of self-efficacy...`,
+    intro: `These bullets highlight your ability to stay calm, motivated, and emotionally steady under pressure have contributed to your confidence and success.`,
   },
 };
 
@@ -144,12 +144,23 @@ export function ReviewSectionView() {
       <h2 className="text-xl font-bold">Let’s Review Your {title} Section</h2>
       <div className="bg-blue-100/70 p-4 rounded-lg border border-blue-200">
         <p className="whitespace-pre-line text-gray-700">{intro}</p>
+        <p className="text-gray-700 mt-2 ml-4">
+          ✅ Rate how well it fits <em>you</em>
+        </p>
+        <p className="text-gray-700 mt-2 ml-4">
+          💬 Leave <strong>clear, specific feedback</strong> on what you like or
+          want changed
+        </p>
+        <p className="text-gray-700 mt-2">
+          Your input will help LetterLab craft a cover letter that truly
+          reflects your voice, strengths, and goals.
+        </p>
       </div>
 
       <h3 className="text-lg font-semibold mt-6"> {title} </h3>
 
-      <Accordion 
-        type="multiple" 
+      <Accordion
+        type="multiple"
         className="space-y-4"
         value={openItems}
         onValueChange={setOpenItems}
@@ -157,12 +168,13 @@ export function ReviewSectionView() {
         {Object.entries(bulletPoints ?? {}).map(([bpKey, bp], index) => {
           // Find the first incomplete bullet
           const bulletKeys = Object.keys(bulletPoints ?? {});
-          const firstIncompleteIndex = bulletKeys.findIndex(key => 
-            !sectionFeedback[key]?.rating || 
-            !sectionFeedback[key]?.qualitative?.trim()
+          const firstIncompleteIndex = bulletKeys.findIndex(
+            (key) =>
+              !sectionFeedback[key]?.rating ||
+              !sectionFeedback[key]?.qualitative?.trim()
           );
           const isNextAction = index === firstIncompleteIndex;
-          
+
           return (
             <BulletAccordionItem
               key={bpKey}
@@ -179,11 +191,15 @@ export function ReviewSectionView() {
           );
         })}
       </Accordion>
-      <Button 
+      <Button
         variant="outline"
-        onClick={handleComplete} 
-        disabled={!allComplete} 
-        className={`mt-8 ${allComplete ? 'border-2 border-orange-500 hover:border-orange-600' : ''}`}
+        onClick={handleComplete}
+        disabled={!allComplete}
+        className={`mt-8 ${
+          allComplete
+            ? "border-2 border-orange-500 hover:border-orange-600"
+            : ""
+        }`}
       >
         {allComplete && <CheckCircle className="w-5 h-5 text-green-600" />}
         Complete Section Review
