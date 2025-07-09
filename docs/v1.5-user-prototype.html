@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Alignment Research Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .screen {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .welcome-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-header h1 {
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .process-step {
+            background: #e8f4fd;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #2196f3;
+        }
+
+        .upload-section {
+            margin: 30px 0;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #fafafa;
+        }
+
+        .upload-area:hover {
+            border-color: #2196f3;
+            background: #f0f8ff;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+        }
+
+        .btn {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #1976d2;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .profile-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #dee2e6;
+        }
+
+        .bullet-item {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .bullet-text {
+            font-size: 16px;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .rationale {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 20px;
+            border-left: 3px solid #28a745;
+        }
+
+        .rating-section {
+            margin: 20px 0;
+        }
+
+        .rating-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 500px;
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+        }
+
+        .radio-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .radio-item input[type="radio"] {
+            transform: scale(1.2);
+        }
+
+        .feedback-area {
+            margin: 15px 0;
+        }
+
+        .feedback-area textarea {
+            min-height: 80px;
+        }
+
+        .iteration-counter {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: 500;
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .comparison-panel {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            border: 2px solid #e1e5e9;
+        }
+
+        .comparison-panel h3 {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .control-panel {
+            border-color: #ffc107;
+        }
+
+        .aligned-panel {
+            border-color: #28a745;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e5e9;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2196f3, #21cbf3);
+            transition: width 0.3s ease;
+        }
+
+        .qual-collection {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .qual-collection h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+            
+            .screen {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill" style="width: 14%"></div>
+        </div>
+
+        <!-- Screen 1: Upload -->
+        <div class="screen active" id="screen1">
+            <div class="welcome-header">
+                <h1>Welcome to LL.me: Collaborative Alignment Tool</h1>
+                <p>Thank you for participating in this study! This tool is designed to explore how you and AI can work together to create a personal profile statement that truly reflects your identity, values, and priorities.</p>
+            </div>
+
+            <div class="process-step">
+                <p>To start, you'll paste in your resume and a job description.</p>
+            </div>
+
+            <div class="process-step">
+                <p>Then, you'll read a short profile statement generated by the tool, rate how well it reflects you, and provide feedback on it.</p>
+            </div>
+
+            <div class="process-step">
+                <p>After that, you'll collaborate with the tool to refine and create a new profile statement that better aligns with your goals and self-understanding.</p>
+            </div>
+
+            <div class="upload-section">
+                <h3>📄 Upload your resume and the job you're applying for to get started!</h3>
+                
+                <div class="upload-area">
+                    <p><strong>Paste Your Resume</strong></p>
+                    <textarea id="resumeText" placeholder="Paste your resume content here..."></textarea>
+                </div>
+
+                <div class="upload-area">
+                    <p><strong>Paste Job Description</strong></p>
+                    <textarea id="jobText" placeholder="Paste the job description here..."></textarea>
+                </div>
+
+                <button class="btn" onclick="generateProfile()">Generate Profile Statement</button>
+            </div>
+        </div>
+
+        <!-- Screen 2: Control Profile with Qualitative Data Collection -->
+        <div class="screen" id="screen2">
+            <h2>Initial Profile Generated</h2>
+            <p>Here's an initial professional profile based on your resume and the job description:</p>
+
+            <div class="profile-section">
+                <h3>Professional Profile</h3>
+                <p id="controlProfile">As a dedicated software engineer with 4+ years of experience in full-stack development, I bring a proven track record of delivering scalable web applications and leading cross-functional teams. My expertise in React, Node.js, and cloud technologies, combined with my passion for user-centered design, positions me to drive innovation and technical excellence in fast-paced environments. I excel at translating complex business requirements into elegant technical solutions while maintaining a focus on code quality and team collaboration.</p>
+            </div>
+
+            <div class="qual-collection">
+                <h4>📝 Please rate and share your thoughts on this initial profile:</h4>
+                
+                <!-- Likert Scales -->
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>The personal profile statement accurately represents me.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="1" id="controlAccuracy_1">
+                                    <label for="controlAccuracy_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="2" id="controlAccuracy_2">
+                                    <label for="controlAccuracy_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="3" id="controlAccuracy_3">
+                                    <label for="controlAccuracy_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="4" id="controlAccuracy_4">
+                                    <label for="controlAccuracy_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="5" id="controlAccuracy_5">
+                                    <label for="controlAccuracy_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="6" id="controlAccuracy_6">
+                                    <label for="controlAccuracy_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAccuracy" value="7" id="controlAccuracy_7">
+                                    <label for="controlAccuracy_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>I felt in control of how I was represented by the AI tool.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="1" id="controlControl_1">
+                                    <label for="controlControl_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="2" id="controlControl_2">
+                                    <label for="controlControl_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="3" id="controlControl_3">
+                                    <label for="controlControl_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="4" id="controlControl_4">
+                                    <label for="controlControl_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="5" id="controlControl_5">
+                                    <label for="controlControl_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="6" id="controlControl_6">
+                                    <label for="controlControl_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlControl" value="7" id="controlControl_7">
+                                    <label for="controlControl_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>The process allowed me to express my identity in my own words.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="1" id="controlExpression_1">
+                                    <label for="controlExpression_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="2" id="controlExpression_2">
+                                    <label for="controlExpression_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="3" id="controlExpression_3">
+                                    <label for="controlExpression_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="4" id="controlExpression_4">
+                                    <label for="controlExpression_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="5" id="controlExpression_5">
+                                    <label for="controlExpression_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="6" id="controlExpression_6">
+                                    <label for="controlExpression_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlExpression" value="7" id="controlExpression_7">
+                                    <label for="controlExpression_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>I was satisfied with the alignment between my intended identity and the AI output.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="1" id="controlAlignment_1">
+                                    <label for="controlAlignment_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="2" id="controlAlignment_2">
+                                    <label for="controlAlignment_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="3" id="controlAlignment_3">
+                                    <label for="controlAlignment_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="4" id="controlAlignment_4">
+                                    <label for="controlAlignment_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="5" id="controlAlignment_5">
+                                    <label for="controlAlignment_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="6" id="controlAlignment_6">
+                                    <label for="controlAlignment_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="controlAlignment" value="7" id="controlAlignment_7">
+                                    <label for="controlAlignment_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>What do you like about this description?</strong></label>
+                    <textarea id="controlLikes" placeholder="What resonates with you about how you're described here?"></textarea>
+                </div>
+                <div style="margin: 15px 0;">
+                    <label><strong>What don't you like or what feels inaccurate?</strong></label>
+                    <textarea id="controlDislikes" placeholder="What doesn't feel right or is missing from this description?"></textarea>
+                </div>
+                <div style="margin: 15px 0;">
+                    <label><strong>How would you change it?</strong></label>
+                    <textarea id="controlChanges" placeholder="What specific changes would make this better represent you?"></textarea>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToScreen(1)">Back</button>
+                <button class="btn" onclick="startBulletRating()">Continue to Experience Review</button>
+            </div>
+        </div>
+
+        <!-- Screen 3-5: Single Bullet Rating Iterations -->
+        <div class="screen" id="screen3">
+            <div class="iteration-counter">
+                Bullet <span id="currentBulletNumber">1</span> of 3 - Iteration <span id="iterationNumber">1</span>
+            </div>
+
+            <h2>Review Your Experience Statement</h2>
+            <p>Below is a statement about your experience and how it relates to the job description. This reflects how you might present yourself to match what the job is looking for.</p>
+            <p><strong>Your task is to evaluate this statement—not for how polished or professional it sounds, but for how well it represents you.</strong></p>
+
+            <div id="currentBulletContainer">
+                <!-- Single bullet will be dynamically inserted here -->
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToScreen(2)">Back</button>
+                <button class="btn" id="regenerateBtn" onclick="regenerateCurrentBullet()">Regenerate with Feedback</button>
+                <button class="btn" id="doneBtn" onclick="finishCurrentBullet()" style="background: #28a745;">All Done - Next Bullet</button>
+            </div>
+        </div>
+
+        <!-- Screen 6: Aligned Profile -->
+        <div class="screen" id="screen6">
+            <h2>Your Refined Profile</h2>
+            <p>Based on your feedback, here's your updated professional profile:</p>
+
+            <div class="profile-section">
+                <h3>Aligned Professional Profile</h3>
+                <p id="alignedProfile"></p>
+            </div>
+
+            <div class="qual-collection">
+                <h4>📝 Please rate and share your thoughts on this refined profile:</h4>
+                
+                <!-- Likert Scales -->
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>The personal profile statement accurately represents me.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="1" id="alignedAccuracy_1">
+                                    <label for="alignedAccuracy_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="2" id="alignedAccuracy_2">
+                                    <label for="alignedAccuracy_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="3" id="alignedAccuracy_3">
+                                    <label for="alignedAccuracy_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="4" id="alignedAccuracy_4">
+                                    <label for="alignedAccuracy_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="5" id="alignedAccuracy_5">
+                                    <label for="alignedAccuracy_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="6" id="alignedAccuracy_6">
+                                    <label for="alignedAccuracy_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAccuracy" value="7" id="alignedAccuracy_7">
+                                    <label for="alignedAccuracy_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>I felt in control of how I was represented by the AI tool.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="1" id="alignedControl_1">
+                                    <label for="alignedControl_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="2" id="alignedControl_2">
+                                    <label for="alignedControl_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="3" id="alignedControl_3">
+                                    <label for="alignedControl_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="4" id="alignedControl_4">
+                                    <label for="alignedControl_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="5" id="alignedControl_5">
+                                    <label for="alignedControl_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="6" id="alignedControl_6">
+                                    <label for="alignedControl_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedControl" value="7" id="alignedControl_7">
+                                    <label for="alignedControl_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>The process allowed me to express my identity in my own words.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="1" id="alignedExpression_1">
+                                    <label for="alignedExpression_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="2" id="alignedExpression_2">
+                                    <label for="alignedExpression_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="3" id="alignedExpression_3">
+                                    <label for="alignedExpression_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="4" id="alignedExpression_4">
+                                    <label for="alignedExpression_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="5" id="alignedExpression_5">
+                                    <label for="alignedExpression_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="6" id="alignedExpression_6">
+                                    <label for="alignedExpression_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedExpression" value="7" id="alignedExpression_7">
+                                    <label for="alignedExpression_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <div class="rating-section">
+                        <label><strong>I was satisfied with the alignment between my intended identity and the AI output.</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="1" id="alignedAlignment_1">
+                                    <label for="alignedAlignment_1">1</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="2" id="alignedAlignment_2">
+                                    <label for="alignedAlignment_2">2</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="3" id="alignedAlignment_3">
+                                    <label for="alignedAlignment_3">3</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="4" id="alignedAlignment_4">
+                                    <label for="alignedAlignment_4">4</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="5" id="alignedAlignment_5">
+                                    <label for="alignedAlignment_5">5</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="6" id="alignedAlignment_6">
+                                    <label for="alignedAlignment_6">6</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio" name="alignedAlignment" value="7" id="alignedAlignment_7">
+                                    <label for="alignedAlignment_7">7</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>Strongly Disagree</span>
+                            <span>Neutral</span>
+                            <span>Strongly Agree</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin: 15px 0;">
+                    <label><strong>What do you like about this description?</strong></label>
+                    <textarea id="alignedLikes" placeholder="What resonates with you about how you're described here?"></textarea>
+                </div>
+                <div style="margin: 15px 0;">
+                    <label><strong>What don't you like or what feels inaccurate?</strong></label>
+                    <textarea id="alignedDislikes" placeholder="What doesn't feel right or is missing from this description?"></textarea>
+                </div>
+                <div style="margin: 15px 0;">
+                    <label><strong>How would you change it?</strong></label>
+                    <textarea id="alignedChanges" placeholder="What specific changes would make this better represent you?"></textarea>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToScreen(3)">Back to Review</button>
+                <button class="btn" onclick="showComparison()">Compare Versions</button>
+            </div>
+        </div>
+
+        <!-- Screen 7: Side-by-Side Comparison -->
+        <div class="screen" id="screen7">
+            <h2>Profile Comparison</h2>
+            <p>Here are your initial and refined profiles side by side:</p>
+
+            <div class="comparison-container">
+                <div class="comparison-panel control-panel">
+                    <h3>Initial Profile</h3>
+                    <p id="comparisonControl"></p>
+                </div>
+                <div class="comparison-panel aligned-panel">
+                    <h3>Refined Profile</h3>
+                    <p id="comparisonAligned"></p>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <p><em>This comparison view would be used during the interview phase of the research study.</em></p>
+            </div>
+
+            <div class="navigation">
+                <button class="btn btn-secondary" onclick="goToScreen(6)">Back</button>
+                <button class="btn" onclick="resetDemo()">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let currentIteration = 1;
+        let currentBulletIndex = 0;
+        let bulletIterations = []; // Store all iterations for each bullet
+        let controlProfileText = "";
+        let alignedProfileText = "";
+
+        // Sample bullet points for demonstration
+        const sampleBullets = [
+            {
+                iterations: [
+                    {
+                        text: "Developed a human-computer interaction model that enhanced user experience, resulting in a 30% increase in participant engagement during trials.",
+                        rationale: "Developing a human-computer interaction model that significantly increased participant engagement by 30% is a testament to the candidate's ability to create effective solutions through direct, successful intervention. This experience supports self-efficacy theory by demonstrating the candidate's capability to enhance user experiences, a key component of the project."
+                    },
+                    {
+                        text: "Led the design and implementation of an intuitive user interface that improved user satisfaction scores by 25% and reduced task completion time by 40%.",
+                        rationale: "This refined statement better reflects your hands-on technical leadership and quantifies the user impact more comprehensively, addressing your feedback about emphasizing practical results."
+                    },
+                    {
+                        text: "Spearheaded the development of an accessible, user-centered interface system that reduced cognitive load for users by 35% and increased task success rates to 95%.",
+                        rationale: "This version incorporates your emphasis on accessibility and user empowerment while maintaining strong quantitative evidence of impact."
+                    }
+                ]
+            },
+            {
+                iterations: [
+                    {
+                        text: "Authored a peer-reviewed paper on adaptive systems in human-centered computing, which was cited over 100 times in subsequent research, demonstrating impactful contributions to the field.",
+                        rationale: "Authoring a highly-cited peer-reviewed paper on adaptive systems in human-centered computing illustrates the candidate's competence and influence in the field. The substantial number of citations reflects recognition from the academic community, reinforcing the candidate's confidence in producing impactful research, which is crucial for a research scientist role at Project Echo."
+                    },
+                    {
+                        text: "Published research on adaptive user interfaces that has influenced industry practices, with implementations adopted by 3 major tech companies and integrated into their core products.",
+                        rationale: "This version emphasizes the real-world impact and industry adoption of your research, moving beyond citation counts to show practical influence as you requested."
+                    },
+                    {
+                        text: "Conducted groundbreaking research on adaptive systems that bridged academic theory and industry practice, resulting in open-source frameworks now used by over 50 development teams worldwide.",
+                        rationale: "This iteration highlights your commitment to open collaboration and community impact, reflecting your feedback about wanting to emphasize knowledge sharing and accessibility."
+                    }
+                ]
+            },
+            {
+                iterations: [
+                    {
+                        text: "Managed and mentored a team of 5 junior developers while simultaneously delivering 3 major product releases on schedule, showcasing strong leadership and project coordination abilities.",
+                        rationale: "Successfully managing a team while delivering multiple major releases demonstrates mastery over complex leadership scenarios, providing strong evidence of the candidate's ability to handle high-pressure, multi-faceted responsibilities effectively."
+                    },
+                    {
+                        text: "Collaborated with a diverse team of researchers and engineers to deliver breakthrough innovations, facilitating knowledge sharing sessions that improved team productivity by 35%.",
+                        rationale: "This revision better captures your collaborative approach and knowledge-sharing focus while still demonstrating leadership through measurable team impact."
+                    },
+                    {
+                        text: "Fostered an inclusive research environment where team members from different disciplines could contribute their unique perspectives, resulting in 2 cross-functional innovations and a 40% increase in team satisfaction scores.",
+                        rationale: "This final version emphasizes your commitment to inclusive leadership and interdisciplinary collaboration, addressing your feedback about valuing diverse perspectives and team well-being."
+                    }
+                ]
+            }
+        ];
+
+        function updateProgress(percentage) {
+            document.getElementById('progressFill').style.width = percentage + '%';
+        }
+
+        function goToScreen(screenNumber) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('screen' + screenNumber).classList.add('active');
+            
+            // Update progress
+            const progressMap = {1: 14, 2: 28, 3: 42, 6: 85, 7: 100};
+            updateProgress(progressMap[screenNumber] || 42);
+        }
+
+        function generateProfile() {
+            const resume = document.getElementById('resumeText').value;
+            const job = document.getElementById('jobText').value;
+            
+            if (!resume.trim() || !job.trim()) {
+                alert('Please paste both your resume and the job description to continue.');
+                return;
+            }
+
+            // Store the control profile
+            controlProfileText = document.getElementById('controlProfile').textContent;
+            updateProgress(28);
+            goToScreen(2);
+        }
+
+        function startBulletRating() {
+            currentBulletIndex = 0;
+            currentIteration = 1;
+            bulletIterations = [[], [], []]; // Initialize storage for 3 bullets
+            renderCurrentBullet();
+            updateProgress(42);
+            goToScreen(3);
+        }
+
+        function renderCurrentBullet() {
+            const container = document.getElementById('currentBulletContainer');
+            const currentBullet = sampleBullets[currentBulletIndex];
+            const currentIterationData = currentBullet.iterations[currentIteration - 1];
+            
+            container.innerHTML = `
+                <div class="bullet-item">
+                    <div class="bullet-text">${currentIterationData.text}</div>
+                    <div class="rationale">
+                        <strong>Rationale:</strong> ${currentIterationData.rationale}
+                    </div>
+                    
+                    <div class="rating-section">
+                        <label><strong>To what extent does this bullet point sound like you?</strong></label>
+                        <div class="rating-scale">
+                            <div class="radio-group">
+                                ${[1,2,3,4,5,6,7].map(val => `
+                                    <div class="radio-item">
+                                        <input type="radio" name="currentRating" value="${val}" id="rating_${val}">
+                                        <label for="rating_${val}">${val}</label>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="scale-labels">
+                            <span>This does not sound like me</span>
+                            <span>Neutral</span>
+                            <span>This sounds like me</span>
+                        </div>
+                    </div>
+
+                    <div class="feedback-area">
+                        <label><strong>Any additional comments?</strong></label>
+                        <textarea id="currentFeedback" placeholder="What would you change about how this represents you? What's missing or inaccurate?"></textarea>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('currentBulletNumber').textContent = currentBulletIndex + 1;
+            document.getElementById('iterationNumber').textContent = currentIteration;
+            
+            // Update button text for last bullet
+            const doneBtn = document.getElementById('doneBtn');
+            if (currentBulletIndex === 2) {
+                doneBtn.textContent = 'All Done - Generate Final Profile';
+                doneBtn.style.background = '#28a745';
+            } else {
+                doneBtn.textContent = 'All Done - Next Bullet';
+                doneBtn.style.background = '#28a745';
+            }
+        }
+
+        function regenerateCurrentBullet() {
+            // Collect current feedback
+            const rating = document.querySelector('input[name="currentRating"]:checked')?.value;
+            const comment = document.getElementById('currentFeedback').value;
+            
+            // Store the iteration data
+            if (!bulletIterations[currentBulletIndex]) {
+                bulletIterations[currentBulletIndex] = [];
+            }
+            bulletIterations[currentBulletIndex].push({
+                iteration: currentIteration,
+                rating: rating,
+                feedback: comment,
+                bulletText: sampleBullets[currentBulletIndex].iterations[currentIteration - 1].text
+            });
+
+            // Move to next iteration of the same bullet
+            currentIteration++;
+            const maxIterations = sampleBullets[currentBulletIndex].iterations.length;
+            
+            if (currentIteration > maxIterations) {
+                alert('No more iterations available for this bullet. Please click "All Done" to proceed.');
+                currentIteration = maxIterations;
+                return;
+            }
+
+            renderCurrentBullet();
+        }
+
+        function finishCurrentBullet() {
+            // Collect final feedback for this bullet
+            const rating = document.querySelector('input[name="currentRating"]:checked')?.value;
+            const comment = document.getElementById('currentFeedback').value;
+            
+            // Store the final iteration data
+            if (!bulletIterations[currentBulletIndex]) {
+                bulletIterations[currentBulletIndex] = [];
+            }
+            bulletIterations[currentBulletIndex].push({
+                iteration: currentIteration,
+                rating: rating,
+                feedback: comment,
+                bulletText: sampleBullets[currentBulletIndex].iterations[currentIteration - 1].text,
+                final: true
+            });
+
+            // Move to next bullet or final profile
+            if (currentBulletIndex < 2) {
+                currentBulletIndex++;
+                currentIteration = 1;
+                renderCurrentBullet();
+                updateProgress(42 + (currentBulletIndex * 14));
+            } else {
+                generateFinalProfile();
+            }
+        }
+
+        function generateFinalProfile() {
+            // Generate aligned profile based on feedback
+            alignedProfileText = `As a collaborative research engineer with deep expertise in human-computer interaction, I specialize in creating user-centered solutions that bridge academic research and real-world applications. My experience leading interdisciplinary teams and publishing influential research in adaptive systems has resulted in innovations adopted by major tech companies. I excel at facilitating knowledge sharing and building inclusive team environments where diverse perspectives drive breakthrough results. My approach combines rigorous research methodology with practical implementation skills, enabling me to translate complex user needs into scalable, impactful technologies.`;
+            
+            document.getElementById('alignedProfile').textContent = alignedProfileText;
+            updateProgress(85);
+            goToScreen(6);
+        }
+
+        function showComparison() {
+            document.getElementById('comparisonControl').textContent = controlProfileText;
+            document.getElementById('comparisonAligned').textContent = alignedProfileText;
+            updateProgress(100);
+            goToScreen(7);
+        }
+
+        function resetDemo() {
+            currentIteration = 1;
+            bulletData = [];
+            controlProfileText = "";
+            alignedProfileText = "";
+            
+            // Clear all form inputs
+            document.querySelectorAll('textarea').forEach(textarea => textarea.value = '');
+            document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+            
+            updateProgress(14);
+            goToScreen(1);
+        }
+
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pre-fill with sample data for easier testing
+            document.getElementById('resumeText').value = `John Smith
+Software Engineer
+
+Experience:
+• 4+ years full-stack development using React, Node.js, Python
+• Led team of 5 developers on user-facing web applications
+• Published research on adaptive user interfaces in HCI conferences
+• Managed 3 major product releases with 99.9% uptime
+• Mentored junior developers and conducted code reviews
+
+Education:
+• MS Computer Science, Georgia Tech
+• BS Software Engineering
+
+Skills: JavaScript, React, Node.js, Python, AWS, Docker, Agile methodologies`;
+
+            document.getElementById('jobText').value = `Research Scientist - Project Echo
+We're looking for a research scientist to join our human-computer interaction team. You'll be responsible for:
+
+• Conducting user research and designing experiments
+• Publishing research in top-tier HCI venues
+• Collaborating with engineers to implement research prototypes
+• Leading interdisciplinary teams on innovative projects
+• Mentoring junior researchers and interns
+
+Requirements:
+• MS/PhD in HCI, Computer Science, or related field
+• 3+ years experience in user research
+• Strong publication record
+• Experience with both qualitative and quantitative research methods
+• Leadership experience preferred`;
+        });
+    </script>
+</body>
+</html>

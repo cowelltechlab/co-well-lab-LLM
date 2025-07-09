@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LL.me</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f7fa;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .card h2 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .refresh-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 0.5rem 0;
+        }
+
+        .status-ok { color: #28a745; }
+        .status-error { color: #dc3545; }
+
+        .btn {
+            background: #2c3e50;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.25rem;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .token-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .token-details {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .log-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.875rem;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .timestamp {
+            color: #6c757d;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .prompt-section {
+            margin-bottom: 2rem;
+        }
+
+        .prompt-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .prompt-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .prompt-meta {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .prompt-content {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            margin-bottom: 1rem;
+            min-height: 120px;
+        }
+
+        .prompt-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-edit {
+            background: #007bff;
+        }
+
+        .btn-reset {
+            background: #6c757d;
+        }
+
+        .btn-save {
+            background: #28a745;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+        }
+
+        textarea.prompt-editor {
+            width: 100%;
+            min-height: 150px;
+            padding: 1rem;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.875rem;
+            resize: vertical;
+        }
+
+        .edit-mode {
+            border-color: #007bff;
+        }
+
+        .version-history {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Dashboard</h1>
+        <button class="logout-btn">Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2>
+                    System Health
+                    <button class="refresh-btn">🔄</button>
+                </h2>
+                <div class="status-item">
+                    <span>frontend:</span>
+                    <span class="status-ok">ok</span>
+                </div>
+                <div class="status-item">
+                    <span>backend:</span>
+                    <span class="status-ok">ok</span>
+                </div>
+                <div class="status-item">
+                    <span>database:</span>
+                    <span class="status-ok">ok</span>
+                </div>
+                <div class="status-item">
+                    <span>openai:</span>
+                    <span class="status-error">error</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    Participant Tokens
+                    <button class="refresh-btn">🔄</button>
+                </h2>
+                <button class="btn">Generate Token</button>
+                
+                <div class="token-item">
+                    <div>
+                        <div><strong>msn735</strong></div>
+                        <div class="token-details">Unused</div>
+                    </div>
+                    <button class="btn btn-danger">Invalidate</button>
+                </div>
+                
+                <div class="token-item">
+                    <div>
+                        <div><strong>xhe110</strong></div>
+                        <div class="token-details">Used • Session: 685d6d66cd6c1d498eeb9929</div>
+                    </div>
+                    <button class="btn btn-danger">Invalidate</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>
+                    Progress Log
+                    <span style="font-size: 0.875rem; font-weight: normal;">(7 completed)</span>
+                    <button class="refresh-btn">🔄</button>
+                </h2>
+                <div class="log-item">
+                    <div class="timestamp">7/2/2025, 3:18:27 PM</div>
+                    <div><strong>initialize_request</strong></div>
+                </div>
+                <div class="log-item">
+                    <div class="timestamp">6/26/2025, 1:28:58 PM</div>
+                    <div><strong>update_success</strong> (session: 685d6d66cd6c1d498eeb9929)</div>
+                </div>
+                <div class="log-item">
+                    <div class="timestamp">6/26/2025, 1:28:54 PM</div>
+                    <div><strong>update_request</strong> (session: 685d6d66cd6c1d498eeb9929)</div>
+                </div>
+                <div class="log-item">
+                    <div class="timestamp">6/26/2025, 11:55:18 AM</div>
+                    <div><strong>initialize_success</strong> (session: 685d6d66cd6c1d498eeb9929)</div>
+                </div>
+                <div class="log-item">
+                    <div class="timestamp">6/18/2025, 11:41:54 AM</div>
+                    <div><strong>final_update_success</strong> (session: 6852d878cd6c1d498eeb9920)</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Download Sessions</h2>
+                <button class="btn">Download CSV</button>
+                <div style="margin-top: 1rem; font-size: 0.875rem; color: #6c757d;">
+                    Export all session data including bullet iterations, ratings, and feedback for research analysis.
+                </div>
+            </div>
+        </div>
+
+        <!-- NEW PROMPT MANAGEMENT SECTION -->
+        <div class="prompt-section">
+            <h2 style="margin-bottom: 1.5rem; color: #2c3e50;">Prompt Management</h2>
+            
+            <div class="prompt-card">
+                <div class="prompt-header">
+                    <div class="prompt-title">Control Profile Generation</div>
+                    <div class="prompt-meta">Last modified: 2025-07-09 14:32 • Version 1.2</div>
+                </div>
+                <div class="prompt-content" id="controlPrompt">Based on the following resume and job description, generate a professional profile statement (1-2 paragraphs) that highlights relevant experience and skills. Focus on creating a compelling narrative that connects the candidate's background to the specific role requirements.
+
+Variables available:
+- {resume} - User's resume content
+- {jobDescription} - Target job description
+
+Generate a profile that sounds professional and polished, representing how an AI would typically interpret and present this candidate's qualifications.</div>
+                <div class="prompt-actions">
+                    <button class="btn btn-edit" onclick="editPrompt('controlPrompt')">Edit</button>
+                    <button class="btn btn-reset">Reset to Default</button>
+                </div>
+                <div class="version-history">Previous versions: v1.1 (2025-07-08), v1.0 (2025-07-01)</div>
+            </div>
+
+            <div class="prompt-card">
+                <div class="prompt-header">
+                    <div class="prompt-title">BSE Bullet Generation</div>
+                    <div class="prompt-meta">Last modified: 2025-07-09 10:15 • Version 2.1</div>
+                </div>
+                <div class="prompt-content" id="bsePrompt">Generate 3 bullet points from this resume that demonstrate self-efficacy experiences relevant to this job. Focus on Bandura's Self-Efficacy theory components:
+
+1. Mastery experiences (successful performance accomplishments)
+2. Vicarious experiences (observing others succeed) 
+3. Verbal persuasion (encouragement from others)
+
+For each bullet:
+- Extract specific achievements from the resume
+- Connect to job requirements
+- Include quantifiable results when possible
+- Provide rationale explaining the BSE theory connection
+
+Variables available:
+- {resume} - User's resume content
+- {jobDescription} - Target job description
+
+Format: Return 3 bullets with rationales that help users understand their self-efficacy in the context of this role.</div>
+                <div class="prompt-actions">
+                    <button class="btn btn-edit" onclick="editPrompt('bsePrompt')">Edit</button>
+                    <button class="btn btn-reset">Reset to Default</button>
+                </div>
+                <div class="version-history">Previous versions: v2.0 (2025-07-07), v1.3 (2025-07-05)</div>
+            </div>
+
+            <div class="prompt-card">
+                <div class="prompt-header">
+                    <div class="prompt-title">Bullet Regeneration</div>
+                    <div class="prompt-meta">Last modified: 2025-07-08 16:45 • Version 1.4</div>
+                </div>
+                <div class="prompt-content" id="regenPrompt">The user rated this bullet {rating}/7 and provided this feedback: '{feedback}'. 
+
+Revise the bullet to better represent their self-concept while maintaining BSE theory focus. Consider:
+- User's specific feedback and concerns
+- Previous iteration history to avoid repetition
+- Maintaining connection to job requirements
+- Preserving self-efficacy theory elements
+
+Variables available:
+- {bulletText} - Current bullet text
+- {rationale} - Current rationale
+- {rating} - User's 1-7 rating
+- {feedback} - User's open feedback
+- {iterationHistory} - Previous versions of this bullet
+
+Generate an improved bullet that addresses the user's feedback while staying true to their authentic self-representation.</div>
+                <div class="prompt-actions">
+                    <button class="btn btn-edit" onclick="editPrompt('regenPrompt')">Edit</button>
+                    <button class="btn btn-reset">Reset to Default</button>
+                </div>
+                <div class="version-history">Previous versions: v1.3 (2025-07-06), v1.2 (2025-07-04)</div>
+            </div>
+
+            <div class="prompt-card">
+                <div class="prompt-header">
+                    <div class="prompt-title">Final Profile Synthesis</div>
+                    <div class="prompt-meta">Last modified: 2025-07-09 09:22 • Version 1.1</div>
+                </div>
+                <div class="prompt-content" id="finalPrompt">Create a final professional profile using the refined bullets and user feedback from the collaborative alignment process. 
+
+Synthesize the iterative refinement into an authentic representation that:
+- Incorporates insights from all bullet iterations
+- Reflects user's self-concept as revealed through feedback
+- Maintains professional tone while honoring user's voice
+- Connects to the target job requirements
+- Demonstrates the collaborative human-AI process
+
+Variables available:
+- {finalBullets} - User's refined bullet points
+- {allFeedback} - Complete feedback history
+- {originalProfile} - Initial control profile
+- {jobDescription} - Target job description
+
+Generate a profile that feels authentic to the user while professionally presenting their qualifications for this role.</div>
+                <div class="prompt-actions">
+                    <button class="btn btn-edit" onclick="editPrompt('finalPrompt')">Edit</button>
+                    <button class="btn btn-reset">Reset to Default</button>
+                </div>
+                <div class="version-history">Previous versions: v1.0 (2025-07-01)</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function editPrompt(promptId) {
+            const promptDiv = document.getElementById(promptId);
+            const currentText = promptDiv.textContent;
+            const parentCard = promptDiv.closest('.prompt-card');
+            const actions = parentCard.querySelector('.prompt-actions');
+            
+            // Replace content with textarea
+            promptDiv.innerHTML = `<textarea class="prompt-editor">${currentText}</textarea>`;
+            
+            // Update buttons
+            actions.innerHTML = `
+                <button class="btn btn-save" onclick="savePrompt('${promptId}')">Save Changes</button>
+                <button class="btn btn-cancel" onclick="cancelEdit('${promptId}', \`${currentText.replace(/`/g, '\\`')}\`)">Cancel</button>
+            `;
+        }
+
+        function savePrompt(promptId) {
+            const promptDiv = document.getElementById(promptId);
+            const textarea = promptDiv.querySelector('textarea');
+            const newText = textarea.value;
+            const parentCard = promptDiv.closest('.prompt-card');
+            const actions = parentCard.querySelector('.prompt-actions');
+            const metaDiv = parentCard.querySelector('.prompt-meta');
+            
+            // Save the new content (in real implementation, this would make an API call)
+            promptDiv.innerHTML = newText;
+            promptDiv.className = 'prompt-content';
+            
+            // Update metadata
+            const now = new Date().toLocaleString('sv-SE', {timeZone: 'America/New_York'}).replace(' ', ' ');
+            metaDiv.textContent = `Last modified: ${now} • Version 1.3`;
+            
+            // Restore buttons
+            actions.innerHTML = `
+                <button class="btn btn-edit" onclick="editPrompt('${promptId}')">Edit</button>
+                <button class="btn btn-reset">Reset to Default</button>
+            `;
+            
+            // Show success message (in real implementation)
+            alert('Prompt updated successfully!');
+        }
+
+        function cancelEdit(promptId, originalText) {
+            const promptDiv = document.getElementById(promptId);
+            const parentCard = promptDiv.closest('.prompt-card');
+            const actions = parentCard.querySelector('.prompt-actions');
+            
+            // Restore original content
+            promptDiv.innerHTML = originalText;
+            promptDiv.className = 'prompt-content';
+            
+            // Restore buttons
+            actions.innerHTML = `
+                <button class="btn btn-edit" onclick="editPrompt('${promptId}')">Edit</button>
+                <button class="btn btn-reset">Reset to Default</button>
+            `;
+        }
+    </script>
+</body>
+</html>
