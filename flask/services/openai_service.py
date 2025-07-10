@@ -2,6 +2,7 @@ import langchain_openai as lcai
 import os
 import json
 import re
+from services.mongodb_service import get_active_prompt
 
 llmchat = lcai.AzureChatOpenAI(
     openai_api_key=os.getenv("AZURE_OPENAI_KEY"),
@@ -38,6 +39,29 @@ Job Description:
     except Exception as e:
         print("Error generating initial cover letter:", e)
         return "Error generating initial cover letter."
+
+# Control Profile Generation for v1.5
+def generate_control_profile(resume, job_description):
+    """Generate control profile using configurable prompt from database."""
+    try:
+        # Get the active control prompt from the database
+        prompt_doc = get_active_prompt("control")
+        if not prompt_doc:
+            raise ValueError("No active control prompt found in database")
+        
+        prompt_template = prompt_doc["content"]
+        
+        # Substitute variables in the prompt
+        prompt = prompt_template.format(
+            resume=resume,
+            jobDescription=job_description
+        )
+        
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating control profile:", e)
+        return "Error generating control profile."
 
 # Task 2
 def generate_role_name(job_desc):
