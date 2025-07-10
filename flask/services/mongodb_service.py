@@ -161,3 +161,156 @@ def invalidate_token(token_str):
     except Exception as e:
         print("Mongo update error:", e)
         return False
+
+# Prompt Management Functions
+def get_active_prompt(prompt_type):
+    """Get the active prompt for a given type."""
+    try:
+        prompt = db["prompts"].find_one({
+            "promptType": prompt_type,
+            "isActive": True
+        })
+        return prompt
+    except Exception as e:
+        print(f"Error fetching active prompt for {prompt_type}:", e)
+        return None
+
+def create_prompt(prompt_type, content, modified_by="system"):
+    """Create a new prompt version."""
+    try:
+        # Get the current highest version number
+        latest = db["prompts"].find_one(
+            {"promptType": prompt_type},
+            sort=[("version", -1)]
+        )
+        next_version = (latest["version"] + 1) if latest else 1
+        
+        # Deactivate previous versions
+        db["prompts"].update_many(
+            {"promptType": prompt_type},
+            {"$set": {"isActive": False}}
+        )
+        
+        # Create new version
+        prompt_doc = {
+            "promptType": prompt_type,
+            "content": content,
+            "version": next_version,
+            "createdAt": datetime.now(timezone.utc),
+            "modifiedBy": modified_by,
+            "isActive": True
+        }
+        
+        result = db["prompts"].insert_one(prompt_doc)
+        return str(result.inserted_id)
+    except Exception as e:
+        print(f"Error creating prompt for {prompt_type}:", e)
+        return None
+
+def get_all_prompts():
+    """Get all active prompts."""
+    try:
+        prompts = list(db["prompts"].find({"isActive": True}))
+        for prompt in prompts:
+            prompt["_id"] = str(prompt["_id"])
+            if isinstance(prompt.get("createdAt"), datetime):
+                prompt["createdAt"] = prompt["createdAt"].isoformat()
+        return prompts
+    except Exception as e:
+        print("Error fetching all prompts:", e)
+        return []
+
+def get_prompt_history(prompt_type):
+    """Get version history for a specific prompt type."""
+    try:
+        history = list(db["prompts"].find(
+            {"promptType": prompt_type}
+        ).sort("version", -1))
+        
+        for prompt in history:
+            prompt["_id"] = str(prompt["_id"])
+            if isinstance(prompt.get("createdAt"), datetime):
+                prompt["createdAt"] = prompt["createdAt"].isoformat()
+        return history
+    except Exception as e:
+        print(f"Error fetching prompt history for {prompt_type}:", e)
+        return []
+
+def update_prompt(prompt_type, content, modified_by="admin"):
+    """Update a prompt, creating a new version."""
+    return create_prompt(prompt_type, content, modified_by)
+
+def initialize_default_prompts():
+    """Initialize default prompts if they don't exist."""
+    default_prompts = {
+        "control": """Based on the following resume and job description, generate a professional profile statement (1-2 paragraphs) that highlights relevant experience and skills. Focus on creating a compelling narrative that connects the candidate's background to the specific role requirements.
+
+Variables available:
+- {resume} - User's resume content
+- {jobDescription} - Target job description
+
+Generate a profile that sounds professional and polished, representing how an AI would typically interpret and present this candidate's qualifications.""",
+
+        "bse_generation": """Generate 3 bullet points from this resume that demonstrate self-efficacy experiences relevant to this job. Focus on Bandura's Self-Efficacy theory components:
+
+1. Mastery experiences (successful performance accomplishments)
+2. Vicarious experiences (observing others succeed) 
+3. Verbal persuasion (encouragement from others)
+
+For each bullet:
+- Extract specific achievements from the resume
+- Connect to job requirements
+- Include quantifiable results when possible
+- Provide rationale explaining the BSE theory connection
+
+Variables available:
+- {resume} - User's resume content
+- {jobDescription} - Target job description
+
+Format: Return 3 bullets with rationales that help users understand their self-efficacy in the context of this role.""",
+
+        "regeneration": """The user rated this bullet {rating}/7 and provided this feedback: '{feedback}'. 
+
+Revise the bullet to better represent their self-concept while maintaining BSE theory focus. Consider:
+- User's specific feedback and concerns
+- Previous iteration history to avoid repetition
+- Maintaining connection to job requirements
+- Preserving self-efficacy theory elements
+
+Variables available:
+- {bulletText} - Current bullet text
+- {rationale} - Current rationale
+- {rating} - User's 1-7 rating
+- {feedback} - User's open feedback
+- {iterationHistory} - Previous versions of this bullet
+
+Generate an improved bullet that addresses the user's feedback while staying true to their authentic self-representation.""",
+
+        "final_synthesis": """Create a final professional profile using the refined bullets and user feedback from the collaborative alignment process. 
+
+Synthesize the iterative refinement into an authentic representation that:
+- Incorporates insights from all bullet iterations
+- Reflects user's self-concept as revealed through feedback
+- Maintains professional tone while honoring user's voice
+- Connects to the target job requirements
+- Demonstrates the collaborative human-AI process
+
+Variables available:
+- {finalBullets} - User's refined bullet points
+- {allFeedback} - Complete feedback history
+- {originalProfile} - Initial control profile
+- {jobDescription} - Target job description
+
+Generate a profile that feels authentic to the user while professionally presenting their qualifications for this role."""
+    }
+    
+    try:
+        for prompt_type, content in default_prompts.items():
+            existing = db["prompts"].find_one({"promptType": prompt_type})
+            if not existing:
+                create_prompt(prompt_type, content, "system")
+                print(f"Initialized default prompt for {prompt_type}")
+        return True
+    except Exception as e:
+        print("Error initializing default prompts:", e)
+        return False
