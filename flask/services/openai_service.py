@@ -113,6 +113,62 @@ def parse_bse_bullets_response(response_text):
         print("Error parsing BSE bullets response:", e)
         raise ValueError("Failed to parse BSE bullets response")
 
+# Bullet Regeneration for v1.5
+def regenerate_bullet(bullet_text, rationale, user_rating, user_feedback, iteration_history=None):
+    """Regenerate a bullet based on user feedback using configurable prompt from database."""
+    try:
+        # Get the active regeneration prompt from the database
+        prompt_doc = get_active_prompt("regeneration")
+        if not prompt_doc:
+            raise ValueError("No active regeneration prompt found in database")
+        
+        prompt_template = prompt_doc["content"]
+        
+        # Prepare iteration history string
+        history_str = ""
+        if iteration_history and len(iteration_history) > 0:
+            history_str = "Previous iterations:\n"
+            for i, iteration in enumerate(iteration_history[-3:], 1):  # Show last 3 iterations
+                history_str += f"Iteration {iteration.get('iterationNumber', i)}: \"{iteration.get('bulletText', '')}\"\n"
+                if iteration.get('userFeedback'):
+                    history_str += f"User feedback: \"{iteration.get('userFeedback')}\"\n"
+            history_str += "\n"
+        
+        # Substitute variables in the prompt
+        prompt = prompt_template.format(
+            bulletText=bullet_text,
+            rationale=rationale,
+            rating=user_rating,
+            feedback=user_feedback,
+            iterationHistory=history_str
+        )
+        
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error regenerating bullet:", e)
+        return "Error regenerating bullet."
+
+def parse_regenerated_bullet_response(response_text):
+    """Parse regenerated bullet response and extract bullet with rationale."""
+    try:
+        # Extract JSON from response
+        bullet_data = extract_and_parse(response_text)
+        
+        # Expected format: { "bullet": {"text": "...", "rationale": "..."} }
+        if "bullet" in bullet_data and isinstance(bullet_data["bullet"], dict):
+            bullet = bullet_data["bullet"]
+            if "text" in bullet and "rationale" in bullet:
+                return {
+                    "text": bullet["text"],
+                    "rationale": bullet["rationale"]
+                }
+        
+        raise ValueError("Invalid bullet structure in response")
+    except Exception as e:
+        print("Error parsing regenerated bullet response:", e)
+        raise ValueError("Failed to parse regenerated bullet response")
+
 # Task 2
 def generate_role_name(job_desc):
     prompt = f"""
