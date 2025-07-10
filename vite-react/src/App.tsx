@@ -3,6 +3,7 @@ import { AppProvider } from "@/context/AppProvider";
 import { AdminProvider } from "@/context/AdminProvider";
 import { WelcomeInputView } from "@/views/WelcomeInputView";
 import { ControlProfileView } from "@/views/ControlProfileView";
+import { BulletRefinementView } from "@/views/BulletRefinementView";
 import { ReviewAllView } from "@/views/ReviewAllView";
 import { ReviewSectionView } from "@/views/ReviewSectionView";
 import { CoverLetterComparisonView } from "@/views/CoverLetterComparisonView";
@@ -19,6 +20,7 @@ function App() {
             <Routes>
               <Route path="/" element={<WelcomeInputView />} />
               <Route path="/control-profile" element={<ControlProfileView />} />
+              <Route path="/bullet-refinement" element={<BulletRefinementView />} />
               <Route path="/review-all" element={<ReviewAllView />} />
               <Route
                 path="/review-section/:sectionName"
