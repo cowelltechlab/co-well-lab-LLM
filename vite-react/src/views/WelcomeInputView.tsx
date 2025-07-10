@@ -33,7 +33,7 @@ export function WelcomeInputView() {
   const handleGenerate = async () => {
     const success = await initialGeneration();
     if (success) {
-      navigate("/review-all");
+      navigate("/control-profile");
     }
   };
 
@@ -117,7 +117,7 @@ export function WelcomeInputView() {
                 Generating...
               </>
             ) : (
-              "Generate Cover Letter Outline"
+              "Generate Profile Statement"
             )}
           </Button>
 

@@ -66,6 +66,37 @@ export interface CoverLetterResponse {
   hasAccess?: boolean;
   completed?: boolean;
   finalPreference?: "control" | "aligned" | "tie" | null;
+  
+  // v1.5 Collaborative Alignment Data
+  controlProfile?: {
+    text: string;
+    likertResponses?: {
+      accuracy: number;
+      control: number;
+      expression: number;
+      alignment: number;
+    };
+    openResponses?: {
+      likes: string;
+      dislikes: string;
+      changes: string;
+    };
+  };
+  
+  alignedProfile?: {
+    text: string;
+    likertResponses?: {
+      accuracy: number;
+      control: number;
+      expression: number;
+      alignment: number;
+    };
+    openResponses?: {
+      likes: string;
+      dislikes: string;
+      changes: string;
+    };
+  };
 }
 
 export interface AppState {
@@ -84,4 +115,5 @@ export interface AppState {
     React.SetStateAction<CoverLetterResponse | null>
   >;
   initialGeneration: () => Promise<boolean>;
+  generateControlProfile: () => Promise<boolean>;
 }

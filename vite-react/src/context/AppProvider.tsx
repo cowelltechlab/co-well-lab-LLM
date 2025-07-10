@@ -73,6 +73,65 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function generateControlProfile(): Promise<boolean> {
+    if (!letterLabData?.document_id) {
+      setGenerationError("No session found. Please start over.");
+      return false;
+    }
+
+    if (!resumeText || !jobDescription) {
+      setGenerationError("Resume and job description are required.");
+      return false;
+    }
+
+    setIsGeneratingCoverLetter(true);
+    setGenerationError("");
+
+    try {
+      const response = await fetch(`${apiBase}/lab/generate-control-profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          session_id: letterLabData.document_id,
+          resume: resumeText,
+          job_description: jobDescription,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to generate control profile");
+      }
+
+      const data = await response.json();
+      
+      // Update the letterLabData with the control profile
+      setLetterLabData(prev => ({
+        ...prev,
+        controlProfile: {
+          text: data.profile_text
+        }
+      }));
+
+      return true;
+    } catch (error: unknown) {
+      console.error("Error generating control profile:", error);
+
+      if (error instanceof Error) {
+        setGenerationError("Failed to generate control profile. " + error.message);
+      } else {
+        setGenerationError("Failed to generate control profile due to an unknown error.");
+      }
+
+      return false;
+    } finally {
+      setIsGeneratingCoverLetter(false);
+    }
+  }
+
   const value: AppState = {
     resumeText,
     jobDescription,
@@ -87,6 +146,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setGenerationError,
     setLetterLabData,
     initialGeneration,
+    generateControlProfile,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
