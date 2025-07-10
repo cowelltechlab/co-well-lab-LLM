@@ -7,6 +7,7 @@ from flask import session
 
 # GENERATION SERVICE FUNCTIONS
 from services.openai_service import generate_initial_cover_letter
+from services.openai_service import generate_control_profile
 from services.openai_service import generate_role_name
 from services.openai_service import generate_enactive_mastery_bullet_points
 from services.openai_service import generate_vicarious_experience_bullet_points
@@ -24,6 +25,7 @@ from services.mongodb_service import set_fields
 from services.mongodb_service import is_valid_token
 from services.mongodb_service import mark_token_used
 from services.mongodb_service import log_progress_event
+from services.mongodb_service import get_active_prompt
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
@@ -369,5 +371,63 @@ def validate_token():
 def logout_participant():
     session.pop("token", None)
     return jsonify({"status": "logged_out"}), 200
+
+@letter_lab_bp.route("/generate-control-profile", methods=["POST"])
+@token_required
+def generate_control_profile_endpoint():
+    """Generate control profile for collaborative alignment research."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        resume = data.get("resume")
+        job_description = data.get("job_description")
+        
+        # Validate required fields
+        if not all([session_id, resume, job_description]):
+            return jsonify({
+                "error": "Missing required fields: session_id, resume, job_description"
+            }), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Generate control profile using prompt management system
+        profile_text = retry_generation(
+            generate_control_profile,
+            validator_fn=is_valid_string_output,
+            args=(resume, job_description),
+            debug_label="Control Profile"
+        )
+        
+        if not profile_text:
+            return jsonify({"error": "Failed to generate control profile"}), 500
+        
+        # Store control profile in session document
+        update_fields = {
+            "controlProfile": {
+                "text": profile_text
+            }
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to save control profile"}), 500
+        
+        log_progress_event("control_profile_generated", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "profile_text": profile_text,
+            "session_id": session_id
+        }), 200
+        
+    except Exception as e:
+        print("Error generating control profile:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
 
 
