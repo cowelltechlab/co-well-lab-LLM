@@ -9,6 +9,7 @@ from flask import session
 from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_control_profile
 from services.openai_service import generate_bse_bullets, parse_bse_bullets_response
+from services.openai_service import regenerate_bullet, parse_regenerated_bullet_response
 from services.openai_service import generate_role_name
 from services.openai_service import generate_enactive_mastery_bullet_points
 from services.openai_service import generate_vicarious_experience_bullet_points
@@ -499,6 +500,80 @@ def generate_bse_bullets_endpoint():
         
     except Exception as e:
         print("Error generating BSE bullets:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+@letter_lab_bp.route("/regenerate-bullet", methods=["POST"])
+@token_required
+def regenerate_bullet_endpoint():
+    """Regenerate a single bullet based on user feedback for collaborative alignment research."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        bullet_index = data.get("bullet_index")
+        current_bullet = data.get("current_bullet")
+        user_rating = data.get("user_rating")
+        user_feedback = data.get("user_feedback")
+        iteration_history = data.get("iteration_history", [])
+        
+        # Validate required fields
+        if not all([session_id, bullet_index is not None, current_bullet, user_rating]):
+            return jsonify({
+                "error": "Missing required fields: session_id, bullet_index, current_bullet, user_rating"
+            }), 400
+        
+        # Validate bullet_index range
+        if not isinstance(bullet_index, int) or bullet_index < 0 or bullet_index > 2:
+            return jsonify({"error": "bullet_index must be 0, 1, or 2"}), 400
+        
+        # Validate user_rating range
+        if not isinstance(user_rating, int) or user_rating < 1 or user_rating > 7:
+            return jsonify({"error": "user_rating must be between 1 and 7"}), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Validate current_bullet structure
+        if not isinstance(current_bullet, dict) or "text" not in current_bullet or "rationale" not in current_bullet:
+            return jsonify({"error": "current_bullet must contain 'text' and 'rationale' fields"}), 400
+        
+        # Generate regenerated bullet using prompt management system
+        regeneration_response = retry_generation(
+            regenerate_bullet,
+            validator_fn=is_valid_string_output,
+            args=(
+                current_bullet["text"],
+                current_bullet["rationale"],
+                user_rating,
+                user_feedback or "",
+                iteration_history
+            ),
+            debug_label="Bullet Regeneration"
+        )
+        
+        if not regeneration_response:
+            return jsonify({"error": "Failed to regenerate bullet"}), 500
+        
+        # Parse the response to extract new bullet and rationale
+        try:
+            regenerated_bullet = parse_regenerated_bullet_response(regeneration_response)
+        except ValueError as e:
+            print("Error parsing regenerated bullet:", str(e))
+            return jsonify({"error": "Failed to parse regenerated bullet response"}), 500
+        
+        log_progress_event("bullet_regenerated", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "bullet": regenerated_bullet
+        }), 200
+        
+    except Exception as e:
+        print("Error regenerating bullet:", str(e))
         return jsonify({"error": "Internal server error"}), 500
 
 

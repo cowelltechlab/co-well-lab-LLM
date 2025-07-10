@@ -302,12 +302,21 @@ Revise the bullet to better represent their self-concept while maintaining BSE t
 - Maintaining connection to job requirements
 - Preserving self-efficacy theory elements
 
-Variables available:
-- {bulletText} - Current bullet text
-- {rationale} - Current rationale
-- {rating} - User's 1-7 rating
-- {feedback} - User's open feedback
-- {iterationHistory} - Previous versions of this bullet
+Current bullet: "{bulletText}"
+Current rationale: "{rationale}"
+
+{iterationHistory}
+
+Return your response as JSON in this exact format:
+
+```json
+{{
+  "bullet": {{
+    "text": "Revised bullet point text that addresses user feedback",
+    "rationale": "Updated rationale explaining how this better represents the user while maintaining BSE theory focus"
+  }}
+}}
+```
 
 Generate an improved bullet that addresses the user's feedback while staying true to their authentic self-representation.""",
 
