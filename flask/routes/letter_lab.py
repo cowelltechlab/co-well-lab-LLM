@@ -8,6 +8,7 @@ from flask import session
 # GENERATION SERVICE FUNCTIONS
 from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_control_profile
+from services.openai_service import generate_bse_bullets, parse_bse_bullets_response
 from services.openai_service import generate_role_name
 from services.openai_service import generate_enactive_mastery_bullet_points
 from services.openai_service import generate_vicarious_experience_bullet_points
@@ -428,6 +429,76 @@ def generate_control_profile_endpoint():
         
     except Exception as e:
         print("Error generating control profile:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+@letter_lab_bp.route("/generate-bse-bullets", methods=["POST"])
+@token_required
+def generate_bse_bullets_endpoint():
+    """Generate 3 BSE theory bullets for collaborative alignment research."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        resume = data.get("resume")
+        job_description = data.get("job_description")
+        
+        # Validate required fields
+        if not all([session_id, resume, job_description]):
+            return jsonify({
+                "error": "Missing required fields: session_id, resume, job_description"
+            }), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Generate BSE bullets using prompt management system
+        bullets_response = retry_generation(
+            generate_bse_bullets,
+            validator_fn=is_valid_string_output,
+            args=(resume, job_description),
+            debug_label="BSE Bullets"
+        )
+        
+        if not bullets_response:
+            return jsonify({"error": "Failed to generate BSE bullets"}), 500
+        
+        # Parse the response to extract bullets and rationales
+        try:
+            bullets = parse_bse_bullets_response(bullets_response)
+        except ValueError as e:
+            print("Error parsing BSE bullets:", str(e))
+            return jsonify({"error": "Failed to parse BSE bullets response"}), 500
+        
+        # Initialize bulletIterations structure in session document
+        bullet_iterations = []
+        for i in range(3):
+            bullet_iterations.append({
+                "bulletIndex": i,
+                "iterations": [],
+                "finalIteration": None
+            })
+        
+        update_fields = {
+            "bulletIterations": bullet_iterations
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to initialize bullet iterations"}), 500
+        
+        log_progress_event("bse_bullets_generated", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "bullets": bullets
+        }), 200
+        
+    except Exception as e:
+        print("Error generating BSE bullets:", str(e))
         return jsonify({"error": "Internal server error"}), 500
 
 

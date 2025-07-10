@@ -63,6 +63,56 @@ def generate_control_profile(resume, job_description):
         print("Error generating control profile:", e)
         return "Error generating control profile."
 
+# BSE Bullet Generation for v1.5
+def generate_bse_bullets(resume, job_description):
+    """Generate 3 BSE theory bullets using configurable prompt from database."""
+    try:
+        # Get the active BSE generation prompt from the database
+        prompt_doc = get_active_prompt("bse_generation")
+        if not prompt_doc:
+            raise ValueError("No active BSE generation prompt found in database")
+        
+        prompt_template = prompt_doc["content"]
+        
+        # Substitute variables in the prompt
+        prompt = prompt_template.format(
+            resume=resume,
+            jobDescription=job_description
+        )
+        
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating BSE bullets:", e)
+        return "Error generating BSE bullets."
+
+def parse_bse_bullets_response(response_text):
+    """Parse BSE bullets response and extract bullets with rationales."""
+    try:
+        # Extract JSON from response
+        bullet_data = extract_and_parse(response_text)
+        
+        # Expected format from the LLM should include bullets and rationales
+        # Structure: { "bullets": [{"index": 0, "text": "...", "rationale": "..."}] }
+        bullets = []
+        
+        if "bullets" in bullet_data and isinstance(bullet_data["bullets"], list):
+            for i, bullet_item in enumerate(bullet_data["bullets"][:3]):  # Limit to 3
+                if "text" in bullet_item and "rationale" in bullet_item:
+                    bullets.append({
+                        "index": i,
+                        "text": bullet_item["text"],
+                        "rationale": bullet_item["rationale"]
+                    })
+        
+        if len(bullets) != 3:
+            raise ValueError(f"Expected 3 bullets, got {len(bullets)}")
+            
+        return bullets
+    except Exception as e:
+        print("Error parsing BSE bullets response:", e)
+        raise ValueError("Failed to parse BSE bullets response")
+
 # Task 2
 def generate_role_name(job_desc):
     prompt = f"""

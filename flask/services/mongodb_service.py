@@ -267,7 +267,32 @@ Variables available:
 - {resume} - User's resume content
 - {jobDescription} - Target job description
 
-Format: Return 3 bullets with rationales that help users understand their self-efficacy in the context of this role.""",
+Return your response as JSON in this exact format:
+
+```json
+{{
+  "bullets": [
+    {{
+      "text": "Bullet point text here",
+      "rationale": "Explanation of how this demonstrates self-efficacy theory"
+    }},
+    {{
+      "text": "Second bullet point text", 
+      "rationale": "Explanation for second bullet"
+    }},
+    {{
+      "text": "Third bullet point text",
+      "rationale": "Explanation for third bullet"
+    }}
+  ]
+}}
+```
+
+Resume:
+{resume}
+
+Job Description:
+{jobDescription}""",
 
         "regeneration": """The user rated this bullet {rating}/7 and provided this feedback: '{feedback}'. 
 
