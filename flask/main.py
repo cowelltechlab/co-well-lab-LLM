@@ -13,6 +13,7 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from flask_login import LoginManager
 from models.admin_user import AdminUser
+from services.mongodb_service import initialize_default_prompts
 
 mongo = PyMongo()
 login_manager = LoginManager()
@@ -39,6 +40,10 @@ def create_app():
     app.register_blueprint(test_bp)
     app.register_blueprint(chat_bp)
     app.register_blueprint(admin_bp)
+
+    # Initialize default prompts on startup
+    with app.app_context():
+        initialize_default_prompts()
 
     return app
 
