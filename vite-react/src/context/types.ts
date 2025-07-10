@@ -68,6 +68,19 @@ export interface CoverLetterResponse {
   finalPreference?: "control" | "aligned" | "tie" | null;
   
   // v1.5 Collaborative Alignment Data
+  bulletIterations?: {
+    bulletIndex: number;
+    iterations: {
+      iterationNumber: number;
+      bulletText: string;
+      rationale: string;
+      userRating: number;
+      userFeedback: string;
+      timestamp: Date;
+    }[];
+    finalIteration: number | null;
+  }[];
+  
   controlProfile?: {
     text: string;
     likertResponses?: {
