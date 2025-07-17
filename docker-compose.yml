@@ -15,19 +15,13 @@ services:
   flask:
     build: ./flask
     env_file:
-      - ./flask/.env
+      - .env
     container_name: flask
     depends_on:
       - mongodb
     environment:
       MONGO_URI: mongodb://root:examplepassword@mongodb:27017/?authSource=admin
       MONGO_DB_NAME: mydatabase
-      PYTHONUNBUFFERED: ${PYTHONUNBUFFERED}
-      AZURE_OPENAI_ENDPOINT: ${AZURE_OPENAI_ENDPOINT}
-      AZURE_OPENAI_KEY: ${AZURE_OPENAI_KEY}
-      PLATFORM_OPENAI_KEY: ${PLATFORM_OPENAI_KEY}
-      SECRET_KEY: ${SECRET_KEY}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
     ports:
       - "5002:5002"
     command: gunicorn --bind 0.0.0.0:5002 main:app

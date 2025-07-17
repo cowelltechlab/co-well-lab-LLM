@@ -4,11 +4,8 @@ import json
 import re
 from services.mongodb_service import get_active_prompt
 
-llmchat = lcai.AzureChatOpenAI(
-    openai_api_key=os.getenv("AZURE_OPENAI_KEY"),
-    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
-    azure_deployment="PROPILOT",
-    openai_api_version="2024-05-01-preview",
+llmchat = lcai.ChatOpenAI(
+    openai_api_key=os.getenv("PLATFORM_OPENAI_KEY"),
     model_name="gpt-4o",
 )
 
