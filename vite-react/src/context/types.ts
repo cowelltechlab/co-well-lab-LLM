@@ -129,4 +129,5 @@ export interface AppState {
   >;
   initialGeneration: () => Promise<boolean>;
   generateControlProfile: () => Promise<boolean>;
+  generateAlignedProfile: () => Promise<boolean>;
 }

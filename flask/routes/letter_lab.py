@@ -10,6 +10,7 @@ from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_control_profile
 from services.openai_service import generate_bse_bullets, parse_bse_bullets_response
 from services.openai_service import regenerate_bullet, parse_regenerated_bullet_response
+from services.openai_service import generate_aligned_profile
 from services.openai_service import generate_role_name
 from services.openai_service import generate_enactive_mastery_bullet_points
 from services.openai_service import generate_vicarious_experience_bullet_points
@@ -474,12 +475,19 @@ def generate_bse_bullets_endpoint():
             print("Error parsing BSE bullets:", str(e))
             return jsonify({"error": "Failed to parse BSE bullets response"}), 500
         
-        # Initialize bulletIterations structure in session document
+        # Initialize bulletIterations structure with generated bullets
         bullet_iterations = []
-        for i in range(3):
+        for i, bullet in enumerate(bullets):
             bullet_iterations.append({
                 "bulletIndex": i,
-                "iterations": [],
+                "iterations": [{
+                    "iterationNumber": 1,
+                    "bulletText": bullet["text"],
+                    "rationale": bullet["rationale"],
+                    "userRating": None,
+                    "userFeedback": "",
+                    "timestamp": None
+                }],
                 "finalIteration": None
             })
         
@@ -487,9 +495,38 @@ def generate_bse_bullets_endpoint():
             "bulletIterations": bullet_iterations
         }
         
+        # Check if session exists before updating
+        existing_session = get_session(session_id)
+        if not existing_session:
+            print(f"ERROR: Session {session_id} not found in database")
+            return jsonify({"error": "Session not found"}), 404
+            
+        # Check if bulletIterations already exists
+        if "bulletIterations" in existing_session and existing_session["bulletIterations"]:
+            # If bullets were already generated, retrieve them from the stored data
+            existing_bullets = []
+            bullet_iterations_data = existing_session.get("bulletIterations", [])
+            for bullet_data in bullet_iterations_data:
+                if bullet_data.get("iterations") and len(bullet_data["iterations"]) > 0:
+                    # Get the first iteration as the "current" bullet
+                    first_iteration = bullet_data["iterations"][0]
+                    existing_bullets.append({
+                        "index": bullet_data.get("bulletIndex", len(existing_bullets)),
+                        "text": first_iteration.get("bulletText", ""),
+                        "rationale": first_iteration.get("rationale", "")
+                    })
+            
+            if existing_bullets:
+                return jsonify({
+                    "success": True,
+                    "bullets": existing_bullets
+                }), 200
+        
+        # Update session with new bulletIterations
         result = set_fields(session_id, update_fields)
-        if not result or result.modified_count == 0:
-            return jsonify({"error": "Failed to initialize bullet iterations"}), 500
+        
+        if not result:
+            return jsonify({"error": "Database update failed"}), 500
         
         log_progress_event("bse_bullets_generated", session_id=session_id)
         
@@ -574,6 +611,180 @@ def regenerate_bullet_endpoint():
         
     except Exception as e:
         print("Error regenerating bullet:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+@letter_lab_bp.route("/generate-aligned-profile", methods=["POST"])
+@token_required
+def generate_aligned_profile_endpoint():
+    """Generate aligned profile using bullet iterations data for collaborative alignment research."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        
+        # Validate required fields
+        if not session_id:
+            return jsonify({"error": "Missing required field: session_id"}), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Get resume and job description from session
+        resume = session_doc.get("resume")
+        job_description = session_doc.get("job_desc")
+        
+        if not resume or not job_description:
+            return jsonify({"error": "Resume or job description not found in session"}), 400
+        
+        # Get bullet iterations data from session
+        bullet_iterations = session_doc.get("bulletIterations", [])
+        
+        if not bullet_iterations:
+            return jsonify({"error": "No bullet iterations found in session"}), 400
+        
+        # Generate aligned profile using prompt management system
+        aligned_profile_text = retry_generation(
+            generate_aligned_profile,
+            validator_fn=is_valid_string_output,
+            args=(resume, job_description, bullet_iterations),
+            debug_label="Aligned Profile"
+        )
+        
+        if not aligned_profile_text:
+            return jsonify({"error": "Failed to generate aligned profile"}), 500
+        
+        # Store aligned profile in session document
+        update_fields = {
+            "alignedProfile": {
+                "text": aligned_profile_text
+            }
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to save aligned profile"}), 500
+        
+        log_progress_event("aligned_profile_generated", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "profile_text": aligned_profile_text,
+            "session_id": session_id
+        }), 200
+        
+    except Exception as e:
+        print("Error generating aligned profile:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@letter_lab_bp.route("/save-iteration-data", methods=["POST"])
+@token_required
+def save_iteration_data_endpoint():
+    """Save bullet iteration data for collaborative alignment research."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        bullet_index = data.get("bullet_index")
+        iteration_number = data.get("iteration_number")
+        bullet_text = data.get("bullet_text")
+        rationale = data.get("rationale")
+        user_rating = data.get("user_rating")
+        user_feedback = data.get("user_feedback")
+        is_final = data.get("is_final", False)
+        
+        # Validate required fields
+        if not all([session_id, bullet_index is not None, iteration_number is not None, bullet_text, rationale]):
+            return jsonify({
+                "error": "Missing required fields: session_id, bullet_index, iteration_number, bullet_text, rationale"
+            }), 400
+        
+        # Validate bullet_index range
+        if not isinstance(bullet_index, int) or bullet_index < 0 or bullet_index > 2:
+            return jsonify({"error": "bullet_index must be 0, 1, or 2"}), 400
+        
+        # Validate iteration_number
+        if not isinstance(iteration_number, int) or iteration_number < 1:
+            return jsonify({"error": "iteration_number must be a positive integer"}), 400
+        
+        # Validate user_rating if provided
+        if user_rating is not None:
+            if not isinstance(user_rating, int) or user_rating < 1 or user_rating > 7:
+                return jsonify({"error": "user_rating must be between 1 and 7"}), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Get current bullet iterations
+        bullet_iterations = session_doc.get("bulletIterations", [])
+        
+        # Ensure we have the right structure
+        while len(bullet_iterations) <= bullet_index:
+            bullet_iterations.append({
+                "bulletIndex": len(bullet_iterations),
+                "iterations": [],
+                "finalIteration": None
+            })
+        
+        # Create iteration data
+        iteration_data = {
+            "iterationNumber": iteration_number,
+            "bulletText": bullet_text,
+            "rationale": rationale,
+            "userRating": user_rating,
+            "userFeedback": user_feedback or "",
+            "timestamp": data.get("timestamp") or None
+        }
+        
+        # Add or update iteration in the specific bullet
+        bullet_data = bullet_iterations[bullet_index]
+        
+        # Find if this iteration already exists
+        existing_iteration_index = None
+        for i, iteration in enumerate(bullet_data["iterations"]):
+            if iteration.get("iterationNumber") == iteration_number:
+                existing_iteration_index = i
+                break
+        
+        if existing_iteration_index is not None:
+            # Update existing iteration
+            bullet_data["iterations"][existing_iteration_index] = iteration_data
+        else:
+            # Add new iteration
+            bullet_data["iterations"].append(iteration_data)
+        
+        # If this is marked as final, set finalIteration
+        if is_final:
+            bullet_data["finalIteration"] = iteration_number
+        
+        # Update session document
+        update_fields = {
+            "bulletIterations": bullet_iterations
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to save iteration data"}), 500
+        
+        log_progress_event("iteration_data_saved", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "message": "Iteration data saved successfully",
+            "bullet_index": bullet_index,
+            "iteration_number": iteration_number
+        }), 200
+        
+    except Exception as e:
+        print("Error saving iteration data:", str(e))
         return jsonify({"error": "Internal server error"}), 500
 
 
