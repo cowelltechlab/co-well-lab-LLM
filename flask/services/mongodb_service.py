@@ -293,7 +293,7 @@ def revert_prompt(prompt_type, target_version, modified_by="admin"):
         print(f"Error reverting prompt {prompt_type} to version {target_version}:", e)
         return False
 
-def initialize_default_prompts():
+def initialize_default_prompts(force_update=False):
     """Initialize default prompts if they don't exist."""
     default_prompts = {
         "control": """Based on the following resume and job description, generate a professional profile statement (1-2 paragraphs) that highlights relevant experience and skills. Focus on creating a compelling narrative that connects the candidate's background to the specific role requirements.
@@ -393,10 +393,21 @@ Generate a profile that feels authentic to the user while professionally present
     
     try:
         for prompt_type, content in default_prompts.items():
-            existing = db["prompts"].find_one({"promptType": prompt_type})
-            if not existing:
-                create_prompt(prompt_type, content, "system")
-                print(f"Initialized default prompt for {prompt_type}")
+            if force_update:
+                # Force create new version regardless of existing content
+                create_prompt(prompt_type, content, "system_force_update")
+                print(f"Force updated default prompt for {prompt_type}")
+            else:
+                existing = db["prompts"].find_one({"promptType": prompt_type})
+                if not existing:
+                    create_prompt(prompt_type, content, "system")
+                    print(f"Initialized default prompt for {prompt_type}")
+                else:
+                    # Update existing prompt if content has changed
+                    active_prompt = db["prompts"].find_one({"promptType": prompt_type, "isActive": True})
+                    if active_prompt and active_prompt["content"] != content:
+                        create_prompt(prompt_type, content, "system_update")
+                        print(f"Updated default prompt for {prompt_type}")
         return True
     except Exception as e:
         print("Error initializing default prompts:", e)
