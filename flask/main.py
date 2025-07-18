@@ -6,7 +6,6 @@ load_dotenv()
 
 from routes.letter_lab import letter_lab_bp
 from routes.test_routes import test_bp
-from routes.chat import chat_bp
 from routes.admin import admin_bp
 
 from flask_pymongo import PyMongo
@@ -38,7 +37,6 @@ def create_app():
     # Register Blueprints
     app.register_blueprint(letter_lab_bp, url_prefix="/lab")
     app.register_blueprint(test_bp)
-    app.register_blueprint(chat_bp)
     app.register_blueprint(admin_bp)
 
     # Initialize default prompts on startup

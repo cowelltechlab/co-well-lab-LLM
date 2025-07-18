@@ -2,7 +2,17 @@ import os
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from utils.flatten import flatten_dict
+
+def flatten_dict(d, parent_key="", sep="_"):
+    """Recursively flattens nested dictionaries for CSV export."""
+    items = []
+    for k, v in d.items():
+        new_key = f"{parent_key}{sep}{k}" if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://mongo:27017/")
 client = MongoClient(MONGO_URI)
