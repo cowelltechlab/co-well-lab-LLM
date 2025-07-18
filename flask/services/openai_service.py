@@ -167,7 +167,7 @@ def parse_regenerated_bullet_response(response_text):
         raise ValueError("Failed to parse regenerated bullet response")
 
 # Aligned Profile Generation for v1.5
-def generate_aligned_profile(resume, job_description, bullet_iterations_data):
+def generate_aligned_profile(resume, job_description, bullet_iterations_data, original_profile=""):
     """Generate aligned profile using bullet iterations data and configurable prompt from database."""
     try:
         # Get the active final synthesis prompt from the database
@@ -177,35 +177,48 @@ def generate_aligned_profile(resume, job_description, bullet_iterations_data):
         
         prompt_template = prompt_doc["content"]
         
-        # Prepare bullet iterations summary for the prompt
-        bullet_summary = ""
+        # Prepare final bullets summary
+        final_bullets = ""
+        all_feedback = ""
+        
         for bullet_data in bullet_iterations_data:
             bullet_index = bullet_data.get("bulletIndex", 0)
             iterations = bullet_data.get("iterations", [])
             final_iteration = bullet_data.get("finalIteration")
             
-            bullet_summary += f"Bullet {bullet_index + 1}:\n"
-            
-            # Show iteration progression
-            for i, iteration in enumerate(iterations):
-                bullet_summary += f"  Iteration {iteration.get('iterationNumber', i + 1)}: \"{iteration.get('bulletText', '')}\"\n"
-                bullet_summary += f"    Rationale: {iteration.get('rationale', '')}\n"
-                bullet_summary += f"    User Rating: {iteration.get('userRating', 'N/A')}/7\n"
-                if iteration.get('userFeedback'):
-                    bullet_summary += f"    User Feedback: \"{iteration.get('userFeedback')}\"\n"
-                bullet_summary += "\n"
-            
-            # Indicate final chosen iteration
+            # Get the final iteration or the last one
             if final_iteration is not None:
-                bullet_summary += f"  Final chosen iteration: {final_iteration}\n"
+                final_iter = next((iter for iter in iterations if iter.get('iterationNumber') == final_iteration), None)
+            else:
+                final_iter = iterations[-1] if iterations else None
             
-            bullet_summary += "\n"
+            if final_iter:
+                final_bullets += f"Bullet {bullet_index + 1}: {final_iter.get('bulletText', '')}\n"
+                final_bullets += f"Rationale: {final_iter.get('rationale', '')}\n\n"
+        
+        # Prepare all feedback summary
+        for bullet_data in bullet_iterations_data:
+            bullet_index = bullet_data.get("bulletIndex", 0)
+            iterations = bullet_data.get("iterations", [])
+            
+            all_feedback += f"Bullet {bullet_index + 1} feedback:\n"
+            
+            # Show iteration progression with feedback
+            for i, iteration in enumerate(iterations):
+                if iteration.get('userRating') is not None:
+                    all_feedback += f"  Rating: {iteration.get('userRating', 'N/A')}/7\n"
+                if iteration.get('userFeedback'):
+                    all_feedback += f"  Feedback: \"{iteration.get('userFeedback')}\"\n"
+            
+            all_feedback += "\n"
         
         # Substitute variables in the prompt
         prompt = prompt_template.format(
             resume=resume,
             jobDescription=job_description,
-            bulletData=bullet_summary
+            finalBullets=final_bullets,
+            allFeedback=all_feedback,
+            originalProfile=original_profile
         )
         
         response = llmchat.invoke(prompt)

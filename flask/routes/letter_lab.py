@@ -646,11 +646,14 @@ def generate_aligned_profile_endpoint():
         if not bullet_iterations:
             return jsonify({"error": "No bullet iterations found in session"}), 400
         
+        # Get original control profile for context
+        original_profile = session_doc.get("controlProfile", {}).get("text", "")
+        
         # Generate aligned profile using prompt management system
         aligned_profile_text = retry_generation(
             generate_aligned_profile,
             validator_fn=is_valid_string_output,
-            args=(resume, job_description, bullet_iterations),
+            args=(resume, job_description, bullet_iterations, original_profile),
             debug_label="Aligned Profile"
         )
         
