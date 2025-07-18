@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/useAppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -47,13 +47,15 @@ export function AlignedProfileView() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const hasCalledGenerate = useRef(false);
 
   // Generate aligned profile on component mount if not already generated
   useEffect(() => {
-    if (!letterLabData?.alignedProfile?.text && !isGeneratingCoverLetter) {
+    if (!letterLabData?.alignedProfile?.text && !isGeneratingCoverLetter && !hasCalledGenerate.current) {
+      hasCalledGenerate.current = true;
       generateAlignedProfile();
     }
-  }, [letterLabData, generateAlignedProfile, isGeneratingCoverLetter]);
+  }, [letterLabData?.alignedProfile?.text, isGeneratingCoverLetter, generateAlignedProfile]);
 
   // Redirect if no access
   useEffect(() => {
@@ -91,6 +93,30 @@ export function AlignedProfileView() {
     setSubmitError("");
 
     try {
+      // Save responses to the database
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lab/save-aligned-profile-responses`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          session_id: letterLabData?.document_id,
+          likert_responses: {
+            accuracy: likertResponses.accuracy!,
+            control: likertResponses.control!,
+            expression: likertResponses.expression!,
+            alignment: likertResponses.alignment!,
+          },
+          open_responses: openResponses,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to save aligned profile responses");
+      }
+
       // Update the letterLabData with the responses
       setLetterLabData(prev => {
         if (!prev) return prev;

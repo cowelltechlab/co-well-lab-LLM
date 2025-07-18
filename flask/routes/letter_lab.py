@@ -52,17 +52,17 @@ def generate_control_profile_endpoint():
         resume = data.get("resume")
         job_description = data.get("job_description")
         
-        # Validate required fields
-        if not all([session_id, resume, job_description]):
+        # Validate required fields (session_id can be null for initial creation)
+        if not all([resume, job_description]):
             return jsonify({
-                "error": "Missing required fields: session_id, resume, job_description"
+                "error": "Missing required fields: resume, job_description"
             }), 400
         
         # Handle session creation or retrieval
         session_doc = None
         
         # Check if session_id is a valid ObjectId and session exists
-        if ObjectId.is_valid(session_id):
+        if session_id and ObjectId.is_valid(session_id):
             session_doc = get_session(session_id)
         
         # If session doesn't exist, create a new one
@@ -366,6 +366,96 @@ def generate_aligned_profile_endpoint():
         
     except Exception as e:
         print("Error generating aligned profile:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+@letter_lab_bp.route("/save-control-profile-responses", methods=["POST"])
+@token_required
+def save_control_profile_responses_endpoint():
+    """Save control profile survey responses."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        likert_responses = data.get("likert_responses")
+        open_responses = data.get("open_responses")
+        
+        # Validate required fields
+        if not all([session_id, likert_responses, open_responses]):
+            return jsonify({
+                "error": "Missing required fields: session_id, likert_responses, open_responses"
+            }), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Update the control profile with survey responses
+        update_fields = {
+            "controlProfile.likertResponses": likert_responses,
+            "controlProfile.openResponses": open_responses
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to save control profile responses"}), 500
+        
+        log_progress_event("control_profile_responses_saved", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "message": "Control profile responses saved successfully"
+        }), 200
+        
+    except Exception as e:
+        print("Error saving control profile responses:", str(e))
+        return jsonify({"error": "Internal server error"}), 500
+
+@letter_lab_bp.route("/save-aligned-profile-responses", methods=["POST"])
+@token_required
+def save_aligned_profile_responses_endpoint():
+    """Save aligned profile survey responses."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        likert_responses = data.get("likert_responses")
+        open_responses = data.get("open_responses")
+        
+        # Validate required fields
+        if not all([session_id, likert_responses, open_responses]):
+            return jsonify({
+                "error": "Missing required fields: session_id, likert_responses, open_responses"
+            }), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Update the aligned profile with survey responses
+        update_fields = {
+            "alignedProfile.likertResponses": likert_responses,
+            "alignedProfile.openResponses": open_responses
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to save aligned profile responses"}), 500
+        
+        log_progress_event("aligned_profile_responses_saved", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "message": "Aligned profile responses saved successfully"
+        }), 200
+        
+    except Exception as e:
+        print("Error saving aligned profile responses:", str(e))
         return jsonify({"error": "Internal server error"}), 500
 
 @letter_lab_bp.route("/save-iteration-data", methods=["POST"])

@@ -33,15 +33,14 @@ export function WelcomeInputView() {
       return;
     }
 
-    // Create a new session with basic data while preserving existing authentication
-    const sessionData = {
-      ...letterLabData, // Preserve existing data including hasAccess
+    // Store resume and job description, let backend create session
+    setLetterLabData(prev => ({
+      ...prev,
       resume: resumeText,
       job_desc: jobDescription,
-      document_id: `session_${Date.now()}`, // Temporary ID
-    };
+      document_id: null // No temporary ID - let backend create real session
+    }));
     
-    setLetterLabData(sessionData);
     navigate("/control-profile");
   };
 

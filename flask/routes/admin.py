@@ -1,5 +1,6 @@
 import csv
 import io
+import zipfile
 import requests
 import random
 import string
@@ -47,31 +48,136 @@ def logout():
 @admin_bp.route("/sessions/export", methods=["GET"])
 @login_required
 def export_sessions_csv():
-    sessions = get_all_sessions()
-    if not sessions:
-        return jsonify({"error": "No sessions found"}), 404
-
-    # Step 1: Build the full set of all keys used in any session
-    all_keys = set()
-    for s in sessions:
-        all_keys.update(s.keys())
+    # Get raw sessions directly from MongoDB (not flattened)
+    from services.mongodb_service import collection
     
-    # Step 2: Define column order with timestamp and document_id first
-    primary_columns = ["timestamp", "document_id"]
-    # Filter out primary columns from other keys and sort the rest
-    other_columns = sorted([k for k in all_keys if k not in primary_columns])
-    fieldnames = primary_columns + other_columns
+    try:
+        sessions = list(collection.find())
+        if not sessions:
+            return jsonify({"error": "No sessions found"}), 404
+        
+        # Add document_id and timestamp to each session
+        for s in sessions:
+            s["document_id"] = str(s["_id"])
+            s["timestamp"] = s["_id"].generation_time.isoformat()
+            del s["_id"]
+    except Exception as e:
+        return jsonify({"error": f"Database error: {str(e)}"}), 500
 
-    # Step 3: Write the CSV
-    si = io.StringIO()
-    writer = csv.DictWriter(si, fieldnames=fieldnames, extrasaction="ignore")
+    # Create single wide format CSV with raw data only
+    csv_data = []
+    
+    for session in sessions:
+        session_id = session.get("document_id")
+        
+        # Start with basic session data
+        row = {
+            "session_id": session_id,
+            "timestamp": session.get("timestamp"),
+            "resume": session.get("resume"),
+            "job_desc": session.get("job_desc"),
+            "completed": session.get("completed", False),
+        }
+        
+        # Control profile data (v1.5 structure)
+        control_profile = session.get("controlProfile", {})
+        row["control_profile_text"] = control_profile.get("text")
+        
+        # Control profile Likert responses (1-7 scale)
+        control_likert = control_profile.get("likertResponses", {})
+        row["control_likert_accuracy"] = control_likert.get("accuracy")
+        row["control_likert_control"] = control_likert.get("control")
+        row["control_likert_expression"] = control_likert.get("expression")
+        row["control_likert_alignment"] = control_likert.get("alignment")
+        
+        # Control profile open-ended responses
+        control_open = control_profile.get("openResponses", {})
+        row["control_response_likes"] = control_open.get("likes")
+        row["control_response_dislikes"] = control_open.get("dislikes")
+        row["control_response_changes"] = control_open.get("changes")
+        
+        # Aligned profile data (v1.5 structure)
+        aligned_profile = session.get("alignedProfile", {})
+        row["aligned_profile_text"] = aligned_profile.get("text")
+        
+        # Aligned profile Likert responses (1-7 scale)
+        aligned_likert = aligned_profile.get("likertResponses", {})
+        row["aligned_likert_accuracy"] = aligned_likert.get("accuracy")
+        row["aligned_likert_control"] = aligned_likert.get("control")
+        row["aligned_likert_expression"] = aligned_likert.get("expression")
+        row["aligned_likert_alignment"] = aligned_likert.get("alignment")
+        
+        # Aligned profile open-ended responses
+        aligned_open = aligned_profile.get("openResponses", {})
+        row["aligned_response_likes"] = aligned_open.get("likes")
+        row["aligned_response_dislikes"] = aligned_open.get("dislikes")
+        row["aligned_response_changes"] = aligned_open.get("changes")
+        
+        # Bullet iterations - extract ALL iterations for each bullet using 1.1, 1.2, 1.3 format
+        bullet_iterations = session.get("bulletIterations", [])
+        
+        # Collect all iterations across all bullets to determine max iterations needed
+        all_iterations = []
+        for bullet in bullet_iterations:
+            bullet_idx = bullet.get("bulletIndex", 0)
+            iterations = bullet.get("iterations", [])
+            for iteration in iterations:
+                iteration_num = iteration.get("iterationNumber", 1)
+                all_iterations.append({
+                    "bullet_num": bullet_idx + 1,  # Convert to 1-based indexing
+                    "iteration_num": iteration_num,
+                    "key": f"bullet_{bullet_idx + 1}_{iteration_num}",
+                    "data": iteration
+                })
+        
+        # Add all iterations to the row
+        for iteration_data in all_iterations:
+            key = iteration_data["key"]
+            data = iteration_data["data"]
+            
+            row[f"{key}_text"] = data.get("bulletText")
+            row[f"{key}_rationale"] = data.get("rationale")
+            row[f"{key}_rating"] = data.get("userRating")
+            row[f"{key}_feedback"] = data.get("userFeedback")
+        
+        csv_data.append(row)
+    
+    # Create CSV content
+    csv_buffer = io.StringIO()
+    
+    # Collect all possible fieldnames from all rows (since iterations are dynamic)
+    all_fieldnames = set()
+    for row in csv_data:
+        all_fieldnames.update(row.keys())
+    
+    # Define base fieldnames in order
+    base_fieldnames = [
+        "session_id", "timestamp", "resume", "job_desc", "completed",
+        "control_profile_text", 
+        "control_likert_accuracy", "control_likert_control", "control_likert_expression", "control_likert_alignment",
+        "control_response_likes", "control_response_dislikes", "control_response_changes",
+        "aligned_profile_text",
+        "aligned_likert_accuracy", "aligned_likert_control", "aligned_likert_expression", "aligned_likert_alignment", 
+        "aligned_response_likes", "aligned_response_dislikes", "aligned_response_changes"
+    ]
+    
+    # Add bullet iteration fieldnames in sorted order
+    bullet_fieldnames = sorted([f for f in all_fieldnames if f.startswith("bullet_")])
+    
+    # Combine all fieldnames
+    fieldnames = base_fieldnames + bullet_fieldnames
+    
+    writer = csv.DictWriter(csv_buffer, fieldnames=fieldnames, extrasaction="ignore", 
+                            quoting=csv.QUOTE_ALL, lineterminator='\n')
     writer.writeheader()
-    writer.writerows(sessions)
-
-    output = make_response(si.getvalue())
-    output.headers["Content-Disposition"] = "attachment; filename=sessions.csv"
+    writer.writerows(csv_data)
+    
+    # Return as CSV file
+    output = make_response(csv_buffer.getvalue())
+    output.headers["Content-Disposition"] = "attachment; filename=research_data.csv"
     output.headers["Content-Type"] = "text/csv"
     return output
+
 
 
 

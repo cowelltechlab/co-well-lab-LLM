@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { AppContext } from "./AppContext";
 import type { AppState, CoverLetterResponse } from "./types";
 const apiBase = import.meta.env.VITE_API_BASE_URL;
@@ -14,6 +14,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const saved = localStorage.getItem("letterLabData");
       return saved ? JSON.parse(saved) : null;
     });
+  const isGeneratingProfile = useRef(false);
+  const isGeneratingAlignedProfile = useRef(false);
 
   useEffect(() => {
     if (letterLabData) {
@@ -22,17 +24,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }, [letterLabData]);
 
 
-  async function generateControlProfile(): Promise<boolean> {
-    if (!letterLabData?.document_id) {
-      setGenerationError("No session found. Please start over.");
-      return false;
-    }
-
+  const generateControlProfile = useCallback(async (): Promise<boolean> => {
     if (!resumeText || !jobDescription) {
       setGenerationError("Resume and job description are required.");
       return false;
     }
 
+    // Prevent duplicate calls (StrictMode protection)
+    if (isGeneratingProfile.current) {
+      return false;
+    }
+    
+    isGeneratingProfile.current = true;
     setIsGeneratingCoverLetter(true);
     setGenerationError("");
 
@@ -44,7 +47,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         },
         credentials: "include",
         body: JSON.stringify({
-          session_id: letterLabData.document_id,
+          session_id: letterLabData?.document_id || null, // Allow null to trigger session creation
           resume: resumeText,
           job_description: jobDescription,
         }),
@@ -79,15 +82,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return false;
     } finally {
       setIsGeneratingCoverLetter(false);
+      isGeneratingProfile.current = false;
     }
-  }
+  }, [resumeText, jobDescription, letterLabData?.document_id]);
 
-  async function generateAlignedProfile(): Promise<boolean> {
+  const generateAlignedProfile = useCallback(async (): Promise<boolean> => {
     if (!letterLabData?.document_id) {
       setGenerationError("No session found. Please start over.");
       return false;
     }
 
+    // Prevent duplicate calls (StrictMode protection)
+    if (isGeneratingAlignedProfile.current) {
+      return false;
+    }
+    
+    isGeneratingAlignedProfile.current = true;
     setIsGeneratingCoverLetter(true);
     setGenerationError("");
 
@@ -131,8 +141,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       return false;
     } finally {
       setIsGeneratingCoverLetter(false);
+      isGeneratingAlignedProfile.current = false;
     }
-  }
+  }, [letterLabData?.document_id]);
 
   const value: AppState = {
     resumeText,

@@ -217,14 +217,23 @@ export function AdminDashboardView() {
 
             {/* 4. Download Sessions */}
             <div className="border rounded p-6 shadow bg-white w-full h-[35vh]">
-              <h2 className="text-lg font-semibold mb-4">Download Sessions</h2>
+              <h2 className="text-lg font-semibold mb-4">Download Research Data</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Downloads a single CSV file containing all research data in wide format (one row per participant):
+                <br />• Session information (timestamp, resume, job description)
+                <br />• Control and aligned profile text
+                <br />• Likert scale responses (1-7 ratings) for both phases
+                <br />• Open-ended survey responses for both phases
+                <br />• All bullet iterations with numbering (bullet_1_1, bullet_1_2, bullet_2_1, etc.)
+                <br />• Final bullet text, rationale, ratings, and feedback for each iteration
+              </p>
               <Button
                 onClick={() =>
                   window.open(`${apiBase}/api/admin/sessions/export`, "_blank")
                 }
                 className=""
               >
-                Download CSV
+                Download Research Data (CSV)
               </Button>
             </div>
           </div>
