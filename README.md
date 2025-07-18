@@ -1,183 +1,101 @@
-# co-well-lab-LLM
+# Collaborative Alignment Research Tool
 
-A language model-powered backend for generating AI-assisted cover letters from resumes.
+A research platform for studying human-AI collaboration in identity representation through sequential bullet refinement. This tool implements a novel workflow for investigating how users and AI systems work together to refine and align personal profile representations.
 
-## Table of Contents
+## Overview
 
-- [Development](#development)
-  - [Clone the Repository](#clone-the-repository)
-  - [Set Up Environment Variables](#set-up-environment-variables)
-  - [Start the Services](#start-the-services)
-  - [Access the Services](#access-the-services)
-- [Production](#production)
-  - [Prepare Environment Files](#prepare-environment-files)
-  - [Run the Production Build](#run-the-production-build)
-  - [Post-Deployment Maintenance](#post-deployment-maintenance)
-- [Working with Docker](#working-with-docker)
-  - [Hot Reloading](#hot-reloading)
-  - [Viewing Logs](#viewing-logs)
-  - [Stopping the Environment](#stopping-the-environment)
-  - [Rebuilding Containers](#rebuilding-containers)
-  - [Pruning Docker System](#pruning-docker-system)
-- [License](#license)
+The v1.5 system enables researchers to study collaborative alignment through:
 
----
+- **Control Profile Generation**: AI-generated initial profile for baseline comparison
+- **Sequential Bullet Refinement**: One-bullet-at-a-time iterative improvement workflow  
+- **Collaborative Data Collection**: Likert scales and open-ended feedback at each stage
+- **Aligned Profile Synthesis**: Final profile generation incorporating user refinements
+- **Comparison Interface**: Side-by-side analysis of control vs aligned profiles
+- **Admin Dashboard**: Researcher tools for prompt management and data analysis
 
-## Development
+## Quick Start
 
-### Clone the Repository
+### Development
 
 ```bash
-git clone https://github.com/your-repo/co-well-lab-LLM.git
+git clone https://github.com/cowelltechlab/co-well-lab-LLM.git
 cd co-well-lab-LLM
-```
-
-### Set Up Environment Variables
-
-**Frontend (`vite-react`)**
-
-Create a `.env` file in `vite-react/`:
-
-```dotenv
-VITE_API_BASE_URL=""
-```
-
-This enables development proxying to Flask during local development.
-
-**Backend (`flask`)**
-
-Create a `.env` file in `flask/` or use the provided `.env copy`:
-
-```dotenv
-PYTHONUNBUFFERED=1
-AZURE_OPENAI_ENDPOINT=https://vds-openai-test-001.openai.azure.com/
-AZURE_OPENAI_KEY=
-PLATFORM_OPENAI_KEY=
-AZURE_OPENAI_DEPLOYMENT=TEST-Embedding
-```
-
-### Start the Services
-
-Run in the root directory:
-
-```bash
 docker-compose up --build
 ```
 
-This uses:
-
-- `docker-compose.yml`
-- `docker-compose.override.yml` (automatically loaded)
-
-### Access the Services
-
+Access at:
 - **Frontend**: http://localhost:5173
-- **API (Flask)**: http://localhost:5002
-- **MongoDB**: localhost:27017 (use Compass or another DB client)
+- **API**: http://localhost:5002
+- **Admin**: http://localhost:5173/admin
 
----
-
-## Production
-
-### Prepare Environment Files
-
-**Frontend**
-
-Create a `.env.production` in `vite-react/`:
-
-```dotenv
-VITE_API_BASE_URL=https://api.letterlab.me
-```
-
-**Backend**
-
-Create a `.env.prod` file in `flask/` with all required keys. This will be used by `docker-compose.prod.yml`.
-
-### Run the Production Build
-
-Use the production compose file:
+### Production
 
 ```bash
 docker-compose -f docker-compose.prod.yml up --build -d
 ```
 
-This spins up:
+## Environment Setup
 
-- Flask behind Gunicorn
-- Vite build served with Nginx
-- MongoDB with volume persistence
-- Caddy as HTTPS reverse proxy
-
-### Post-Deployment Maintenance
-
-You’ll find a helper file with commands under:
-
+### Flask Backend (.env)
 ```
-docs/docker-commands
+PLATFORM_OPENAI_KEY=your_openai_key
+SECRET_KEY=your_flask_secret
+ADMIN_PASSWORD=your_admin_password
 ```
 
-Be sure to review this for:
+### React Frontend (.env)
+```
+VITE_API_BASE_URL=http://localhost:5002
+```
 
-- Port pruning
-- Backup suggestions
-- Docker health check ideas
+## Architecture
 
----
+- **Backend**: Flask API with MongoDB for session storage
+- **Frontend**: React/TypeScript with Tailwind CSS
+- **AI Integration**: OpenAI GPT-4o for profile and bullet generation
+- **Admin Interface**: Prompt management and data export tools
+- **Authentication**: Token-based user access with admin panel
 
-## Working with Docker
+## Research Workflow
 
-### Hot Reloading
+1. **Welcome Input**: User provides resume and job description
+2. **Control Profile**: AI generates initial profile (baseline)
+3. **Bullet Refinement**: Sequential improvement of 3 BSE theory bullets
+4. **Aligned Profile**: AI synthesizes final profile from user iterations
+5. **Comparison**: Side-by-side evaluation of control vs aligned profiles
 
-- Development mode auto-reloads Flask and Vite when code changes.
-
-### Viewing Logs
+## Development Commands
 
 ```bash
+# Start development environment
+docker-compose up --build
+
+# View logs
 docker-compose logs -f
-```
 
-For production:
+# Access MongoDB shell
+docker exec -it mongodb mongosh -u root -p examplepassword
 
-```bash
-docker-compose -f docker-compose.prod.yml logs -f
-```
-
-### Stopping the Environment
-
-```bash
+# Stop services
 docker-compose down
 ```
 
-Production:
+## Admin Features
 
-```bash
-docker-compose -f docker-compose.prod.yml down
-```
+- **Prompt Management**: Edit AI prompts without code deployment
+- **Session Export**: Download research data as CSV
+- **Token Management**: Create and manage participant access tokens
+- **Progress Monitoring**: Real-time system health and usage analytics
 
-### Rebuilding Containers
+## Data Structure
 
-```bash
-docker-compose build --no-cache
-```
-
-Production:
-
-```bash
-docker-compose -f docker-compose.prod.yml build --no-cache
-```
-
-### Pruning Docker System
-
-If you run into persistent container issues on the server:
-
-```bash
-docker system prune -a --volumes
-```
-
-⚠️ This will remove all stopped containers, networks, volumes, and images not in use. Use with care.
-
----
+Research sessions capture:
+- User demographics and input data
+- Control profile generation and ratings
+- Complete bullet iteration history with feedback
+- Aligned profile generation and final ratings
+- Comparison preferences and qualitative responses
 
 ## License
 
-TBD
+MIT License - See [LICENSE](LICENSE) for details
