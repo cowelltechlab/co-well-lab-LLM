@@ -34,6 +34,9 @@ def validate_token():
 
     # Store in session so @token_required works
     session["token"] = token
+    
+    # Mark token as used immediately when participant logs in
+    mark_token_used(token)
 
     return jsonify({"status": "authorized"}), 200
 
@@ -75,7 +78,7 @@ def generate_control_profile_endpoint():
             session_id = create_session(session_data)
             session_doc = get_session(session_id)
             
-            # Mark the token as used when creating a new session
+            # Update the token with the session_id now that session is created
             token = session.get("token")
             if token:
                 mark_token_used(token, session_id)
