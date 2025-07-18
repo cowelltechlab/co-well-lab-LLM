@@ -210,10 +210,10 @@ def health_check():
     # Frontend - check based on environment
     try:
         import os
-        # In development, frontend runs on port 5173 (Vite default)
+        # In development (Docker), frontend runs on vite-react container port 5173
         # In production, it's served by the same host
         if os.environ.get("FLASK_ENV") == "development":
-            frontend_url = "http://localhost:5173"
+            frontend_url = "http://vite-react:5173"
         else:
             frontend_url = "https://letterlab.me"
         

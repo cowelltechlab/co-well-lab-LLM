@@ -13,6 +13,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    allowedHosts: ["vite-react", "localhost"],
     proxy: {
       "/lab": {
         target: "http://flask:5002",
