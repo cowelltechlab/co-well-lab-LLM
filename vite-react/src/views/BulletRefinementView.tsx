@@ -15,23 +15,13 @@ interface Bullet {
   rationale: string;
 }
 
-interface BulletIteration {
-  iterationNumber: number;
-  bulletText: string;
-  rationale: string;
-  userRating: number | null;
-  userFeedback: string;
-  timestamp: Date;
-}
 
 export function BulletRefinementView() {
   const navigate = useNavigate();
   const { 
     letterLabData, 
-    setLetterLabData,
     resumeText,
     jobDescription,
-    isGeneratingCoverLetter,
     generationError 
   } = useAppContext();
 
@@ -111,29 +101,78 @@ export function BulletRefinementView() {
 
     try {
       // Save current iteration data
-      const iterationData: BulletIteration = {
-        iterationNumber: currentIteration,
-        bulletText: bullets[currentBulletIndex].text,
-        rationale: bullets[currentBulletIndex].rationale,
-        userRating: currentRating,
-        userFeedback: currentFeedback,
-        timestamp: new Date(),
-      };
+      // Save iteration data to backend
+      try {
+        const saveResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lab/save-iteration-data`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            session_id: letterLabData?.document_id,
+            bullet_index: currentBulletIndex,
+            iteration_number: currentIteration,
+            bullet_text: bullets[currentBulletIndex].text,
+            rationale: bullets[currentBulletIndex].rationale,
+            user_rating: currentRating,
+            user_feedback: currentFeedback,
+            is_final: false,
+          }),
+        });
 
-      // TODO: Save iteration data to backend
-      // For now, we'll simulate regeneration by updating the bullet text
-      console.log("Saving iteration data:", iterationData);
+        if (!saveResponse.ok) {
+          throw new Error("Failed to save iteration data");
+        }
+      } catch (error) {
+        console.error("Error saving iteration data:", error);
+        setRegenerationError("Failed to save iteration data. Please try again.");
+        setIsRegenerating(false);
+        return;
+      }
 
-      // TODO: Call regeneration endpoint
-      // For now, simulate a regenerated bullet
-      const updatedBullets = [...bullets];
-      updatedBullets[currentBulletIndex] = {
-        ...updatedBullets[currentBulletIndex],
-        text: `[Iteration ${currentIteration + 1}] ${updatedBullets[currentBulletIndex].text}`,
-        rationale: `Updated rationale based on your feedback: "${currentFeedback}". ${updatedBullets[currentBulletIndex].rationale}`,
-      };
+      // Call regeneration endpoint
+      try {
+        const regenerateResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lab/regenerate-bullet`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            session_id: letterLabData?.document_id,
+            bullet_index: currentBulletIndex,
+            current_bullet: {
+              text: bullets[currentBulletIndex].text,
+              rationale: bullets[currentBulletIndex].rationale,
+            },
+            user_rating: currentRating,
+            user_feedback: currentFeedback,
+            iteration_history: [], // TODO: Include actual iteration history if needed
+          }),
+        });
 
-      setBullets(updatedBullets);
+        if (!regenerateResponse.ok) {
+          throw new Error("Failed to regenerate bullet");
+        }
+
+        const regeneratedData = await regenerateResponse.json();
+        
+        // Update the bullet with the regenerated content
+        const updatedBullets = [...bullets];
+        updatedBullets[currentBulletIndex] = {
+          ...updatedBullets[currentBulletIndex],
+          text: regeneratedData.bullet.text,
+          rationale: regeneratedData.bullet.rationale,
+        };
+
+        setBullets(updatedBullets);
+      } catch (error) {
+        console.error("Error regenerating bullet:", error);
+        setRegenerationError("Failed to regenerate bullet. Please try again.");
+        setIsRegenerating(false);
+        return;
+      }
       setCurrentIteration(prev => prev + 1);
       setCurrentRating(null);
       setCurrentFeedback("");
@@ -147,20 +186,32 @@ export function BulletRefinementView() {
     }
   };
 
-  const handleAllDone = () => {
+  const handleAllDone = async () => {
     // Save final iteration data if user provided feedback
     if (currentRating !== null || currentFeedback.trim() !== "") {
-      const iterationData: BulletIteration = {
-        iterationNumber: currentIteration,
-        bulletText: bullets[currentBulletIndex].text,
-        rationale: bullets[currentBulletIndex].rationale,
-        userRating: currentRating,
-        userFeedback: currentFeedback,
-        timestamp: new Date(),
-      };
-
-      console.log("Saving final iteration data:", iterationData);
-      // TODO: Save to backend
+      // Save final iteration data to backend
+      try {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL}/lab/save-iteration-data`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            session_id: letterLabData?.document_id,
+            bullet_index: currentBulletIndex,
+            iteration_number: currentIteration,
+            bullet_text: bullets[currentBulletIndex].text,
+            rationale: bullets[currentBulletIndex].rationale,
+            user_rating: currentRating,
+            user_feedback: currentFeedback,
+            is_final: true,
+          }),
+        });
+      } catch (error) {
+        console.error("Error saving final iteration data:", error);
+        // Continue with navigation even if save fails
+      }
     }
 
     // Move to next bullet or final profile

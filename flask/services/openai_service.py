@@ -166,6 +166,54 @@ def parse_regenerated_bullet_response(response_text):
         print("Error parsing regenerated bullet response:", e)
         raise ValueError("Failed to parse regenerated bullet response")
 
+# Aligned Profile Generation for v1.5
+def generate_aligned_profile(resume, job_description, bullet_iterations_data):
+    """Generate aligned profile using bullet iterations data and configurable prompt from database."""
+    try:
+        # Get the active final synthesis prompt from the database
+        prompt_doc = get_active_prompt("final_synthesis")
+        if not prompt_doc:
+            raise ValueError("No active final synthesis prompt found in database")
+        
+        prompt_template = prompt_doc["content"]
+        
+        # Prepare bullet iterations summary for the prompt
+        bullet_summary = ""
+        for bullet_data in bullet_iterations_data:
+            bullet_index = bullet_data.get("bulletIndex", 0)
+            iterations = bullet_data.get("iterations", [])
+            final_iteration = bullet_data.get("finalIteration")
+            
+            bullet_summary += f"Bullet {bullet_index + 1}:\n"
+            
+            # Show iteration progression
+            for i, iteration in enumerate(iterations):
+                bullet_summary += f"  Iteration {iteration.get('iterationNumber', i + 1)}: \"{iteration.get('bulletText', '')}\"\n"
+                bullet_summary += f"    Rationale: {iteration.get('rationale', '')}\n"
+                bullet_summary += f"    User Rating: {iteration.get('userRating', 'N/A')}/7\n"
+                if iteration.get('userFeedback'):
+                    bullet_summary += f"    User Feedback: \"{iteration.get('userFeedback')}\"\n"
+                bullet_summary += "\n"
+            
+            # Indicate final chosen iteration
+            if final_iteration is not None:
+                bullet_summary += f"  Final chosen iteration: {final_iteration}\n"
+            
+            bullet_summary += "\n"
+        
+        # Substitute variables in the prompt
+        prompt = prompt_template.format(
+            resume=resume,
+            jobDescription=job_description,
+            bulletData=bullet_summary
+        )
+        
+        response = llmchat.invoke(prompt)
+        return response.content.strip()
+    except Exception as e:
+        print("Error generating aligned profile:", e)
+        return "Error generating aligned profile."
+
 # Task 2
 def generate_role_name(job_desc):
     prompt = f"""

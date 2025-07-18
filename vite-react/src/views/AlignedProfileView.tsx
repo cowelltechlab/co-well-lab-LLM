@@ -22,12 +22,12 @@ interface OpenResponses {
   changes: string;
 }
 
-export function ControlProfileView() {
+export function AlignedProfileView() {
   const navigate = useNavigate();
   const { 
     letterLabData, 
     setLetterLabData, 
-    generateControlProfile, 
+    generateAlignedProfile, 
     isGeneratingCoverLetter,
     generationError 
   } = useAppContext();
@@ -48,12 +48,12 @@ export function ControlProfileView() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
-  // Generate control profile on component mount if not already generated
+  // Generate aligned profile on component mount if not already generated
   useEffect(() => {
-    if (!letterLabData?.controlProfile?.text && !isGeneratingCoverLetter) {
-      generateControlProfile();
+    if (!letterLabData?.alignedProfile?.text && !isGeneratingCoverLetter) {
+      generateAlignedProfile();
     }
-  }, [letterLabData, generateControlProfile, isGeneratingCoverLetter]);
+  }, [letterLabData, generateAlignedProfile, isGeneratingCoverLetter]);
 
   // Redirect if no access
   useEffect(() => {
@@ -96,9 +96,9 @@ export function ControlProfileView() {
         if (!prev) return prev;
         return {
           ...prev,
-          controlProfile: {
-            ...prev.controlProfile,
-            text: prev.controlProfile?.text || "",
+          alignedProfile: {
+            ...prev.alignedProfile,
+            text: prev.alignedProfile?.text || "",
             likertResponses: {
               accuracy: likertResponses.accuracy!,
               control: likertResponses.control!,
@@ -110,10 +110,10 @@ export function ControlProfileView() {
         };
       });
 
-      // Navigate to the next phase (bullet refinement)
-      navigate("/bullet-refinement");
+      // Navigate to the comparison view
+      navigate("/comparison");
     } catch (error) {
-      console.error("Error submitting control profile responses:", error);
+      console.error("Error submitting aligned profile responses:", error);
       setSubmitError("Failed to save responses. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -121,7 +121,7 @@ export function ControlProfileView() {
   };
 
   const handleBack = () => {
-    navigate("/");
+    navigate("/bullet-refinement");
   };
 
   if (isGeneratingCoverLetter) {
@@ -130,7 +130,7 @@ export function ControlProfileView() {
         <CardContent className="space-y-6">
           <div className="flex items-center justify-center space-x-2">
             <Loader2 className="h-6 w-6 animate-spin" />
-            <span className="text-lg">Generating your profile statement...</span>
+            <span className="text-lg">Generating your aligned profile...</span>
           </div>
         </CardContent>
       </Card>
@@ -145,20 +145,20 @@ export function ControlProfileView() {
             <AlertDescription>{generationError}</AlertDescription>
           </Alert>
           <Button onClick={handleBack} variant="outline">
-            Back to Start
+            Back to Bullet Refinement
           </Button>
         </CardContent>
       </Card>
     );
   }
 
-  if (!letterLabData?.controlProfile?.text) {
+  if (!letterLabData?.alignedProfile?.text) {
     return (
       <Card className="w-full max-w-4xl mx-auto p-6 text-center shadow-lg bg-white">
         <CardContent className="space-y-6">
-          <div className="text-lg">No profile generated. Please start over.</div>
+          <div className="text-lg">No aligned profile generated. Please complete the bullet refinement first.</div>
           <Button onClick={handleBack} variant="outline">
-            Back to Start
+            Back to Bullet Refinement
           </Button>
         </CardContent>
       </Card>
@@ -169,26 +169,26 @@ export function ControlProfileView() {
     <Card className="w-full max-w-4xl mx-auto p-6 shadow-lg bg-white space-y-6">
       <CardHeader>
         <CardTitle className="text-2xl font-bold">
-          Initial Profile Generated
+          Your Aligned Profile
         </CardTitle>
         <p className="text-gray-600">
-          Here's an initial professional profile based on your resume and the job description:
+          Based on your collaboration and feedback, here's your refined professional profile:
         </p>
       </CardHeader>
 
       <CardContent className="space-y-8">
         {/* Profile Display */}
-        <div className="bg-gray-50 p-6 rounded-lg border">
-          <h3 className="text-lg font-semibold mb-4">Professional Profile</h3>
+        <div className="bg-green-50 p-6 rounded-lg border border-green-200">
+          <h3 className="text-lg font-semibold mb-4 text-green-800">Aligned Professional Profile</h3>
           <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">
-            {letterLabData.controlProfile.text}
+            {letterLabData.alignedProfile.text}
           </p>
         </div>
 
         {/* Research Data Collection */}
         <div className="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
           <h4 className="text-lg font-semibold mb-4 text-yellow-800">
-            📝 Please rate and share your thoughts on this initial profile:
+            📝 Please rate and share your thoughts on this final aligned profile:
           </h4>
           
           {/* Likert Scales */}
@@ -311,7 +311,7 @@ export function ControlProfileView() {
           <Button 
             onClick={handleSubmit}
             disabled={!isFormComplete() || isSubmitting}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-green-600 hover:bg-green-700"
           >
             {isSubmitting ? (
               <>
@@ -319,7 +319,7 @@ export function ControlProfileView() {
                 Saving...
               </>
             ) : (
-              "Continue to Experience Review"
+              "Continue to Comparison"
             )}
           </Button>
         </div>

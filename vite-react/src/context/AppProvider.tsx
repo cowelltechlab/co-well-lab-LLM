@@ -132,6 +132,58 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  async function generateAlignedProfile(): Promise<boolean> {
+    if (!letterLabData?.document_id) {
+      setGenerationError("No session found. Please start over.");
+      return false;
+    }
+
+    setIsGeneratingCoverLetter(true);
+    setGenerationError("");
+
+    try {
+      const response = await fetch(`${apiBase}/lab/generate-aligned-profile`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          session_id: letterLabData.document_id,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to generate aligned profile");
+      }
+
+      const data = await response.json();
+      
+      // Update the letterLabData with the aligned profile
+      setLetterLabData(prev => ({
+        ...prev,
+        alignedProfile: {
+          text: data.profile_text
+        }
+      }));
+
+      return true;
+    } catch (error: unknown) {
+      console.error("Error generating aligned profile:", error);
+
+      if (error instanceof Error) {
+        setGenerationError("Failed to generate aligned profile. " + error.message);
+      } else {
+        setGenerationError("Failed to generate aligned profile due to an unknown error.");
+      }
+
+      return false;
+    } finally {
+      setIsGeneratingCoverLetter(false);
+    }
+  }
+
   const value: AppState = {
     resumeText,
     jobDescription,
@@ -147,6 +199,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setLetterLabData,
     initialGeneration,
     generateControlProfile,
+    generateAlignedProfile,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
