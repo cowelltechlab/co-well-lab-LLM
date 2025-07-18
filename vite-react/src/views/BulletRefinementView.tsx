@@ -241,14 +241,16 @@ export function BulletRefinementView() {
 
   if (isLoadingBullets) {
     return (
-      <Card className="w-full max-w-4xl mx-auto p-6 text-center shadow-lg bg-white">
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-center space-x-2">
-            <Loader2 className="h-6 w-6 animate-spin" />
-            <span className="text-lg">Generating your experience statements...</span>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        <Card className="w-full max-w-4xl text-center shadow-lg bg-white">
+          <CardContent className="flex items-center justify-center min-h-[200px] px-8">
+            <div className="flex items-center justify-center space-x-2">
+              <Loader2 className="h-6 w-6 animate-spin" />
+              <span className="text-lg">Generating your experience statements...</span>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -274,14 +276,16 @@ export function BulletRefinementView() {
 
   if (!bullets.length) {
     return (
-      <Card className="w-full max-w-4xl mx-auto p-6 text-center shadow-lg bg-white">
-        <CardContent className="space-y-6">
-          <div className="text-lg">No bullets generated. Please try again.</div>
-          <Button onClick={generateBullets} variant="default">
-            Generate Bullets
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 p-6">
+        <Card className="w-full max-w-4xl text-center shadow-lg bg-white">
+          <CardContent className="flex flex-col items-center justify-center min-h-[200px] space-y-4 px-8">
+            <div className="text-lg">No bullets generated. Please try again.</div>
+            <Button onClick={generateBullets} variant="default">
+              Generate Bullets
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

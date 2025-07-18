@@ -15,7 +15,7 @@ services:
   flask:
     build: ./flask
     env_file:
-      - .env
+      - ./flask/.env
     container_name: flask
     depends_on:
       - mongodb

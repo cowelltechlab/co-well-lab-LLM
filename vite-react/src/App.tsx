@@ -6,9 +6,6 @@ import { ControlProfileView } from "@/views/ControlProfileView";
 import { BulletRefinementView } from "@/views/BulletRefinementView";
 import { AlignedProfileView } from "@/views/AlignedProfileView";
 import { ProfileComparisonView } from "@/views/ProfileComparisonView";
-import { ReviewAllView } from "@/views/ReviewAllView";
-import { ReviewSectionView } from "@/views/ReviewSectionView";
-import { CoverLetterComparisonView } from "@/views/CoverLetterComparisonView";
 import { AdminLoginView } from "@/views/AdminLoginView";
 import { AdminDashboardView } from "@/views/AdminDashboardView";
 import { EnterTokenView } from "@/views/EnterTokenView";
@@ -25,15 +22,6 @@ function App() {
               <Route path="/bullet-refinement" element={<BulletRefinementView />} />
               <Route path="/aligned-profile" element={<AlignedProfileView />} />
               <Route path="/comparison" element={<ProfileComparisonView />} />
-              <Route path="/review-all" element={<ReviewAllView />} />
-              <Route
-                path="/review-section/:sectionName"
-                element={<ReviewSectionView />}
-              />
-              <Route
-                path="/cover-letter-comparison"
-                element={<CoverLetterComparisonView />}
-              />
               <Route path="/admin/login" element={<AdminLoginView />} />
               <Route path="/admin" element={<AdminDashboardView />} />
               <Route path="/enter" element={<EnterTokenView />} />

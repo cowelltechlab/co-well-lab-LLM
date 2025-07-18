@@ -15,7 +15,7 @@ from services.mongodb_service import collection
 from services.mongodb_service import get_all_progress_events
 from services.mongodb_service import get_all_tokens
 from services.mongodb_service import invalidate_token
-from services.mongodb_service import get_all_prompts, get_prompt_history, update_prompt, create_prompt
+from services.mongodb_service import get_all_prompts, get_prompt_history, update_prompt, create_prompt, revert_prompt
 
 from services.openai_service import llmchat
 from services.openai_service import check_openai_health
@@ -233,3 +233,25 @@ def create_prompt_endpoint():
     except Exception as e:
         print("Error creating prompt:", e)
         return jsonify({"error": "Failed to create prompt"}), 500
+
+@admin_bp.route("/prompts/<prompt_type>/revert", methods=["POST"])
+@login_required
+def revert_prompt_endpoint(prompt_type):
+    """Revert a prompt to a specific version."""
+    try:
+        data = request.get_json()
+        target_version = data.get("version")
+        
+        if not target_version:
+            return jsonify({"error": "version required"}), 400
+        
+        result = revert_prompt(prompt_type, target_version, modified_by="admin")
+        
+        if result:
+            return jsonify({"status": "reverted", "prompt_type": prompt_type, "version": target_version}), 200
+        else:
+            return jsonify({"error": "Failed to revert prompt"}), 500
+            
+    except Exception as e:
+        print(f"Error reverting prompt {prompt_type}:", e)
+        return jsonify({"error": "Failed to revert prompt"}), 500

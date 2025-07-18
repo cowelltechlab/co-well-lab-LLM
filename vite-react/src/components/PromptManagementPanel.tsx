@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { RefreshCw, Edit, Save, X, Clock, User } from "lucide-react";
+import { RefreshCw, Edit, Save, X, Clock, User, RotateCcw } from "lucide-react";
 
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 
@@ -37,6 +37,7 @@ export function PromptManagementPanel() {
   const [success, setSuccess] = useState("");
   const [showHistory, setShowHistory] = useState<string | null>(null);
   const [history, setHistory] = useState<PromptHistory[]>([]);
+  const [reverting, setReverting] = useState<string | null>(null);
 
   const promptTypeLabels: Record<string, string> = {
     control: "Control Profile Generation",
@@ -44,6 +45,9 @@ export function PromptManagementPanel() {
     regeneration: "Bullet Regeneration",
     final_synthesis: "Final Profile Synthesis"
   };
+
+  // Define the order of prompts based on UI flow
+  const promptOrder = ['control', 'bse_generation', 'regeneration', 'final_synthesis'];
 
   const fetchPrompts = async () => {
     try {
@@ -141,6 +145,42 @@ export function PromptManagementPanel() {
     }
   };
 
+  const handleRevert = async (promptType: string, historyItem: PromptHistory) => {
+    if (historyItem.isActive) {
+      setError("Cannot revert to the currently active version");
+      return;
+    }
+
+    setReverting(historyItem._id);
+    setError("");
+
+    try {
+      const response = await fetch(`${apiBase}/api/admin/prompts/${promptType}/revert`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          version: historyItem.version,
+        }),
+      });
+
+      if (response.ok) {
+        setSuccess(`Reverted ${promptTypeLabels[promptType]} to version ${historyItem.version}`);
+        fetchPrompts(); // Refresh the main prompts list
+        await fetchPromptHistory(promptType); // Refresh the history
+      } else {
+        const errorData = await response.json();
+        setError(errorData.error || "Failed to revert prompt");
+      }
+    } catch (err) {
+      setError("Error reverting prompt");
+    } finally {
+      setReverting(null);
+    }
+  };
+
   useEffect(() => {
     fetchPrompts();
   }, []);
@@ -197,7 +237,13 @@ export function PromptManagementPanel() {
       )}
 
       <div className="space-y-3">
-        {prompts.map((prompt) => (
+        {prompts
+          .sort((a, b) => {
+            const aIndex = promptOrder.indexOf(a.promptType);
+            const bIndex = promptOrder.indexOf(b.promptType);
+            return aIndex - bIndex;
+          })
+          .map((prompt) => (
           <Card key={prompt._id} className="border">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -275,17 +321,37 @@ export function PromptManagementPanel() {
               {showHistory === prompt.promptType && (
                 <div className="mt-4 border-t pt-3">
                   <h4 className="text-sm font-medium mb-2">Version History</h4>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
                     {history.map((historyItem) => (
-                      <div key={historyItem._id} className="text-xs bg-gray-50 p-2 rounded border">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="font-medium">v{historyItem.version}</span>
-                          <span className="text-gray-500">{formatDate(historyItem.createdAt)}</span>
+                      <div key={historyItem._id} className="bg-gray-50 p-3 rounded border">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="font-medium text-sm">v{historyItem.version} {historyItem.isActive && <span className="text-green-600 text-xs">(Active)</span>}</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-gray-500 text-xs">{formatDate(historyItem.createdAt)}</span>
+                            {!historyItem.isActive && (
+                              <Button
+                                onClick={() => handleRevert(prompt.promptType, historyItem)}
+                                disabled={reverting === historyItem._id}
+                                size="sm"
+                                variant="outline"
+                                className="h-6 px-2 text-xs"
+                              >
+                                {reverting === historyItem._id ? (
+                                  <RefreshCw className="h-3 w-3 animate-spin" />
+                                ) : (
+                                  <>
+                                    <RotateCcw className="h-3 w-3 mr-1" />
+                                    Revert
+                                  </>
+                                )}
+                              </Button>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-gray-600 font-mono">
-                          {truncateContent(historyItem.content, 150)}
+                        <div className="text-gray-600 font-mono text-xs bg-white p-2 rounded border whitespace-pre-wrap">
+                          {historyItem.content}
                         </div>
-                        <div className="text-gray-500 mt-1">
+                        <div className="text-gray-500 mt-2 text-xs">
                           Modified by: {historyItem.modifiedBy}
                         </div>
                       </div>

@@ -3,8 +3,7 @@ import { useAppContext } from "@/context/useAppContext";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { TextInputDialog } from "@/components/TextInputDialog";
 
 export function WelcomeInputView() {
@@ -22,19 +21,28 @@ export function WelcomeInputView() {
     jobDescription,
     setResumeText,
     setJobDescription,
-    isGeneratingCoverLetter,
-    generationError,
-    initialGeneration,
+    setLetterLabData,
   } = useAppContext();
 
   const [showResumePopup, setShowResumePopup] = useState(false);
   const [showJobPopup, setShowJobPopup] = useState(false);
 
   const handleGenerate = async () => {
-    const success = await initialGeneration();
-    if (success) {
-      navigate("/control-profile");
+    if (!resumeText || !jobDescription) {
+      alert("Please provide both a resume and a job description.");
+      return;
     }
+
+    // Create a new session with basic data while preserving existing authentication
+    const sessionData = {
+      ...letterLabData, // Preserve existing data including hasAccess
+      resume: resumeText,
+      job_desc: jobDescription,
+      document_id: `session_${Date.now()}`, // Temporary ID
+    };
+    
+    setLetterLabData(sessionData);
+    navigate("/control-profile");
   };
 
   return (
@@ -77,7 +85,6 @@ export function WelcomeInputView() {
                 : ""
             }
             onClick={() => setShowResumePopup(true)}
-            disabled={isGeneratingCoverLetter}
           >
             {resumeText && (
               <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
@@ -94,7 +101,6 @@ export function WelcomeInputView() {
                 : ""
             }
             onClick={() => setShowJobPopup(true)}
-            disabled={isGeneratingCoverLetter}
           >
             {jobDescription && (
               <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
@@ -109,23 +115,10 @@ export function WelcomeInputView() {
                 : ""
             }
             onClick={handleGenerate}
-            disabled={isGeneratingCoverLetter || !resumeText || !jobDescription}
+            disabled={!resumeText || !jobDescription}
           >
-            {isGeneratingCoverLetter ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-              </>
-            ) : (
-              "Generate Profile Statement"
-            )}
+            Generate Profile Statement
           </Button>
-
-          {generationError && (
-            <Alert variant="destructive" className="mt-2">
-              <AlertDescription>{generationError}</AlertDescription>
-            </Alert>
-          )}
         </div>
       </CardContent>
 
