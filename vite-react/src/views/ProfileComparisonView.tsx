@@ -8,7 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export function ProfileComparisonView() {
   const navigate = useNavigate();
-  const { letterLabData } = useAppContext();
+  const { letterLabData, setLetterLabData } = useAppContext();
   const { handleApiResponse } = useTokenHandler();
   const [isCompleted, setIsCompleted] = useState(false);
   const [isMarkingCompleted, setIsMarkingCompleted] = useState(false);
@@ -46,7 +46,7 @@ export function ProfileComparisonView() {
       });
 
       // Check for invalidated token and handle redirect
-      const handledResponse = await handleApiResponse(response);
+      const handledResponse = await handleApiResponse(response, setLetterLabData);
       if (!handledResponse) {
         return; // Token was invalidated, redirect handled
       }

@@ -56,7 +56,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
 
       // Check for invalidated token and handle redirect
-      const handledResponse = await handleApiResponse(response);
+      const handledResponse = await handleApiResponse(response, setLetterLabData);
       if (!handledResponse) {
         return false; // Token was invalidated, redirect handled
       }
@@ -122,7 +122,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       });
 
       // Check for invalidated token and handle redirect
-      const handledResponse = await handleApiResponse(response);
+      const handledResponse = await handleApiResponse(response, setLetterLabData);
       if (!handledResponse) {
         return false; // Token was invalidated, redirect handled
       }

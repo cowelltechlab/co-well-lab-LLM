@@ -115,7 +115,7 @@ export function AlignedProfileView() {
       });
 
       // Check for invalidated token and handle redirect
-      const handledResponse = await handleApiResponse(response);
+      const handledResponse = await handleApiResponse(response, setLetterLabData);
       if (!handledResponse) {
         return; // Token was invalidated, redirect handled
       }
