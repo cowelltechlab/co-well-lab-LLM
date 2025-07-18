@@ -6,357 +6,24 @@ from flask import Blueprint, request, jsonify
 from flask import session
 
 # GENERATION SERVICE FUNCTIONS
-from services.openai_service import generate_initial_cover_letter
 from services.openai_service import generate_control_profile
 from services.openai_service import generate_bse_bullets, parse_bse_bullets_response
 from services.openai_service import regenerate_bullet, parse_regenerated_bullet_response
 from services.openai_service import generate_aligned_profile
-from services.openai_service import generate_role_name
-from services.openai_service import generate_enactive_mastery_bullet_points
-from services.openai_service import generate_vicarious_experience_bullet_points
-from services.openai_service import generate_verbal_persuasion_bullet_points
-from services.openai_service import generate_rationales_for_enactive_mastery_bullet_points
-from services.openai_service import generate_rationales_for_vicarious_bullet_points
-from services.openai_service import generate_rationales_for_verbal_persuasion_bullet_points
-from services.openai_service import generate_final_cover_letter
 
 # MONGODB SERVICE FUNCTIONS
-from services.mongodb_service import create_session
-from services.mongodb_service import update_session
-from services.mongodb_service import get_session
+from services.mongodb_service import get_session, create_session
 from services.mongodb_service import set_fields
 from services.mongodb_service import is_valid_token
-from services.mongodb_service import mark_token_used
 from services.mongodb_service import log_progress_event
-from services.mongodb_service import get_active_prompt
 
 # UTILITIES
 from utils.generation_helpers import retry_generation
-from utils.validation import is_valid_bullet_output, is_valid_rationale_output, is_valid_string_output, is_valid_role_name
-from utils.data_structuring import zip_bullets_and_rationales
+from utils.validation import is_valid_string_output
 from utils.auth_decorators import token_required
 
 letter_lab_bp = Blueprint("letter_lab_bp", __name__)
 
-@letter_lab_bp.route('/initialize', methods=['POST'])
-@token_required
-def initialize():
-    
-    # DEBUG FLAGS
-    DEBUG_GENERATION = False
-    DEBUG_SESSION_OUTPUT = False
-    DEBUG_MONGO_WRITE = False
-
-    try:
-        log_progress_event("initialize_request")
-
-        data = request.get_json()
-        resume = data.get("resume_text")
-        job_desc = data.get("job_desc")
-
-        if not resume or not job_desc:
-            return jsonify({"error": "Missing resume or job description"}), 400
-
-        # INITIAL COVER LETTER
-        initial_cover_letter = retry_generation(
-            generate_initial_cover_letter,
-            validator_fn=is_valid_string_output,
-            args=(resume, job_desc),
-            debug_label="Initial Cover Letter"
-        )
-
-        if not initial_cover_letter:
-            return jsonify({"error": "Failed to generate initial cover letter"}), 500
-
-        if DEBUG_GENERATION:
-            print(initial_cover_letter)
-            sys.stdout.flush()
-
-        # ROLE NAME GENERATION
-        role_name = retry_generation(
-            generate_role_name,
-            validator_fn=is_valid_role_name,
-            args=(job_desc,),
-            debug_label="Role Name"
-        )
-
-        if not role_name:
-            return jsonify({"error": "Failed to generate role_name"}), 500
-
-
-        if DEBUG_GENERATION:
-            print(role_name)
-            sys.stdout.flush()
-
-        ### BULLET POINTS
-
-        # ENACTIVE MASTERY BULLET POINTS
-        enactive_mastery_bullet_points = retry_generation(
-            generate_enactive_mastery_bullet_points,
-            validator_fn=is_valid_bullet_output,
-            args=(resume, job_desc),
-            debug_label="Enactive Bullet Points"
-        )
-
-        if not enactive_mastery_bullet_points:
-            return jsonify({"error": "Failed to generate Enactive Mastery bullet points"}), 500
-
-        if DEBUG_GENERATION:
-            print("Enactive Mastery Bullet Point 1:", enactive_mastery_bullet_points["BP_1"])
-            sys.stdout.flush()
-
-        # VICARIOUS EXPERIENCE BULLET POINTS
-        vicarious_experience_bullet_points = retry_generation(
-            generate_vicarious_experience_bullet_points,
-            validator_fn=is_valid_bullet_output,
-            args=(resume, job_desc),
-            debug_label="Vicarious Bullet Points"
-        )
-
-        if not vicarious_experience_bullet_points:
-            return jsonify({"error": "Failed to generate Vicarious Experience bullet points"}), 500
-        
-        if DEBUG_GENERATION:
-            print("Vicarious Experience Bullet Point 1:", vicarious_experience_bullet_points["BP_1"])
-            sys.stdout.flush()
-
-        # VERBAL PERSUASION BULLET POINTS
-        verbal_persuasion_bullet_points = retry_generation(
-            generate_verbal_persuasion_bullet_points,
-            validator_fn=is_valid_bullet_output,
-            args=(resume, job_desc),
-            debug_label="Verbal Persuasion Bullet Points"
-        )
-
-        if not verbal_persuasion_bullet_points:
-            return jsonify({"error": "Failed to generate Verbal Persuasion bullet points"}), 500
-        
-        if DEBUG_GENERATION:
-            print("Verbal Persuasion Bullet Point 1:", verbal_persuasion_bullet_points["BP_1"])
-            sys.stdout.flush()
-
-        ### RATIONALES
-
-        # ENACTIVE MASTERY RATIONALES
-        enactive_mastery_rationales = retry_generation(
-            generate_rationales_for_enactive_mastery_bullet_points,
-            validator_fn=is_valid_rationale_output,
-            args=(resume, job_desc, enactive_mastery_bullet_points),
-            debug_label="Enactive Rationales"
-        )
-
-        if not enactive_mastery_rationales:
-            return jsonify({"error": "Failed to generate Enactive Mastery rationales"}), 500
-        
-        if DEBUG_GENERATION:
-            print("Enactive Mastery Rationale 1:", enactive_mastery_rationales.get("R_1"))
-            sys.stdout.flush()
-
-        # VICARIOUS EXPERIENCE RATIONALES
-        vicarious_experience_rationales = retry_generation(
-            generate_rationales_for_vicarious_bullet_points,
-            validator_fn=is_valid_rationale_output,
-            args=(resume, job_desc, vicarious_experience_bullet_points),
-            debug_label="Vicarious Rationales"
-        )
-
-        if not vicarious_experience_rationales:
-            return jsonify({"error": "Failed to generate Vicarious Experience rationales"}), 500
-
-        if DEBUG_GENERATION:
-            print("Vicarious Rationale 1:", vicarious_experience_rationales.get("R_1"))
-            sys.stdout.flush()
-
-        # VERBAL PERSUASION RATIONALES
-        verbal_persuasion_rationales = retry_generation(
-            generate_rationales_for_verbal_persuasion_bullet_points,
-            validator_fn=is_valid_rationale_output,
-            args=(resume, job_desc, verbal_persuasion_bullet_points),
-            debug_label="Verbal Persuasion Rationales"
-        )
-
-        if not verbal_persuasion_rationales:
-            return jsonify({"error": "Failed to generate Verbal Persuasion rationales"}), 500
-
-        if DEBUG_GENERATION:
-            print("Verbal Persuasion Rationale 1:", verbal_persuasion_rationales.get("R_1"))
-            sys.stdout.flush()
-
-        ### DATA STRUCTURING
-
-        zipped_enactive = zip_bullets_and_rationales(
-            enactive_mastery_bullet_points, enactive_mastery_rationales
-        )
-
-        zipped_vicarious = zip_bullets_and_rationales(
-            vicarious_experience_bullet_points, vicarious_experience_rationales
-        )
-
-        zipped_verbal = zip_bullets_and_rationales(
-            verbal_persuasion_bullet_points, verbal_persuasion_rationales
-        )
-
-        session_data = {
-            "resume": resume,
-            "job_desc": job_desc,
-            "initial_cover_letter": initial_cover_letter,
-            "role_name": role_name,
-            "BSETB_enactive_mastery": zipped_enactive,
-            "BSETB_vicarious_experience": zipped_vicarious,
-            "BSETB_verbal_persuasion": zipped_verbal
-        }
-
-        if DEBUG_SESSION_OUTPUT:
-            print("Final session_data object:")
-            print(json.dumps(session_data, indent=2))
-            sys.stdout.flush()
-
-        ### DATA STORAGE
-
-        document_id = create_session(session_data)
-
-        log_progress_event("initialize_success", session_id=document_id)
-        
-        # Link the token to this session
-        if "token" in session:
-            mark_token_used(session["token"], session_id=str(document_id))
-
-        if DEBUG_MONGO_WRITE:
-            print("MongoDB document successfully created.")
-            print("Document ID:", document_id)
-            sys.stdout.flush()
-
-        ### RESPONSE TO FRONTEND
-
-        session_data["document_id"] = str(document_id)
-        session_data["completed"] = False
-
-        return jsonify(session_data), 200
-
-    except Exception as e:
-        print("Error processing cover letter:", str(e))
-        return jsonify({"error": "Error processing cover letter"}), 500
-
-@letter_lab_bp.route("/final-cover-letter", methods=["POST"])
-@token_required
-def final_cover_letter():
-    try:
-
-        payload = request.get_json()
-        document_id = payload.get("document_id")
-        section_feedback = payload.get("section_feedback")
-        log_progress_event("update_request", session_id=document_id)
-
-        if not document_id or not section_feedback:
-            return jsonify({"error": "Missing document_id or section_feedback"}), 400
-
-        result = update_session(document_id, section_feedback)
-        if not result:
-            raise ValueError("update_session() returned None")
-        
-        print(f"Updated session with feedback: {document_id}")
-        
-        document = get_session(document_id)
-        if not document:
-            return jsonify({"error": "Document not found"}), 404
-        
-        resume = document.get("resume")
-        job_desc = document.get("job_desc")
-
-        all_bullets = {
-            "BSETB_enactive_mastery": document.get("BSETB_enactive_mastery"),
-            "BSETB_vicarious_experience": document.get("BSETB_vicarious_experience"),
-            "BSETB_verbal_persuasion": document.get("BSETB_verbal_persuasion"),
-        }
-
-        final_letter = retry_generation(
-            generate_final_cover_letter,
-            validator_fn=is_valid_string_output,
-            args=(resume, job_desc, all_bullets, section_feedback),
-            debug_label="Final Cover Letter"
-        )
-
-        set_fields(document_id, {"final_cover_letter": final_letter})
-
-        log_progress_event("update_success", session_id=document_id)
-
-        print(f"Updated session with final cover letter: {document_id}")
-
-        return jsonify({"final_cover_letter": final_letter}), 200
-
-    except Exception as e:
-        print("Error updating final feedback:", e)
-        return jsonify({"error": "Internal server error"}), 500
-
-@letter_lab_bp.route("/submit-final-data", methods=["POST"])
-@token_required
-def submit_final_data():
-    try:
-        data = request.get_json()
-        doc_id = data.get("document_id")
-
-        log_progress_event("final_update_request", session_id=doc_id)
-
-        if not doc_id or not ObjectId.is_valid(doc_id):
-            return jsonify({"error": "Invalid or missing document_id"}), 400
-
-        # Extract the fields we want to save
-        content_ratings = data.get("contentRepresentationRating", {})
-        style_ratings = data.get("styleRepresentationRating", {})
-        text_feedback = data.get("textFeedback", {})
-        draft_mapping = data.get("draftMapping", {})
-        
-        # Calculate finalPreference based on contentRepresentationRating
-        draft1_content = content_ratings.get("draft1")
-        draft2_content = content_ratings.get("draft2")
-        
-        final_preference = None
-        if draft1_content is not None and draft2_content is not None:
-            # Determine which draft corresponds to initial/final
-            initial_rating = draft1_content if draft_mapping.get("draft1") == "initial" else draft2_content
-            final_rating = draft1_content if draft_mapping.get("draft1") == "final" else draft2_content
-            
-            if initial_rating > final_rating:
-                final_preference = "control"
-            elif final_rating > initial_rating:
-                final_preference = "aligned"
-            else:
-                final_preference = "tie"
-        
-        # Prepare fields to update (excluding chatMessages and draftRating)
-        update_fields = {
-            "contentRepresentationRating": content_ratings,
-            "styleRepresentationRating": style_ratings,
-            "textFeedback": text_feedback,
-            "draftMapping": draft_mapping,
-            "finalPreference": final_preference,
-            "completed": True
-        }
-        
-        # Only include non-None fields from original data
-        if data.get("resume"):
-            update_fields["resume"] = data["resume"]
-        if data.get("job_desc"):
-            update_fields["job_desc"] = data["job_desc"]
-
-        result = set_fields(doc_id, update_fields)
-
-        if not result or result.modified_count == 0:
-            return jsonify({"error": "No document updated"}), 404
-        
-        print(f"Updated session with final data: {doc_id}")
-        log_progress_event("final_update_success", session_id=doc_id)
-
-        return jsonify({
-            "status": "success",
-            "completed": True,
-            "finalPreference": final_preference
-        }), 200
-
-    except Exception as e:
-        print("❌ Error submitting final data:", e)
-        return jsonify({"error": "Server error"}), 500
-    
 @letter_lab_bp.route("/validate-token", methods=["POST"])
 def validate_token():
     data = request.get_json()
@@ -391,29 +58,40 @@ def generate_control_profile_endpoint():
                 "error": "Missing required fields: session_id, resume, job_description"
             }), 400
         
-        # Validate session exists
-        if not ObjectId.is_valid(session_id):
-            return jsonify({"error": "Invalid session_id format"}), 400
-            
-        session_doc = get_session(session_id)
+        # Handle session creation or retrieval
+        session_doc = None
+        
+        # Check if session_id is a valid ObjectId and session exists
+        if ObjectId.is_valid(session_id):
+            session_doc = get_session(session_id)
+        
+        # If session doesn't exist, create a new one
         if not session_doc:
-            return jsonify({"error": "Session not found"}), 404
+            session_data = {
+                "resume": resume,
+                "job_desc": job_description,
+                "completed": False
+            }
+            session_id = create_session(session_data)
+            session_doc = get_session(session_id)
         
         # Generate control profile using prompt management system
-        profile_text = retry_generation(
+        profile_result = retry_generation(
             generate_control_profile,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(resume, job_description),
             debug_label="Control Profile"
         )
         
-        if not profile_text:
+        if not profile_result:
             return jsonify({"error": "Failed to generate control profile"}), 500
         
-        # Store control profile in session document
+        # Store control profile in session document with version tracking
         update_fields = {
             "controlProfile": {
-                "text": profile_text
+                "text": profile_result["content"],
+                "promptVersion": profile_result["prompt_version"],
+                "promptType": profile_result["prompt_type"]
             }
         }
         
@@ -425,7 +103,7 @@ def generate_control_profile_endpoint():
         
         return jsonify({
             "success": True,
-            "profile_text": profile_text,
+            "profile_text": profile_result["content"],
             "session_id": session_id
         }), 200
         
@@ -458,19 +136,19 @@ def generate_bse_bullets_endpoint():
             return jsonify({"error": "Session not found"}), 404
         
         # Generate BSE bullets using prompt management system
-        bullets_response = retry_generation(
+        bullets_result = retry_generation(
             generate_bse_bullets,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(resume, job_description),
             debug_label="BSE Bullets"
         )
         
-        if not bullets_response:
+        if not bullets_result:
             return jsonify({"error": "Failed to generate BSE bullets"}), 500
         
         # Parse the response to extract bullets and rationales
         try:
-            bullets = parse_bse_bullets_response(bullets_response)
+            bullets = parse_bse_bullets_response(bullets_result["content"])
         except ValueError as e:
             print("Error parsing BSE bullets:", str(e))
             return jsonify({"error": "Failed to parse BSE bullets response"}), 500
@@ -486,7 +164,9 @@ def generate_bse_bullets_endpoint():
                     "rationale": bullet["rationale"],
                     "userRating": None,
                     "userFeedback": "",
-                    "timestamp": None
+                    "timestamp": None,
+                    "promptVersion": bullets_result["prompt_version"],
+                    "promptType": bullets_result["prompt_type"]
                 }],
                 "finalIteration": None
             })
@@ -579,9 +259,9 @@ def regenerate_bullet_endpoint():
             return jsonify({"error": "current_bullet must contain 'text' and 'rationale' fields"}), 400
         
         # Generate regenerated bullet using prompt management system
-        regeneration_response = retry_generation(
+        regeneration_result = retry_generation(
             regenerate_bullet,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(
                 current_bullet["text"],
                 current_bullet["rationale"],
@@ -592,12 +272,15 @@ def regenerate_bullet_endpoint():
             debug_label="Bullet Regeneration"
         )
         
-        if not regeneration_response:
+        if not regeneration_result:
             return jsonify({"error": "Failed to regenerate bullet"}), 500
         
         # Parse the response to extract new bullet and rationale
         try:
-            regenerated_bullet = parse_regenerated_bullet_response(regeneration_response)
+            regenerated_bullet = parse_regenerated_bullet_response(regeneration_result["content"])
+            # Add version information to the regenerated bullet
+            regenerated_bullet["promptVersion"] = regeneration_result["prompt_version"]
+            regenerated_bullet["promptType"] = regeneration_result["prompt_type"]
         except ValueError as e:
             print("Error parsing regenerated bullet:", str(e))
             return jsonify({"error": "Failed to parse regenerated bullet response"}), 500
@@ -647,20 +330,22 @@ def generate_aligned_profile_endpoint():
             return jsonify({"error": "No bullet iterations found in session"}), 400
         
         # Generate aligned profile using prompt management system
-        aligned_profile_text = retry_generation(
+        aligned_profile_result = retry_generation(
             generate_aligned_profile,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(resume, job_description, bullet_iterations),
             debug_label="Aligned Profile"
         )
         
-        if not aligned_profile_text:
+        if not aligned_profile_result:
             return jsonify({"error": "Failed to generate aligned profile"}), 500
         
-        # Store aligned profile in session document
+        # Store aligned profile in session document with version tracking
         update_fields = {
             "alignedProfile": {
-                "text": aligned_profile_text
+                "text": aligned_profile_result["content"],
+                "promptVersion": aligned_profile_result["prompt_version"],
+                "promptType": aligned_profile_result["prompt_type"]
             }
         }
         
@@ -672,14 +357,13 @@ def generate_aligned_profile_endpoint():
         
         return jsonify({
             "success": True,
-            "profile_text": aligned_profile_text,
+            "profile_text": aligned_profile_result["content"],
             "session_id": session_id
         }), 200
         
     except Exception as e:
         print("Error generating aligned profile:", str(e))
         return jsonify({"error": "Internal server error"}), 500
-
 
 @letter_lab_bp.route("/save-iteration-data", methods=["POST"])
 @token_required
@@ -741,7 +425,9 @@ def save_iteration_data_endpoint():
             "rationale": rationale,
             "userRating": user_rating,
             "userFeedback": user_feedback or "",
-            "timestamp": data.get("timestamp") or None
+            "timestamp": data.get("timestamp") or None,
+            "promptVersion": data.get("prompt_version"),
+            "promptType": data.get("prompt_type")
         }
         
         # Add or update iteration in the specific bullet
@@ -786,5 +472,3 @@ def save_iteration_data_endpoint():
     except Exception as e:
         print("Error saving iteration data:", str(e))
         return jsonify({"error": "Internal server error"}), 500
-
-
