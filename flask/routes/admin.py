@@ -15,6 +15,7 @@ from services.mongodb_service import collection
 from services.mongodb_service import get_all_progress_events
 from services.mongodb_service import get_all_tokens
 from services.mongodb_service import invalidate_token
+from services.mongodb_service import get_all_prompts, get_prompt_history, update_prompt, create_prompt
 
 from services.openai_service import llmchat
 from services.openai_service import check_openai_health
@@ -163,3 +164,72 @@ def invalidate_token_endpoint():
     except Exception as e:
         print("Error invalidating token:", e)
         return jsonify({"error": "Failed to invalidate token"}), 500
+
+# Prompt Management Endpoints
+
+@admin_bp.route("/prompts", methods=["GET"])
+@login_required
+def get_prompts():
+    """Get all prompts with version history."""
+    try:
+        prompts = get_all_prompts()
+        return jsonify({"prompts": prompts}), 200
+    except Exception as e:
+        print("Error fetching prompts:", e)
+        return jsonify({"error": "Failed to fetch prompts"}), 500
+
+@admin_bp.route("/prompts/<prompt_type>/history", methods=["GET"])
+@login_required
+def get_prompt_history_endpoint(prompt_type):
+    """Get version history for a specific prompt type."""
+    try:
+        history = get_prompt_history(prompt_type)
+        return jsonify({"history": history}), 200
+    except Exception as e:
+        print(f"Error fetching prompt history for {prompt_type}:", e)
+        return jsonify({"error": "Failed to fetch prompt history"}), 500
+
+@admin_bp.route("/prompts/<prompt_type>", methods=["PUT"])
+@login_required
+def update_prompt_endpoint(prompt_type):
+    """Update a prompt with new content."""
+    try:
+        data = request.get_json()
+        content = data.get("content")
+        
+        if not content:
+            return jsonify({"error": "Prompt content required"}), 400
+        
+        result = update_prompt(prompt_type, content, modified_by="admin")
+        
+        if result:
+            return jsonify({"status": "updated", "prompt_type": prompt_type}), 200
+        else:
+            return jsonify({"error": "Failed to update prompt"}), 500
+            
+    except Exception as e:
+        print(f"Error updating prompt {prompt_type}:", e)
+        return jsonify({"error": "Failed to update prompt"}), 500
+
+@admin_bp.route("/prompts", methods=["POST"])
+@login_required
+def create_prompt_endpoint():
+    """Create a new prompt."""
+    try:
+        data = request.get_json()
+        prompt_type = data.get("prompt_type")
+        content = data.get("content")
+        
+        if not prompt_type or not content:
+            return jsonify({"error": "prompt_type and content required"}), 400
+        
+        result = create_prompt(prompt_type, content, modified_by="admin")
+        
+        if result:
+            return jsonify({"status": "created", "prompt_type": prompt_type}), 201
+        else:
+            return jsonify({"error": "Failed to create prompt"}), 500
+            
+    except Exception as e:
+        print("Error creating prompt:", e)
+        return jsonify({"error": "Failed to create prompt"}), 500
