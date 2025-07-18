@@ -76,20 +76,22 @@ def generate_control_profile_endpoint():
             session_doc = get_session(session_id)
         
         # Generate control profile using prompt management system
-        profile_text = retry_generation(
+        profile_result = retry_generation(
             generate_control_profile,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(resume, job_description),
             debug_label="Control Profile"
         )
         
-        if not profile_text:
+        if not profile_result:
             return jsonify({"error": "Failed to generate control profile"}), 500
         
-        # Store control profile in session document
+        # Store control profile in session document with version tracking
         update_fields = {
             "controlProfile": {
-                "text": profile_text
+                "text": profile_result["content"],
+                "promptVersion": profile_result["prompt_version"],
+                "promptType": profile_result["prompt_type"]
             }
         }
         
@@ -101,7 +103,7 @@ def generate_control_profile_endpoint():
         
         return jsonify({
             "success": True,
-            "profile_text": profile_text,
+            "profile_text": profile_result["content"],
             "session_id": session_id
         }), 200
         
@@ -134,19 +136,19 @@ def generate_bse_bullets_endpoint():
             return jsonify({"error": "Session not found"}), 404
         
         # Generate BSE bullets using prompt management system
-        bullets_response = retry_generation(
+        bullets_result = retry_generation(
             generate_bse_bullets,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(resume, job_description),
             debug_label="BSE Bullets"
         )
         
-        if not bullets_response:
+        if not bullets_result:
             return jsonify({"error": "Failed to generate BSE bullets"}), 500
         
         # Parse the response to extract bullets and rationales
         try:
-            bullets = parse_bse_bullets_response(bullets_response)
+            bullets = parse_bse_bullets_response(bullets_result["content"])
         except ValueError as e:
             print("Error parsing BSE bullets:", str(e))
             return jsonify({"error": "Failed to parse BSE bullets response"}), 500
@@ -162,7 +164,9 @@ def generate_bse_bullets_endpoint():
                     "rationale": bullet["rationale"],
                     "userRating": None,
                     "userFeedback": "",
-                    "timestamp": None
+                    "timestamp": None,
+                    "promptVersion": bullets_result["prompt_version"],
+                    "promptType": bullets_result["prompt_type"]
                 }],
                 "finalIteration": None
             })
@@ -255,9 +259,9 @@ def regenerate_bullet_endpoint():
             return jsonify({"error": "current_bullet must contain 'text' and 'rationale' fields"}), 400
         
         # Generate regenerated bullet using prompt management system
-        regeneration_response = retry_generation(
+        regeneration_result = retry_generation(
             regenerate_bullet,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(
                 current_bullet["text"],
                 current_bullet["rationale"],
@@ -268,12 +272,15 @@ def regenerate_bullet_endpoint():
             debug_label="Bullet Regeneration"
         )
         
-        if not regeneration_response:
+        if not regeneration_result:
             return jsonify({"error": "Failed to regenerate bullet"}), 500
         
         # Parse the response to extract new bullet and rationale
         try:
-            regenerated_bullet = parse_regenerated_bullet_response(regeneration_response)
+            regenerated_bullet = parse_regenerated_bullet_response(regeneration_result["content"])
+            # Add version information to the regenerated bullet
+            regenerated_bullet["promptVersion"] = regeneration_result["prompt_version"]
+            regenerated_bullet["promptType"] = regeneration_result["prompt_type"]
         except ValueError as e:
             print("Error parsing regenerated bullet:", str(e))
             return jsonify({"error": "Failed to parse regenerated bullet response"}), 500
@@ -323,20 +330,22 @@ def generate_aligned_profile_endpoint():
             return jsonify({"error": "No bullet iterations found in session"}), 400
         
         # Generate aligned profile using prompt management system
-        aligned_profile_text = retry_generation(
+        aligned_profile_result = retry_generation(
             generate_aligned_profile,
-            validator_fn=is_valid_string_output,
+            validator_fn=lambda x: x is not None and isinstance(x, dict) and "content" in x,
             args=(resume, job_description, bullet_iterations),
             debug_label="Aligned Profile"
         )
         
-        if not aligned_profile_text:
+        if not aligned_profile_result:
             return jsonify({"error": "Failed to generate aligned profile"}), 500
         
-        # Store aligned profile in session document
+        # Store aligned profile in session document with version tracking
         update_fields = {
             "alignedProfile": {
-                "text": aligned_profile_text
+                "text": aligned_profile_result["content"],
+                "promptVersion": aligned_profile_result["prompt_version"],
+                "promptType": aligned_profile_result["prompt_type"]
             }
         }
         
@@ -348,7 +357,7 @@ def generate_aligned_profile_endpoint():
         
         return jsonify({
             "success": True,
-            "profile_text": aligned_profile_text,
+            "profile_text": aligned_profile_result["content"],
             "session_id": session_id
         }), 200
         
@@ -416,7 +425,9 @@ def save_iteration_data_endpoint():
             "rationale": rationale,
             "userRating": user_rating,
             "userFeedback": user_feedback or "",
-            "timestamp": data.get("timestamp") or None
+            "timestamp": data.get("timestamp") or None,
+            "promptVersion": data.get("prompt_version"),
+            "promptType": data.get("prompt_type")
         }
         
         # Add or update iteration in the specific bullet

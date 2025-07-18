@@ -2,7 +2,7 @@ import langchain_openai as lcai
 import os
 import json
 import re
-from services.mongodb_service import get_active_prompt
+from services.mongodb_service import get_active_prompt, get_active_prompt_with_version
 
 llmchat = lcai.ChatOpenAI(
     openai_api_key=os.getenv("PLATFORM_OPENAI_KEY"),
@@ -21,7 +21,7 @@ def generate_control_profile(resume, job_description):
     """Generate control profile using configurable prompt from database."""
     try:
         # Get the active control prompt from the database
-        prompt_doc = get_active_prompt("control")
+        prompt_doc = get_active_prompt_with_version("control")
         if not prompt_doc:
             raise ValueError("No active control prompt found in database")
         
@@ -34,17 +34,21 @@ def generate_control_profile(resume, job_description):
         )
         
         response = llmchat.invoke(prompt)
-        return response.content.strip()
+        return {
+            "content": response.content.strip(),
+            "prompt_version": prompt_doc["version"],
+            "prompt_type": prompt_doc["prompt_type"]
+        }
     except Exception as e:
         print("Error generating control profile:", e)
-        return "Error generating control profile."
+        return None
 
 # BSE Bullet Generation for v1.5
 def generate_bse_bullets(resume, job_description):
     """Generate 3 BSE theory bullets using configurable prompt from database."""
     try:
         # Get the active BSE generation prompt from the database
-        prompt_doc = get_active_prompt("bse_generation")
+        prompt_doc = get_active_prompt_with_version("bse_generation")
         if not prompt_doc:
             raise ValueError("No active BSE generation prompt found in database")
         
@@ -57,10 +61,14 @@ def generate_bse_bullets(resume, job_description):
         )
         
         response = llmchat.invoke(prompt)
-        return response.content.strip()
+        return {
+            "content": response.content.strip(),
+            "prompt_version": prompt_doc["version"],
+            "prompt_type": prompt_doc["prompt_type"]
+        }
     except Exception as e:
         print("Error generating BSE bullets:", e)
-        return "Error generating BSE bullets."
+        return None
 
 def parse_bse_bullets_response(response_text):
     """Parse BSE bullets response and extract bullets with rationales."""
@@ -94,7 +102,7 @@ def regenerate_bullet(bullet_text, rationale, user_rating, user_feedback, iterat
     """Regenerate a bullet based on user feedback using configurable prompt from database."""
     try:
         # Get the active regeneration prompt from the database
-        prompt_doc = get_active_prompt("regeneration")
+        prompt_doc = get_active_prompt_with_version("regeneration")
         if not prompt_doc:
             raise ValueError("No active regeneration prompt found in database")
         
@@ -120,10 +128,14 @@ def regenerate_bullet(bullet_text, rationale, user_rating, user_feedback, iterat
         )
         
         response = llmchat.invoke(prompt)
-        return response.content.strip()
+        return {
+            "content": response.content.strip(),
+            "prompt_version": prompt_doc["version"],
+            "prompt_type": prompt_doc["prompt_type"]
+        }
     except Exception as e:
         print("Error regenerating bullet:", e)
-        return "Error regenerating bullet."
+        return None
 
 def parse_regenerated_bullet_response(response_text):
     """Parse regenerated bullet response and extract bullet with rationale."""
@@ -150,7 +162,7 @@ def generate_aligned_profile(resume, job_description, bullet_iterations_data):
     """Generate aligned profile using bullet iterations data and configurable prompt from database."""
     try:
         # Get the active final synthesis prompt from the database
-        prompt_doc = get_active_prompt("final_synthesis")
+        prompt_doc = get_active_prompt_with_version("final_synthesis")
         if not prompt_doc:
             raise ValueError("No active final synthesis prompt found in database")
         
@@ -188,10 +200,14 @@ def generate_aligned_profile(resume, job_description, bullet_iterations_data):
         )
         
         response = llmchat.invoke(prompt)
-        return response.content.strip()
+        return {
+            "content": response.content.strip(),
+            "prompt_version": prompt_doc["version"],
+            "prompt_type": prompt_doc["prompt_type"]
+        }
     except Exception as e:
         print("Error generating aligned profile:", e)
-        return "Error generating aligned profile."
+        return None
 
 def check_openai_health():
     """

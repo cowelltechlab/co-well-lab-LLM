@@ -185,6 +185,24 @@ def get_active_prompt(prompt_type):
         print(f"Error fetching active prompt for {prompt_type}:", e)
         return None
 
+def get_active_prompt_with_version(prompt_type):
+    """Get the active prompt for a given type with version info."""
+    try:
+        prompt = db["prompts"].find_one({
+            "promptType": prompt_type,
+            "isActive": True
+        })
+        if prompt:
+            return {
+                "content": prompt["content"],
+                "version": prompt["version"],
+                "prompt_type": prompt["promptType"]
+            }
+        return None
+    except Exception as e:
+        print(f"Error fetching active prompt for {prompt_type}:", e)
+        return None
+
 def create_prompt(prompt_type, content, modified_by="system"):
     """Create a new prompt version."""
     try:
@@ -249,6 +267,31 @@ def get_prompt_history(prompt_type):
 def update_prompt(prompt_type, content, modified_by="admin"):
     """Update a prompt, creating a new version."""
     return create_prompt(prompt_type, content, modified_by)
+
+def revert_prompt(prompt_type, target_version, modified_by="admin"):
+    """Revert to a specific version by reactivating it."""
+    try:
+        # First, deactivate all versions of this prompt type
+        db["prompts"].update_many(
+            {"promptType": prompt_type},
+            {"$set": {"isActive": False}}
+        )
+        
+        # Then reactivate the target version
+        result = db["prompts"].update_one(
+            {"promptType": prompt_type, "version": target_version},
+            {"$set": {"isActive": True}}
+        )
+        
+        if result.modified_count > 0:
+            return True
+        else:
+            print(f"No prompt found with type {prompt_type} and version {target_version}")
+            return False
+            
+    except Exception as e:
+        print(f"Error reverting prompt {prompt_type} to version {target_version}:", e)
+        return False
 
 def initialize_default_prompts():
     """Initialize default prompts if they don't exist."""
