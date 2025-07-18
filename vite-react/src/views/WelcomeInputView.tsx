@@ -38,7 +38,7 @@ export function WelcomeInputView() {
       ...prev,
       resume: resumeText,
       job_desc: jobDescription,
-      document_id: null // No temporary ID - let backend create real session
+      document_id: undefined // No temporary ID - let backend create real session
     }));
     
     navigate("/control-profile");

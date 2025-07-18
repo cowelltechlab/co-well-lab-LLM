@@ -11,7 +11,6 @@ export function ProfileComparisonView() {
   const { letterLabData, setLetterLabData } = useAppContext();
   const { handleApiResponse } = useTokenHandler();
   const [isCompleted, setIsCompleted] = useState(false);
-  const [isMarkingCompleted, setIsMarkingCompleted] = useState(false);
   const hasMarkedCompleted = useRef(false);
 
   // Redirect if no access
@@ -30,7 +29,6 @@ export function ProfileComparisonView() {
       return;
     }
 
-    setIsMarkingCompleted(true);
     hasMarkedCompleted.current = true;
 
     try {
@@ -60,8 +58,6 @@ export function ProfileComparisonView() {
     } catch (error) {
       console.error("Error marking session as completed:", error);
       // Don't reset hasMarkedCompleted on error to prevent spam
-    } finally {
-      setIsMarkingCompleted(false);
     }
   };
 
