@@ -373,7 +373,7 @@ Return your response as JSON in this exact format:
 
 Generate an improved bullet that addresses the user's feedback while staying true to their authentic self-representation.""",
 
-        "final_synthesis": """Create a final professional profile using the refined bullets and user feedback from the collaborative alignment process. 
+        "final_synthesis": """Create a final professional profile (1-2 paragraphs) using the refined bullets and user feedback from the collaborative alignment process. 
 
 Synthesize the iterative refinement into an authentic representation that:
 - Incorporates insights from all bullet iterations
