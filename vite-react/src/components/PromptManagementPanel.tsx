@@ -46,6 +46,13 @@ export function PromptManagementPanel() {
     final_synthesis: "Final Profile Synthesis"
   };
 
+  const promptVariables: Record<string, string[]> = {
+    control: ["{resume}", "{jobDescription}"],
+    bse_generation: ["{resume}", "{jobDescription}"],
+    regeneration: ["{bulletText}", "{rationale}", "{rating}", "{feedback}", "{iterationHistory}"],
+    final_synthesis: ["{finalBullets}", "{allFeedback}", "{originalProfile}", "{resume}", "{jobDescription}"]
+  };
+
   // Define the order of prompts based on UI flow
   const promptOrder = ['control', 'bse_generation', 'regeneration', 'final_synthesis'];
 
@@ -306,6 +313,39 @@ export function PromptManagementPanel() {
               ) : (
                 <div className="text-sm text-gray-600 font-mono bg-gray-50 p-3 rounded border">
                   {truncateContent(prompt.content, 200)}
+                </div>
+              )}
+
+              {/* Available Variables Panel */}
+              {editingPrompt === prompt.promptType && (
+                <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                  <h4 className="text-sm font-medium text-blue-800 mb-2">Available Variables:</h4>
+                  <div className="flex flex-wrap gap-1">
+                    {promptVariables[prompt.promptType]?.map((variable) => (
+                      <code 
+                        key={variable} 
+                        className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded cursor-pointer hover:bg-blue-200"
+                        onClick={() => {
+                          // Insert variable at cursor position
+                          const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+                          if (textarea) {
+                            const start = textarea.selectionStart;
+                            const end = textarea.selectionEnd;
+                            const newContent = editContent.substring(0, start) + variable + editContent.substring(end);
+                            setEditContent(newContent);
+                            // Set cursor position after the inserted variable
+                            setTimeout(() => {
+                              textarea.setSelectionRange(start + variable.length, start + variable.length);
+                              textarea.focus();
+                            }, 0);
+                          }
+                        }}
+                      >
+                        {variable}
+                      </code>
+                    ))}
+                  </div>
+                  <p className="text-xs text-blue-600 mt-2">Click on a variable to insert it at your cursor position</p>
                 </div>
               )}
               
