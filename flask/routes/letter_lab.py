@@ -14,7 +14,7 @@ from services.openai_service import generate_aligned_profile
 # MONGODB SERVICE FUNCTIONS
 from services.mongodb_service import get_session, create_session
 from services.mongodb_service import set_fields
-from services.mongodb_service import is_valid_token
+from services.mongodb_service import is_valid_token, mark_token_used
 from services.mongodb_service import log_progress_event
 
 # UTILITIES
@@ -74,6 +74,11 @@ def generate_control_profile_endpoint():
             }
             session_id = create_session(session_data)
             session_doc = get_session(session_id)
+            
+            # Mark the token as used when creating a new session
+            token = session.get("token")
+            if token:
+                mark_token_used(token, session_id)
         
         # Generate control profile using prompt management system
         profile_result = retry_generation(
