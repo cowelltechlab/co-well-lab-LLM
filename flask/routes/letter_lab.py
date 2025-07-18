@@ -12,7 +12,7 @@ from services.openai_service import regenerate_bullet, parse_regenerated_bullet_
 from services.openai_service import generate_aligned_profile
 
 # MONGODB SERVICE FUNCTIONS
-from services.mongodb_service import get_session
+from services.mongodb_service import get_session, create_session
 from services.mongodb_service import set_fields
 from services.mongodb_service import is_valid_token
 from services.mongodb_service import log_progress_event
@@ -58,13 +58,22 @@ def generate_control_profile_endpoint():
                 "error": "Missing required fields: session_id, resume, job_description"
             }), 400
         
-        # Validate session exists
-        if not ObjectId.is_valid(session_id):
-            return jsonify({"error": "Invalid session_id format"}), 400
-            
-        session_doc = get_session(session_id)
+        # Handle session creation or retrieval
+        session_doc = None
+        
+        # Check if session_id is a valid ObjectId and session exists
+        if ObjectId.is_valid(session_id):
+            session_doc = get_session(session_id)
+        
+        # If session doesn't exist, create a new one
         if not session_doc:
-            return jsonify({"error": "Session not found"}), 404
+            session_data = {
+                "resume": resume,
+                "job_desc": job_description,
+                "completed": False
+            }
+            session_id = create_session(session_data)
+            session_doc = get_session(session_id)
         
         # Generate control profile using prompt management system
         profile_text = retry_generation(
