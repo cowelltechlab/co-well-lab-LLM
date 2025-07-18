@@ -5,6 +5,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import { RefreshCw } from "lucide-react";
 
 import { ProgressLogPanel } from "@/components/ProgressLogPanel";
+import { PromptManagementPanel } from "@/components/PromptManagementPanel";
 
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 
@@ -101,7 +102,7 @@ export function AdminDashboardView() {
   }
   return (
     <div className="min-h-screen w-full p-6 bg-gray-50 flex justify-center">
-      <div className="">
+      <div className="w-full max-w-7xl">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Admin Dashboard</h1>
           <Button
@@ -119,107 +120,118 @@ export function AdminDashboardView() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 1. System Health */}
-          <div className="w-[40vw] h-[40vh]">
-            <HealthStatusCard />
-          </div>
+        <div className="space-y-6">
+          {/* Row 1: System Health and Participant Tokens */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 1. System Health */}
+            <div className="w-full h-[35vh]">
+              <HealthStatusCard />
+            </div>
 
-          {/* 2. Participant Tokens */}
-          <div className="border rounded p-6 shadow bg-white w-[40vw] h-[40vh] flex flex-col">
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Participant Tokens</h2>
+            {/* 2. Participant Tokens */}
+            <div className="border rounded p-6 shadow bg-white w-full h-[35vh] flex flex-col">
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Participant Tokens</h2>
+                  <Button
+                    onClick={fetchTokens}
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0"
+                    title="Refresh tokens"
+                    disabled={isRefreshing}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  </Button>
+                </div>
                 <Button
-                  onClick={fetchTokens}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0"
-                  title="Refresh tokens"
-                  disabled={isRefreshing}
+                  onClick={async () => {
+                    const res = await fetch(
+                      `${apiBase}/api/admin/tokens/create`,
+                      {
+                        method: "POST",
+                        credentials: "include",
+                      }
+                    );
+                    const data = await res.json();
+                    setNewToken(data.token);
+                    fetchTokens(); // Refresh list
+                  }}
+                  className="mb-4"
                 >
-                  <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                  Generate Token
                 </Button>
               </div>
-              <Button
-                onClick={async () => {
-                  const res = await fetch(
-                    `${apiBase}/api/admin/tokens/create`,
-                    {
-                      method: "POST",
-                      credentials: "include",
-                    }
-                  );
-                  const data = await res.json();
-                  setNewToken(data.token);
-                  fetchTokens(); // Refresh list
-                }}
-                className="mb-4"
-              >
-                Generate Token
-              </Button>
-            </div>
 
-            {newToken && (
-              <div className="mb-4 text-center bg-green-50 p-3 rounded">
-                <p className="text-sm text-gray-600">New Token Created:</p>
-                <div className="text-xl font-mono bg-gray-100 px-4 py-2 rounded mt-1">
-                  {newToken}
-                </div>
-              </div>
-            )}
-
-            {/* Token List */}
-            <div className="flex-1 overflow-y-auto min-h-0 border-t pt-4 mt-4">
-              {tokens.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">No active tokens</p>
-              ) : (
-                <div className="space-y-2 pr-2">
-                  {tokens.map((token) => (
-                  <div
-                    key={token._id}
-                    className="flex items-center justify-between p-3 bg-gray-50 rounded"
-                  >
-                    <div className="flex-1">
-                      <div className="font-mono text-sm">{token.token}</div>
-                      <div className="text-xs text-gray-500">
-                        {token.used ? (
-                          <>Used • Session: {token.session_id}</>
-                        ) : (
-                          "Unused"
-                        )}
-                      </div>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => handleInvalidateToken(token.token)}
-                    >
-                      Invalidate
-                    </Button>
+              {newToken && (
+                <div className="mb-4 text-center bg-green-50 p-3 rounded">
+                  <p className="text-sm text-gray-600">New Token Created:</p>
+                  <div className="text-xl font-mono bg-gray-100 px-4 py-2 rounded mt-1">
+                    {newToken}
                   </div>
-                  ))}
                 </div>
               )}
+
+              {/* Token List */}
+              <div className="flex-1 overflow-y-auto min-h-0 border-t pt-4 mt-4">
+                {tokens.length === 0 ? (
+                  <p className="text-gray-500 text-center py-8">No active tokens</p>
+                ) : (
+                  <div className="space-y-2 pr-2">
+                    {tokens.map((token) => (
+                      <div
+                        key={token._id}
+                        className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                      >
+                        <div className="flex-1">
+                          <div className="font-mono text-sm">{token.token}</div>
+                          <div className="text-xs text-gray-500">
+                            {token.used ? (
+                              <>Used • Session: {token.session_id}</>
+                            ) : (
+                              "Unused"
+                            )}
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => handleInvalidateToken(token.token)}
+                        >
+                          Invalidate
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* 3. Progress Log */}
-          <div className="border rounded p-6 shadow bg-white w-[40vw] h-[40vh]">
-            <ProgressLogPanel />
+          {/* Row 2: Progress Log and Download Sessions */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 3. Progress Log */}
+            <div className="border rounded p-6 shadow bg-white w-full h-[35vh]">
+              <ProgressLogPanel />
+            </div>
+
+            {/* 4. Download Sessions */}
+            <div className="border rounded p-6 shadow bg-white w-full h-[35vh]">
+              <h2 className="text-lg font-semibold mb-4">Download Sessions</h2>
+              <Button
+                onClick={() =>
+                  window.open(`${apiBase}/api/admin/sessions/export`, "_blank")
+                }
+                className=""
+              >
+                Download CSV
+              </Button>
+            </div>
           </div>
 
-          {/* 4. Download Sessions */}
-          <div className="border rounded p-6 shadow bg-white w-[40vw] h-[40vh]">
-            <h2 className="text-lg font-semibold mb-4">Download Sessions</h2>
-            <Button
-              onClick={() =>
-                window.open(`${apiBase}/api/admin/sessions/export`, "_blank")
-              }
-              className=""
-            >
-              Download CSV
-            </Button>
+          {/* Row 3: Full Width Prompt Management */}
+          <div className="border rounded p-6 shadow bg-white w-full">
+            <PromptManagementPanel />
           </div>
         </div>
       </div>
