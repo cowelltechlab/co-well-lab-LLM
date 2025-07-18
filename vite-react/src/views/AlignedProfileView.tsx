@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/useAppContext";
+import { useTokenHandler } from "@/hooks/useTokenHandler";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -31,6 +32,7 @@ export function AlignedProfileView() {
     isGeneratingCoverLetter,
     generationError 
   } = useAppContext();
+  const { handleApiResponse } = useTokenHandler();
 
   const [likertResponses, setLikertResponses] = useState<LikertResponses>({
     accuracy: null,
@@ -112,8 +114,14 @@ export function AlignedProfileView() {
         }),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
+      // Check for invalidated token and handle redirect
+      const handledResponse = await handleApiResponse(response);
+      if (!handledResponse) {
+        return; // Token was invalidated, redirect handled
+      }
+
+      if (!handledResponse.ok) {
+        const err = await handledResponse.json();
         throw new Error(err.error || "Failed to save aligned profile responses");
       }
 

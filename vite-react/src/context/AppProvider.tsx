@@ -1,9 +1,11 @@
 import { useState, useEffect, useCallback, useRef, ReactNode } from "react";
 import { AppContext } from "./AppContext";
+import { useTokenHandler } from "@/hooks/useTokenHandler";
 import type { AppState, CoverLetterResponse } from "./types";
 const apiBase = import.meta.env.VITE_API_BASE_URL;
 
 export function AppProvider({ children }: { children: ReactNode }) {
+  const { handleApiResponse } = useTokenHandler();
   const [resumeText, setResumeText] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [generatedCoverLetter, setGeneratedCoverLetter] = useState("");
@@ -53,12 +55,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
+      // Check for invalidated token and handle redirect
+      const handledResponse = await handleApiResponse(response);
+      if (!handledResponse) {
+        return false; // Token was invalidated, redirect handled
+      }
+
+      if (!handledResponse.ok) {
+        const err = await handledResponse.json();
         throw new Error(err.error || "Failed to generate control profile");
       }
 
-      const data = await response.json();
+      const data = await handledResponse.json();
       
       // Update the letterLabData with the control profile and session_id
       setLetterLabData(prev => ({
@@ -84,7 +92,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsGeneratingCoverLetter(false);
       isGeneratingProfile.current = false;
     }
-  }, [resumeText, jobDescription, letterLabData?.document_id]);
+  }, [resumeText, jobDescription, letterLabData?.document_id, handleApiResponse]);
 
   const generateAlignedProfile = useCallback(async (): Promise<boolean> => {
     if (!letterLabData?.document_id) {
@@ -113,12 +121,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
+      // Check for invalidated token and handle redirect
+      const handledResponse = await handleApiResponse(response);
+      if (!handledResponse) {
+        return false; // Token was invalidated, redirect handled
+      }
+
+      if (!handledResponse.ok) {
+        const err = await handledResponse.json();
         throw new Error(err.error || "Failed to generate aligned profile");
       }
 
-      const data = await response.json();
+      const data = await handledResponse.json();
       
       // Update the letterLabData with the aligned profile
       setLetterLabData(prev => ({
@@ -143,7 +157,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setIsGeneratingCoverLetter(false);
       isGeneratingAlignedProfile.current = false;
     }
-  }, [letterLabData?.document_id]);
+  }, [letterLabData?.document_id, handleApiResponse]);
 
   const value: AppState = {
     resumeText,
