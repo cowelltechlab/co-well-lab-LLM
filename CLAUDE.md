@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Status: v1.5 Implementation - Collaborative Alignment Tool
 
-**Current Objective**: Transform the existing cover letter generation tool into a collaborative alignment research tool that studies how users and AI systems work together to refine personal identity representations.
+**Current Status**: v1.5 implementation is complete and deployed. The collaborative alignment research tool is fully functional with comprehensive admin dashboard, token management, and research data export capabilities.
+
+**Objective**: Successfully transformed the existing cover letter generation tool into a collaborative alignment research tool that studies how users and AI systems work together to refine personal identity representations.
 
 ### Key Implementation Documents
 - `/docs/v1.5-implementation-brief.md` - Detailed requirements and technical specifications
@@ -120,9 +122,22 @@ Each section generates bullet points and rationales based on the user's resume a
 
 ### Authentication
 
-- Token-based access system for end users
-- Admin login for monitoring and management
-- Flask provides token validation via decorators
+- **Token-based access system** for end users
+- **Admin login** for monitoring and management
+- **Flask token validation** via `@token_required` decorator
+
+#### Token Lifecycle
+1. **Admin generates token** in admin dashboard
+2. **Participant enters token** on `/enter` page
+3. **Token validated and marked as used** immediately on successful login
+4. **Token associated with session** when first session is created
+5. **Token invalidation** automatically redirects user to `/enter` page
+
+#### Token Invalidation Handling
+- All API calls check for 401 errors from invalidated tokens
+- `useTokenHandler` hook provides automatic redirect to token entry page
+- Clears localStorage and resets app state when tokens are invalidated
+- Provides seamless user experience when admins invalidate tokens mid-session
 
 ## Important Files
 
@@ -153,9 +168,10 @@ Each section generates bullet points and rationales based on the user's resume a
   - `AdminProvider.tsx` - Admin authentication state
 - `/vite-react/src/views/` - Application views
   - `WelcomeInputView.tsx` - Initial input of resume and job description
-  - `ReviewAllView.tsx` - Overview of all generated sections
-  - `ReviewSectionView.tsx` - Detailed review of a specific section
-  - `CoverLetterComparisonView.tsx` - Final cover letter review
+  - `ControlProfileView.tsx` - Control profile generation and survey responses
+  - `BulletRefinementView.tsx` - Iterative bullet refinement workflow
+  - `AlignedProfileView.tsx` - Aligned profile generation and survey responses
+  - `ProfileComparisonView.tsx` - Final comparison and research summary
   - `AdminLoginView.tsx` - Admin authentication interface
   - `AdminDashboardView.tsx` - Admin dashboard
 - `/vite-react/src/components/` - Reusable components
@@ -166,6 +182,7 @@ Each section generates bullet points and rationales based on the user's resume a
   - `/ui/` - Base UI components (button, card, dialog, input, etc.)
 - `/vite-react/src/types.ts` - TypeScript interfaces and types
 - `/vite-react/src/placeholders/placeholder_values.tsx` - Sample data for testing
+- `/vite-react/src/hooks/useTokenHandler.ts` - Token invalidation handling hook
 
 ### Configuration
 
@@ -293,12 +310,17 @@ VITE_API_BASE_URL=<api_base_url>
 }
 ```
 
-### New API Endpoints Required
+### v1.5 API Endpoints (Implemented)
 
-1. `POST /api/generate-bse-bullets` - Generate initial 3 BSE bullets
-2. `POST /api/regenerate-bullet` - Regenerate single bullet with feedback
-3. `POST /api/generate-aligned-profile` - Create final profile from iterations
-4. `POST /api/save-iteration-data` - Save bullet iteration data
+1. `POST /lab/generate-control-profile` - Generate initial control profile
+2. `POST /lab/generate-bse-bullets` - Generate initial 3 BSE bullets
+3. `POST /lab/regenerate-bullet` - Regenerate single bullet with feedback
+4. `POST /lab/generate-aligned-profile` - Create final profile from iterations
+5. `POST /lab/save-iteration-data` - Save bullet iteration data
+6. `POST /lab/save-control-profile-responses` - Save control profile survey responses
+7. `POST /lab/save-aligned-profile-responses` - Save aligned profile survey responses
+8. `POST /lab/mark-session-completed` - Mark session as completed
+9. `POST /lab/validate-token` - Validate and mark token as used
 
 ### Admin Prompt Management
 
@@ -314,6 +336,38 @@ Add new collection `prompts` with version control:
   isActive: Boolean
 }
 ```
+
+## Research Data Export
+
+### CSV Export Format
+The admin dashboard provides a single wide-format CSV export containing all research data:
+
+- **One row per participant session**
+- **Dynamic columns** for bullet iterations (bullet_1_1, bullet_1_2, bullet_2_1, etc.)
+- **All possible iteration columns** included across all sessions
+- **Blank values** for sessions with fewer iterations
+- **Raw data only** - no computed analysis columns
+
+### CSV Column Structure
+```
+session_id, timestamp, resume, job_desc, completed,
+control_profile_text, 
+control_likert_accuracy, control_likert_control, control_likert_expression, control_likert_alignment,
+control_response_likes, control_response_dislikes, control_response_changes,
+aligned_profile_text,
+aligned_likert_accuracy, aligned_likert_control, aligned_likert_expression, aligned_likert_alignment,
+aligned_response_likes, aligned_response_dislikes, aligned_response_changes,
+bullet_1_1_text, bullet_1_1_rationale, bullet_1_1_rating, bullet_1_1_feedback,
+bullet_1_2_text, bullet_1_2_rationale, bullet_1_2_rating, bullet_1_2_feedback,
+... (continues for all iterations found across all sessions)
+```
+
+### Admin Dashboard Features
+- **System Health** monitoring for frontend, backend, database, and OpenAI
+- **Participant Token** management with real-time status updates
+- **Session Progress** tracking and completion monitoring
+- **CSV Export** download for research data analysis
+- **Prompt Management** for researchers to modify AI prompts without code changes
 
 ## Development Process
 
@@ -351,3 +405,25 @@ Add new collection `prompts` with version control:
 - **Feature-first development** - tests written only when bugs encountered
 - **Diagnostic tests** remain standing to prevent regressions
 - **No mandatory test coverage** for initial feature development
+
+## Common Issues & Solutions
+
+### Docker Environment Issues
+- **Frontend health check fails**: Use container name `vite-react:5173` instead of `localhost:5173`
+- **Vite dev server blocks requests**: Add `allowedHosts: ["vite-react", "localhost"]` to vite.config.ts
+- **Missing bullet iterations in CSV**: Restart containers to clear any memory/state issues
+
+### React Development Issues
+- **StrictMode double execution**: Use `useRef` guards to prevent duplicate API calls
+- **Token invalidation not working**: Check that `useTokenHandler` is properly implemented in all views
+- **TypeScript build errors**: Ensure unused imports are removed and types match exactly
+
+### Database Issues
+- **Sessions not marked as completed**: Check that `mark-session-completed` endpoint is called
+- **Empty survey responses**: Verify that save-profile-responses endpoints are called before navigation
+- **CSV export missing data**: Ensure all iteration data is properly saved to bulletIterations array
+
+### Production Deployment
+- **TypeScript build fails**: Remove unused imports and ensure type compatibility
+- **Frontend shows error status**: Check that environment variables are set correctly
+- **Token management issues**: Verify that tokens are being marked as used in the correct lifecycle stage
