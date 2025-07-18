@@ -207,9 +207,17 @@ def health_check():
         print("Azure OpenAI health check failed:", e)
         health["openai"] = "error"
 
-    # Frontend
+    # Frontend - check based on environment
     try:
-        res = requests.get("https://letterlab.me", timeout=2)  # 🔁 Adjust for prod
+        import os
+        # In development, frontend runs on port 5173 (Vite default)
+        # In production, it's served by the same host
+        if os.environ.get("FLASK_ENV") == "development":
+            frontend_url = "http://localhost:5173"
+        else:
+            frontend_url = "https://letterlab.me"
+        
+        res = requests.get(frontend_url, timeout=2)
         if res.status_code != 200 or "text/html" not in res.headers.get("Content-Type", ""):
             health["frontend"] = "error"
     except Exception as e:

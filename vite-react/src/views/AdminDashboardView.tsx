@@ -124,12 +124,12 @@ export function AdminDashboardView() {
           {/* Row 1: System Health and Participant Tokens */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 1. System Health */}
-            <div className="w-full h-[35vh]">
+            <div className="w-full h-[45vh]">
               <HealthStatusCard />
             </div>
 
             {/* 2. Participant Tokens */}
-            <div className="border rounded p-6 shadow bg-white w-full h-[35vh] flex flex-col">
+            <div className="border rounded p-6 shadow bg-white w-full h-[45vh] flex flex-col">
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold">Participant Tokens</h2>
@@ -211,12 +211,12 @@ export function AdminDashboardView() {
           {/* Row 2: Progress Log and Download Sessions */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* 3. Progress Log */}
-            <div className="border rounded p-6 shadow bg-white w-full h-[35vh]">
+            <div className="border rounded p-6 shadow bg-white w-full h-[45vh]">
               <ProgressLogPanel />
             </div>
 
             {/* 4. Download Sessions */}
-            <div className="border rounded p-6 shadow bg-white w-full h-[35vh]">
+            <div className="border rounded p-6 shadow bg-white w-full h-[45vh]">
               <h2 className="text-lg font-semibold mb-4">Download Research Data</h2>
               <p className="text-sm text-gray-600 mb-4">
                 Downloads a single CSV file containing all research data in wide format (one row per participant):

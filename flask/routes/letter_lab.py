@@ -565,3 +565,43 @@ def save_iteration_data_endpoint():
     except Exception as e:
         print("Error saving iteration data:", str(e))
         return jsonify({"error": "Internal server error"}), 500
+
+@letter_lab_bp.route("/mark-session-completed", methods=["POST"])
+@token_required
+def mark_session_completed_endpoint():
+    """Mark a session as completed when user reaches the final screen."""
+    try:
+        data = request.get_json()
+        session_id = data.get("session_id")
+        
+        # Validate required fields
+        if not session_id:
+            return jsonify({"error": "Missing required field: session_id"}), 400
+        
+        # Validate session exists
+        if not ObjectId.is_valid(session_id):
+            return jsonify({"error": "Invalid session_id format"}), 400
+            
+        session_doc = get_session(session_id)
+        if not session_doc:
+            return jsonify({"error": "Session not found"}), 404
+        
+        # Mark session as completed
+        update_fields = {
+            "completed": True
+        }
+        
+        result = set_fields(session_id, update_fields)
+        if not result or result.modified_count == 0:
+            return jsonify({"error": "Failed to mark session as completed"}), 500
+        
+        log_progress_event("session_completed", session_id=session_id)
+        
+        return jsonify({
+            "success": True,
+            "message": "Session marked as completed successfully"
+        }), 200
+        
+    except Exception as e:
+        print("Error marking session as completed:", str(e))
+        return jsonify({"error": "Internal server error"}), 500

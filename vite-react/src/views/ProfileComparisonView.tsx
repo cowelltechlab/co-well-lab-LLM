@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppContext } from "@/context/useAppContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +9,8 @@ export function ProfileComparisonView() {
   const navigate = useNavigate();
   const { letterLabData } = useAppContext();
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isMarkingCompleted, setIsMarkingCompleted] = useState(false);
+  const hasMarkedCompleted = useRef(false);
 
   // Redirect if no access
   useEffect(() => {
@@ -21,6 +23,40 @@ export function ProfileComparisonView() {
   const hasControlProfile = letterLabData?.controlProfile?.text;
   const hasAlignedProfile = letterLabData?.alignedProfile?.text;
 
+  const markSessionCompleted = async () => {
+    if (!letterLabData?.document_id || hasMarkedCompleted.current) {
+      return;
+    }
+
+    setIsMarkingCompleted(true);
+    hasMarkedCompleted.current = true;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lab/mark-session-completed`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          session_id: letterLabData.document_id,
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        throw new Error(err.error || "Failed to mark session as completed");
+      }
+
+      console.log("Session marked as completed");
+    } catch (error) {
+      console.error("Error marking session as completed:", error);
+      // Don't reset hasMarkedCompleted on error to prevent spam
+    } finally {
+      setIsMarkingCompleted(false);
+    }
+  };
+
   useEffect(() => {
     // Check if both profiles have been completed with responses
     const controlComplete = letterLabData?.controlProfile?.likertResponses && letterLabData?.controlProfile?.openResponses;
@@ -28,6 +64,11 @@ export function ProfileComparisonView() {
     
     if (controlComplete && alignedComplete) {
       setIsCompleted(true);
+      
+      // Automatically mark session as completed when user reaches this screen
+      if (!hasMarkedCompleted.current) {
+        markSessionCompleted();
+      }
     }
   }, [letterLabData]);
 
@@ -35,10 +76,15 @@ export function ProfileComparisonView() {
     navigate("/aligned-profile");
   };
 
-  const handleComplete = () => {
-    // For now, just show completion message
+  const handleComplete = async () => {
+    // Ensure session is marked as completed
+    if (!hasMarkedCompleted.current) {
+      await markSessionCompleted();
+    }
+    
+    // Show completion message
     alert("Study completed! Thank you for your participation.");
-    // Could navigate to a completion page or home
+    // Navigate to home
     navigate("/");
   };
 
