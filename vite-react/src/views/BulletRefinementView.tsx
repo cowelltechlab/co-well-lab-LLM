@@ -335,14 +335,14 @@ export function BulletRefinementView() {
         {/* Rating Section */}
         <div className="bg-gray-50 p-6 rounded-lg border">
           <Label className="text-base font-medium block mb-4">
-            To what extent does this bullet point sound like you?
+            How well does this bullet represent your strengths?
           </Label>
           <LikertScale
             value={currentRating}
             onChange={setCurrentRating}
-            leftLabel="This does not sound like me"
+            leftLabel="This does not represent my strengths"
             middleLabel="Neutral"
-            rightLabel="This sounds like me"
+            rightLabel="This represents my strengths"
             showBorder={false}
           />
         </div>
