@@ -351,11 +351,11 @@ export function BulletRefinementView() {
         <div className="space-y-4">
           <div>
             <Label htmlFor="feedback" className="text-base font-medium">
-              Any additional comments?
+              How would you change this bullet to better represent yourself and/or your strengths?
             </Label>
             <Textarea
               id="feedback"
-              placeholder="What would you change about how this represents you? What's missing or inaccurate?"
+              placeholder="Describe specific changes you'd like to see, such as different skills to highlight, accomplishments to emphasize, or ways to better align with your experience..."
               value={currentFeedback}
               onChange={(e) => setCurrentFeedback(e.target.value)}
               className="mt-2"
