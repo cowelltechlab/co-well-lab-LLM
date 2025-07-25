@@ -19,6 +19,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **Prompt Management**: Admin interface for researchers to modify prompts without code changes
 4. **Collaborative Focus**: Emphasis on human-AI collaboration for identity representation
 
+### Recent UI/UX Improvements (Post v1.5)
+1. **Strengths-Focused Terminology**: Updated all copy to emphasize "strengths" over personal identity matching
+2. **Enhanced Loading States**: Added skeleton loading animations during bullet regeneration
+3. **Improved Button Hierarchy**: Rebalanced regeneration vs completion buttons to encourage iteration
+4. **Contextual Messaging**: Added guidance text to support user decision-making
+5. **Admin UX Improvements**: Implemented diff-based prompt versioning and terminology updates
+
 ## Environment Setup & Commands
 
 ### Development
@@ -120,6 +127,8 @@ The application uses **Bandura's Self-Efficacy Theory (BSET)** to structure cove
 
 Each section generates bullet points and rationales based on the user's resume and target job description.
 
+**Note**: Recent UI updates have moved toward general "strengths representation" terminology rather than theory-specific language to make the interface more accessible to participants.
+
 ### Authentication
 
 - **Token-based access system** for end users
@@ -179,7 +188,8 @@ Each section generates bullet points and rationales based on the user's resume a
   - `ChatPanel.tsx` - Chat interface for AI interactions
   - `BulletAccordionItem.tsx` - Accordion items for bullet points
   - `TextFeedbackPanel.tsx` - Text feedback collection
-  - `/ui/` - Base UI components (button, card, dialog, input, etc.)
+  - `PromptManagementPanel.tsx` - Admin prompt editing with version control
+  - `/ui/` - Base UI components (button, card, dialog, input, skeleton, etc.)
 - `/vite-react/src/types.ts` - TypeScript interfaces and types
 - `/vite-react/src/placeholders/placeholder_values.tsx` - Sample data for testing
 - `/vite-react/src/hooks/useTokenHandler.ts` - Token invalidation handling hook
@@ -313,7 +323,7 @@ VITE_API_BASE_URL=<api_base_url>
 ### v1.5 API Endpoints (Implemented)
 
 1. `POST /lab/generate-control-profile` - Generate initial control profile
-2. `POST /lab/generate-bse-bullets` - Generate initial 3 BSE bullets
+2. `POST /lab/generate-bse-bullets` - Generate initial 3 bullets (backend still uses 'bse' internally)
 3. `POST /lab/regenerate-bullet` - Regenerate single bullet with feedback
 4. `POST /lab/generate-aligned-profile` - Create final profile from iterations
 5. `POST /lab/save-iteration-data` - Save bullet iteration data
@@ -321,6 +331,8 @@ VITE_API_BASE_URL=<api_base_url>
 7. `POST /lab/save-aligned-profile-responses` - Save aligned profile survey responses
 8. `POST /lab/mark-session-completed` - Mark session as completed
 9. `POST /lab/validate-token` - Validate and mark token as used
+
+**Note**: While the backend API still uses 'bse' in endpoint names for consistency, the frontend UI displays this as "Initial Bullet Generation" to users.
 
 ### Admin Prompt Management
 
@@ -368,6 +380,30 @@ bullet_1_2_text, bullet_1_2_rationale, bullet_1_2_rating, bullet_1_2_feedback,
 - **Session Progress** tracking and completion monitoring
 - **CSV Export** download for research data analysis
 - **Prompt Management** for researchers to modify AI prompts without code changes
+- **Version Control** prevents saving prompts without changes, maintains clean version history
+
+## UI/UX Patterns and Conventions
+
+### Loading States
+- **Skeleton Component**: Custom Tailwind-based component at `/vite-react/src/components/ui/skeleton.tsx`
+- **Usage Pattern**: Show skeleton during content regeneration while preserving layout structure
+- **Implementation**: `<Skeleton className="h-4 w-full" />` with configurable height/width
+
+### Button Hierarchy and Messaging
+- **Primary Actions**: Use `variant="default"` for actions that align with research goals (e.g., regeneration)
+- **Secondary Actions**: Use `variant="outline"` for completion/navigation actions
+- **Contextual Messaging**: Include guidance text above buttons to influence user behavior
+- **Layout**: Vertical stacking with spacing for equal visual weight when needed
+
+### Terminology Standards
+- **Strengths Focus**: Always use "strengths" instead of "you/yourself" in user-facing copy
+- **Admin Terminology**: Avoid theory-specific terms (e.g., "BSE") in favor of descriptive labels
+- **Consistency**: Rating questions should focus on "representation of strengths" rather than personal identity
+
+### State Management Patterns
+- **Diff Checking**: Implement `hasContentChanged()` functions for forms that should only save on actual changes
+- **Original State Tracking**: Store initial values when editing begins for comparison
+- **Visual Feedback**: Disable save buttons when no changes exist to prevent unnecessary operations
 
 ## Development Process
 
@@ -417,6 +453,8 @@ bullet_1_2_text, bullet_1_2_rationale, bullet_1_2_rating, bullet_1_2_feedback,
 - **StrictMode double execution**: Use `useRef` guards to prevent duplicate API calls
 - **Token invalidation not working**: Check that `useTokenHandler` is properly implemented in all views
 - **TypeScript build errors**: Ensure unused imports are removed and types match exactly
+- **Skeleton loading not showing**: Ensure `isRegenerating` state is properly managed in conditional rendering
+- **Button states not updating**: Check that state changes trigger re-renders (e.g., `hasContentChanged()` dependencies)
 
 ### Database Issues
 - **Sessions not marked as completed**: Check that `mark-session-completed` endpoint is called
