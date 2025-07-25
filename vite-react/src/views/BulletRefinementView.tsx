@@ -304,11 +304,11 @@ export function BulletRefinementView() {
         </CardTitle>
         <p className="text-gray-600">
           Below is a statement about your experience and how it relates to the job description. 
-          This reflects how you might present yourself to match what the job is looking for.
+          This reflects how you might present your strengths to match what the job is looking for.
         </p>
         <p className="text-gray-800 font-medium">
           <strong>Your task is to evaluate this statement—not for how polished or professional it sounds, 
-          but for how well it represents you.</strong>
+          but for how well it represents your strengths.</strong>
         </p>
       </CardHeader>
 
