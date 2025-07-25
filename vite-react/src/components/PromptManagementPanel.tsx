@@ -41,7 +41,7 @@ export function PromptManagementPanel() {
 
   const promptTypeLabels: Record<string, string> = {
     control: "Control Profile Generation",
-    bse_generation: "BSE Bullet Generation", 
+    bse_generation: "Initial Bullet Generation", 
     regeneration: "Bullet Regeneration",
     final_synthesis: "Final Profile Synthesis"
   };
