@@ -393,32 +393,45 @@ export function BulletRefinementView() {
             {currentBulletIndex === 0 ? "Back" : "Previous Bullet"}
           </Button>
           
-          <div className="flex space-x-3">
-            <Button 
-              onClick={handleRegenerateWithFeedback}
-              disabled={isRegenerating || currentRating === null}
-              variant="outline"
-              className="border-blue-500 text-blue-700 hover:bg-blue-50"
-            >
-              {isRegenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Regenerating...
-                </>
-              ) : (
-                "Regenerate with Feedback"
-              )}
-            </Button>
-            
-            <Button 
-              onClick={handleAllDone}
-              className="bg-green-600 hover:bg-green-700"
-            >
-              {currentBulletIndex === bullets.length - 1 
-                ? "All Done - Generate Final Profile" 
-                : "All Done - Next Bullet"
-              }
-            </Button>
+          <div className="space-y-4 flex-1 max-w-md ml-6">
+            {/* Regeneration Section */}
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600 text-center">
+                Keep refining until this bullet truly represents your strengths
+              </p>
+              <Button 
+                onClick={handleRegenerateWithFeedback}
+                disabled={isRegenerating || currentRating === null}
+                variant="default"
+                className="w-full"
+              >
+                {isRegenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Regenerating...
+                  </>
+                ) : (
+                  "Regenerate with Feedback"
+                )}
+              </Button>
+            </div>
+
+            {/* Completion Section */}
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600 text-center">
+                Satisfied with this bullet? Move on to the next one
+              </p>
+              <Button 
+                onClick={handleAllDone}
+                variant="outline"
+                className="w-full"
+              >
+                {currentBulletIndex === bullets.length - 1 
+                  ? "All Done - Generate Final Profile" 
+                  : "All Done - Next Bullet"
+                }
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
