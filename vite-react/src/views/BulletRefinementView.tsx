@@ -8,6 +8,7 @@ import { Loader2 } from "lucide-react";
 import { LikertScale } from "@/components/LikertScale";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Bullet {
   index: number;
@@ -318,16 +319,31 @@ export function BulletRefinementView() {
           <div className="space-y-4">
             <div>
               <h3 className="text-lg font-semibold mb-3">Experience Statement</h3>
-              <p className="text-gray-800 leading-relaxed text-base">
-                {currentBullet.text}
-              </p>
+              {isRegenerating ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              ) : (
+                <p className="text-gray-800 leading-relaxed text-base">
+                  {currentBullet.text}
+                </p>
+              )}
             </div>
             
             <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-green-500">
               <h4 className="text-sm font-semibold text-gray-700 mb-2">Rationale</h4>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                {currentBullet.rationale}
-              </p>
+              {isRegenerating ? (
+                <div className="space-y-2">
+                  <Skeleton className="h-3 w-full" />
+                  <Skeleton className="h-3 w-5/6" />
+                </div>
+              ) : (
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {currentBullet.rationale}
+                </p>
+              )}
             </div>
           </div>
         </div>
