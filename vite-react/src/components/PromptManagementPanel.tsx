@@ -31,6 +31,7 @@ export function PromptManagementPanel() {
   const [prompts, setPrompts] = useState<Prompt[]>([]);
   const [editingPrompt, setEditingPrompt] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
+  const [originalContent, setOriginalContent] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -95,6 +96,7 @@ export function PromptManagementPanel() {
   const handleEdit = (prompt: Prompt) => {
     setEditingPrompt(prompt.promptType);
     setEditContent(prompt.content);
+    setOriginalContent(prompt.content);
     setError("");
     setSuccess("");
   };
@@ -123,6 +125,7 @@ export function PromptManagementPanel() {
       if (response.ok) {
         setSuccess(`${promptTypeLabels[promptType]} updated successfully`);
         setEditingPrompt(null);
+        setOriginalContent("");
         fetchPrompts(); // Refresh the prompts
       } else {
         const errorData = await response.json();
@@ -138,8 +141,13 @@ export function PromptManagementPanel() {
   const handleCancel = () => {
     setEditingPrompt(null);
     setEditContent("");
+    setOriginalContent("");
     setError("");
     setSuccess("");
+  };
+
+  const hasContentChanged = () => {
+    return editContent.trim() !== originalContent.trim();
   };
 
   const handleShowHistory = async (promptType: string) => {
@@ -271,7 +279,7 @@ export function PromptManagementPanel() {
                     <div className="flex space-x-1">
                       <Button
                         onClick={() => handleSave(prompt.promptType)}
-                        disabled={saving}
+                        disabled={saving || !hasContentChanged()}
                         size="sm"
                         className="h-7 px-2 text-xs"
                       >
