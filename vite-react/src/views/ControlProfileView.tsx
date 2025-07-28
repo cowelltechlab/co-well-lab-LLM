@@ -273,7 +273,7 @@ export function ControlProfileView() {
 
             <div>
               <Label className="text-sm font-medium block mb-3">
-                I was satisfied with the alignment between my intended identity and the AI output.
+                I feel the professional profile statement aligns with how I want my identity and strengths to be represented.
               </Label>
               <LikertScale
                 value={likertResponses.alignment}
@@ -318,7 +318,7 @@ export function ControlProfileView() {
 
             <div>
               <Label htmlFor="changes" className="text-sm font-medium">
-                How would you change it?
+                How would you change this content to better represent your strengths?
               </Label>
               <Textarea
                 id="changes"

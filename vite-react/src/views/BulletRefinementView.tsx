@@ -327,13 +327,13 @@ export function BulletRefinementView() {
                 </div>
               ) : (
                 <p className="text-gray-800 leading-relaxed text-base">
-                  {currentBullet.text}
+                  • {currentBullet.text}
                 </p>
               )}
             </div>
             
             <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-green-500">
-              <h4 className="text-sm font-semibold text-gray-700 mb-2">Rationale</h4>
+              <h4 className="text-sm font-semibold text-gray-700 mb-2">System Rationale</h4>
               {isRegenerating ? (
                 <div className="space-y-2">
                   <Skeleton className="h-3 w-full" />
